@@ -19,11 +19,16 @@
 
 #define RESPONSE_WAIT_TIME_S 1
 
-void send_response(int sockfd, char *response, int response_length, 
-                   struct sockaddr_in *client_address) {
-    if (sendto(sockfd, response, response_length, 0, (struct sockaddr*) client_address,
+void send_message_to_client(
+    int sockfd, 
+    char *message,
+    int message_length,
+    struct sockaddr_in *client_address
+) {
+    if (sendto(sockfd, message, message_length, 0,
+            (struct sockaddr*) client_address, 
             sizeof(*client_address)) == -1) {
-        perror("Failed to send a response");
+        perror("Failed to send a message to the client");
     }
 }
 
