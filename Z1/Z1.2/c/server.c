@@ -1,3 +1,5 @@
+// Created by Michał Sobiech on 20.11.2023
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <arpa/inet.h>
@@ -18,7 +20,7 @@
 #define RESPONSE_WAIT_TIME_S 1
 
 void send_response(int sockfd, char *response, int response_length, 
-                  struct sockaddr_in *client_address) {
+                   struct sockaddr_in *client_address) {
     if (sendto(sockfd, response, response_length, 0, (struct sockaddr*) client_address,
             sizeof(*client_address)) == -1) {
         perror("Failed to send a response");
