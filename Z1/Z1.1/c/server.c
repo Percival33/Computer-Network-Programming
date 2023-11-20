@@ -9,11 +9,12 @@
 #define ERROR_FAILED_DATA_RECEIVAL 4
 #define ERROR_FAILED_TO_SEND_RESPONSE 5
 
+#define PAIR_SIZE 4
 #define BUFFER_SIZE 1024
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        perror("Invalid argument count");
+        printf("Invalid argument count\n");
         exit(ERROR_INVALID_ARGC);
     }
 
@@ -49,17 +50,20 @@ int main(int argc, char *argv[]) {
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
-        // uint16_t *two_byte_buffer = (uint16_t*) buffer;
+        // The first 2 bytes are the size
+        uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
 
-        // for (int i = 0; i < sizeof(two_byte_buffer); i++) {
-        //     printf("%d ", two_byte_buffer[i]);
-        // }
-        
-        for (int i = 0; i < sizeof(buffer); i++) {
-            printf("%d ", buffer[i]);
+        printf("Number of pairs: %d\n", pair_count);
+
+        int current_byte_no = 2;
+        char key[PAIR_SIZE/2];
+        char value[PAIR_SIZE/2];
+        for (int i = 0; i < pair_count; i++) {
+            strncpy(key, &buffer[current_byte_no], sizeof(key));
+            strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
+            current_byte_no += sizeof(key) + sizeof(value);
+            printf("%s : %s\n", key, value);
         }
-
-        // printf("%d\n", ntohs(1));
 
         char response[] = "test";
         if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
