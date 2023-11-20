@@ -2,7 +2,10 @@ set -e
 
 NAME='z41_z_1_c_server'
 
-docker stop $NAME
+if [[ "$(docker ps | grep $NAME)" ]]; then
+    docker stop $NAME
+fi
+
 if [[ "$(docker ps -aqf name=$NAME)" ]]; then
     docker rm $NAME
 fi
@@ -13,4 +16,4 @@ docker create -it --name $NAME --network z41_network --cap-add NET_ADMIN $NAME:v
 
 docker ps -a
 
-docker start $NAME
+docker start -ai $NAME
