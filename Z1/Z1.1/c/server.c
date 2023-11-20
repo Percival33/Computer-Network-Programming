@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 #define ERROR_INVALID_ARGC 1
 #define ERROR_FAILED_SOCKET_CREATION 2
@@ -58,7 +60,7 @@ int main(int argc, char *argv[]) {
         int current_byte_no = 2;
         char key[PAIR_SIZE/2];
         char value[PAIR_SIZE/2];
-        for (int i = 0; i < pair_count; i++) {
+        for (int i = 0; i < 1; i++) {
             strncpy(key, &buffer[current_byte_no], sizeof(key));
             strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
             current_byte_no += sizeof(key) + sizeof(value);
@@ -68,10 +70,10 @@ int main(int argc, char *argv[]) {
         // TODO check if datagram is valid
 
         char response[] = "test";
-        if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
-            perror("Failed to send a response");
-            exit(ERROR_FAILED_TO_SEND_RESPONSE);
-        }
+        // if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
+        //     perror("Failed to send a response");
+        //     exit(ERROR_FAILED_TO_SEND_RESPONSE);
+        // }
     }
 
     exit(0);
