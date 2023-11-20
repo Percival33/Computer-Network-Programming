@@ -4,6 +4,7 @@ WORKDIR /server
 
 COPY ./server.c .
 COPY ./Makefile .
+COPY ./server_container_config.sh .
 RUN make server
 
-CMD ["./server", "8888"]
+CMD ["./server_container_config.sh"]
