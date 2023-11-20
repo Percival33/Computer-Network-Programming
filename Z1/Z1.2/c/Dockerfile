@@ -1,10 +1,9 @@
 FROM gcc:latest
 
-WORKDIR .
+WORKDIR /server
 
-RUN mkdir /server
-RUN cd /server
 COPY ./server.c .
 COPY ./Makefile .
 RUN make server
-RUN ./server 8888
+
+CMD ["./server", "8888"]
