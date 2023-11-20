@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define ERROR_INVALID_ARGC 1
 #define ERROR_FAILED_SOCKET_CREATION 2
@@ -13,6 +14,16 @@
 
 #define PAIR_SIZE 4
 #define BUFFER_SIZE 1024
+
+#define RESPONSE_WAIT_TIME_S 1
+
+void send_response(int sockfd, char *response, int response_length, 
+                  struct sockaddr_in *client_address) {
+    if (sendto(sockfd, response, response_length, 0, (struct sockaddr*) client_address,
+            sizeof(*client_address)) == -1) {
+        perror("Failed to send a response");
+    }
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -69,12 +80,28 @@ int main(int argc, char *argv[]) {
 
         // TODO check if datagram is valid
 
+        // int send_response(char *response, int response_length, )
         char response[] = "test";
-        if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
-            perror("Failed to send a response");
-            exit(ERROR_FAILED_TO_SEND_RESPONSE);
+        send_response(sockfd, response, sizeof(response), &client_address);
+
+        // Wait for the response to the response
+        float start_tick = clock();
+        float current_tick;
+        while(true) {
+            int data_length = recvfrom(sockfd, buffer, sizeof(buffer), 0,
+                (struct sockaddr*)&client_address, &(socklen_t){sizeof(client_address)});
+            if (data_length != -1) {
+                break;
+            }
+            // Still no response
+            current_tick = clock();
+            float elapsed_time = (current_tick - start_tick)/CLOCKS_PER_SEC;
+            if (elapsed_time > RESPONSE_WAIT_TIME_S) {
+                start_tick = current_tick;
+                send_response(sockfd, response, sizeof(response),
+                        &client_address);
+            }
         }
     }
-
     exit(0);
 }
