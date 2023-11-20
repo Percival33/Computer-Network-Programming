@@ -70,10 +70,10 @@ int main(int argc, char *argv[]) {
         // TODO check if datagram is valid
 
         char response[] = "test";
-        // if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
-        //     perror("Failed to send a response");
-        //     exit(ERROR_FAILED_TO_SEND_RESPONSE);
-        // }
+        if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
+            perror("Failed to send a response");
+            exit(ERROR_FAILED_TO_SEND_RESPONSE);
+        }
     }
 
     exit(0);
