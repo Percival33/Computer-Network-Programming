@@ -65,6 +65,8 @@ int main(int argc, char *argv[]) {
             printf("%s : %s\n", key, value);
         }
 
+        // TODO check if datagram is valid
+
         char response[] = "test";
         if (sendto(sockfd, response, sizeof(response), 0, (struct sockaddr*) &client_address, sizeof(client_address)) == -1) {
             perror("Failed to send a response");
