@@ -21,8 +21,8 @@
 #define MAX_PAYLOAD_SIZE 508 // (512 - 4)
 #define KEY_SIZE 2
 #define VALUE_SIZE 2
-#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)\
-#define PAIR_SIZE KEY_SIZE + VALUE_SIZE
+#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)
+#define PAIR_SIZE (KEY_SIZE + VALUE_SIZE)
 
 #define RESPONSE_WAIT_TIME_S 1
 
@@ -102,6 +102,15 @@ typedef struct {
     key_value_pair_t pairs[MAX_PAIR_COUNT];
 } packet_data_t;
 
+bool text_is_only_zeroes(char *text, int text_length) {
+    for (int i = 0; i < text_length; i++) {
+        if (text[i] != '\0') {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool datagram_is_valid(packet_data_t *packet_data) {
     // Datagram is valid, if:
     // - After the declared pairs there are only zeroes,
@@ -125,20 +134,11 @@ bool datagram_is_valid(packet_data_t *packet_data) {
     char *value;
     for (int i = pair_count; i < max_pair_count; i++) {
         key = packet_data->pairs[i].key;
-        if (!text_is_only_zeroes(key, sizeof(key))) {
+        if (!text_is_only_zeroes(key, KEY_SIZE)) {
             return false;
         }
         value = packet_data->pairs[i].value;
-        if (!text_is_only_zeroes(value, sizeof(key))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool text_is_only_zeroes(char *text, int text_length) {
-    for (int i = 0; i < text_length; i++) {
-        if (text[i] != '\0') {
+        if (!text_is_only_zeroes(value, VALUE_SIZE)) {
             return false;
         }
     }
@@ -156,6 +156,16 @@ bool response_is_valid(char buffer[], int expected_id) {
         return false;
     }
     return true;
+}
+
+void ntoh_on_packet_data(packet_data_t *packet_data) {
+    packet_data->pair_count = ntohs(packet_data->pair_count);
+    packet_data->packet_id = ntohs(packet_data->packet_id);
+}
+
+void ntoh_on_response(response_t *response) {
+    response->id = ntohs(response->id);
+    response->status = ntohs(response->status);
 }
 
 int main(int argc, char *argv[]) {
@@ -195,18 +205,25 @@ int main(int argc, char *argv[]) {
             &client_address
         };
         receive_message_from_client(&receive_msg_from_clients_args);
+        ntoh_on_packet_data(&packet_data);
 
         // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
-        if (datagram_is_valid(&packet_data)) {
-            printf("Number of pairs: %d\n", packet_data.pair_count);
-            printf("Packet id: %d\n", packet_data.packet_id);
-            printf("Pairs: \n");
-            for (int i = 0; i < packet_data.pair_count; i++) {
-                printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
-            }
+        // if (datagram_is_valid(&packet_data)) {
+        //     printf("Number of pairs: %d\n", packet_data.pair_count);
+        //     printf("Packet id: %d\n", packet_data.packet_id);
+        //     printf("Pairs: \n");
+        //     for (int i = 0; i < packet_data.pair_count; i++) {
+        //         printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
+        //     }
+        // }
+        printf("Number of pairs: %d\n", packet_data.pair_count);
+        printf("Packet id: %d\n", packet_data.packet_id);
+        printf("Pairs: \n");
+        for (int i = 0; i < packet_data.pair_count; i++) {
+            printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
         }
 
         response_t response_to_client = {
