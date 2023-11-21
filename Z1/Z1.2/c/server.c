@@ -32,15 +32,16 @@ typedef struct {
 
 typedef struct {
     int sockfd;
-    response_t *response;
+    void *message;
+    int message_length;
     struct sockaddr_in *client_address;
 } s_m_t_c_args_t;
 
 int send_message_to_client(s_m_t_c_args_t *args) {
     int data_length = sendto(
         args->sockfd,
-        args->response,
-        sizeof(*args->response),
+        args->message,
+        args->message_length,
         0,
         (struct sockaddr*) args->client_address, 
         sizeof(*args->client_address)
@@ -76,9 +77,7 @@ int receive_message_from_client(r_m_f_c_args_t *args) {
 }
 
 typedef struct {
-    int sockfd;
-    response_t *response;
-    struct sockaddr_in *client_address;
+    s_m_t_c_args_t *send_message_args;
     bool message_received;
 } timer_thread_args_t;
 
@@ -92,12 +91,7 @@ void *timer_thread_function(void *args) {
             return NULL;
         }
         else {
-            s_m_t_c_args_t args = {
-                args_parsed->sockfd,
-                args_parsed->response,
-                args_parsed->client_address
-            };
-            send_message_to_client(&args);
+            send_message_to_client(args_parsed->send_message_args);
         }
     }
 }
@@ -129,8 +123,7 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
     int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
     if (pair_count > max_pair_count) {
-        // return false;
-        ;
+        return false;
     }
     packet_data->pair_count = pair_count;
 
@@ -153,8 +146,7 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     // Check if the remaining bytes are equal to 0.
     for (int i = current_byte_no; i < BUF_SIZE; i++) {
         if (buffer[i] != 0) {
-            // return false;
-            ;
+            return false;
         }
     }
 
@@ -218,13 +210,11 @@ int main(int argc, char *argv[]) {
 
         packet_data_t packet_data;
         if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
-        // datagram_is_valid(buffer, sizeof(buffer), &packet_data);
-        // if (true) {
             printf("Number of pairs: %d\n", packet_data.pair_count);
             printf("Packet id: %d\n", packet_data.packet_id);
             printf("Pairs: \n");
             for (int i = 0; i < packet_data.pair_count; i++) {
-                printf("%s:%s", packet_data.pairs[i].key, packet_data.pairs[i].value);
+                printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
             }
         }
 
@@ -235,6 +225,7 @@ int main(int argc, char *argv[]) {
         s_m_t_c_args_t first_response_args = {
             sockfd,
             &response,
+            sizeof(response),
             &client_address
         };
         send_message_to_client(&first_response_args);
@@ -245,9 +236,12 @@ int main(int argc, char *argv[]) {
         // It will periodically resend the message...
         pthread_t timer_thread;
         timer_thread_args_t timer_args = {
-            sockfd,
-            &response,
-            &client_address,
+            &(s_m_t_c_args_t){
+                sockfd,
+                &response,
+                sizeof(response),
+                &client_address
+            },
             false
         };
         pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
