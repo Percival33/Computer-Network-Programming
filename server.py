@@ -1,5 +1,6 @@
 import socket
 import argparse
+import struct
 
 BUFFER_SIZE = 1024
 
@@ -39,14 +40,14 @@ def run_server(server_ip, server_port):
                 break
 
             try:
-                message_to_print = message.decode("utf-8")
+                size, key, value = struct.unpack('!H2s2s', message)
+                message_to_print = f'Size: {size}, Key: {key.decode("utf-8")}, Value: {value.decode("utf-8")}'
 
-            except UnicodeDecodeError as e:
-                print(f"Error while decoding message: {e}")
-                message_to_print = message
+                print(f'Client ip address   : {address}')
+                print(f'Message received    : {message_to_print}')
 
-            print(f'Client ip address   : {address}')
-            print(f'Message received    : {message_to_print}')
+            except struct.error as e:
+                print(f"Error while unpacking message: {e}")
 
     except socket.error as e:
         print(f"Socket error: {e}")
@@ -63,4 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
