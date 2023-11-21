@@ -26,17 +26,21 @@
 #define RESPONSE_WAIT_TIME_S 1
 
 typedef struct {
+    uint16_t id;
+    uint8_t status; // if different from 0 then err
+} response_t;
+
+typedef struct {
     int sockfd;
-    char *message;
-    int message_length;
+    response_t *response;
     struct sockaddr_in *client_address;
 } s_m_t_c_args_t;
 
 int send_message_to_client(s_m_t_c_args_t *args) {
     int data_length = sendto(
         args->sockfd,
-        args->message,
-        args->message_length,
+        args->response,
+        sizeof(*args->response),
         0,
         (struct sockaddr*) args->client_address, 
         sizeof(*args->client_address)
@@ -73,8 +77,7 @@ int receive_message_from_client(r_m_f_c_args_t *args) {
 
 typedef struct {
     int sockfd;
-    char *message;
-    int message_length;
+    response_t *response;
     struct sockaddr_in *client_address;
     bool message_received;
 } timer_thread_args_t;
@@ -91,8 +94,7 @@ void *timer_thread_function(void *args) {
         else {
             s_m_t_c_args_t args = {
                 args_parsed->sockfd,
-                args_parsed->message,
-                args_parsed->message_length,
+                args_parsed->response,
                 args_parsed->client_address
             };
             send_message_to_client(&args);
@@ -215,9 +217,9 @@ int main(int argc, char *argv[]) {
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
         packet_data_t packet_data;
-        // if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
-        datagram_is_valid(buffer, sizeof(buffer), &packet_data);
-        if (true) {
+        if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
+        // datagram_is_valid(buffer, sizeof(buffer), &packet_data);
+        // if (true) {
             printf("Number of pairs: %d\n", packet_data.pair_count);
             printf("Packet id: %d\n", packet_data.packet_id);
             printf("Pairs: \n");
@@ -226,11 +228,13 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        char response[] = "test";
+        response_t response = {
+            (uint16_t) packet_data.packet_id,
+            0
+        };
         s_m_t_c_args_t first_response_args = {
             sockfd,
-            response,
-            sizeof(response),
+            &response,
             &client_address
         };
         send_message_to_client(&first_response_args);
@@ -242,8 +246,7 @@ int main(int argc, char *argv[]) {
         pthread_t timer_thread;
         timer_thread_args_t timer_args = {
             sockfd,
-            response,
-            sizeof(response),
+            &response,
             &client_address,
             false
         };
