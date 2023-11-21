@@ -35,9 +35,9 @@ typedef struct {
     void *message;
     int message_length;
     struct sockaddr_in *client_address;
-} s_m_t_c_args_t;
+} message_s_or_r_args_t;
 
-int send_message_to_client(s_m_t_c_args_t *args) {
+int send_message_to_client(message_s_or_r_args_t *args) {
     int data_length = sendto(
         args->sockfd,
         args->message,
@@ -53,14 +53,7 @@ int send_message_to_client(s_m_t_c_args_t *args) {
     return data_length;
 }
 
-typedef struct {
-    int sockfd;
-    char *buffer;
-    int buffer_length;
-    struct sockaddr_in *client_address;
-} r_m_f_c_args_t;
-
-int receive_message_from_client(r_m_f_c_args_t *args) {
+int receive_message_from_client(message_s_or_r_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
         args->buffer, 
@@ -77,7 +70,7 @@ int receive_message_from_client(r_m_f_c_args_t *args) {
 }
 
 typedef struct {
-    s_m_t_c_args_t *send_message_args;
+    message_s_or_r_args_t *send_message_args;
     bool message_received;
 } timer_thread_args_t;
 
@@ -123,6 +116,7 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
     int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
     if (pair_count > max_pair_count) {
+        printf("aaaa\n");
         return false;
     }
     packet_data->pair_count = pair_count;
@@ -196,7 +190,7 @@ int main(int argc, char *argv[]) {
     char buffer[BUF_SIZE];
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
-        r_m_f_c_args_t receive_req_args = {
+        message_s_or_r_args_t receive_req_args = {
             sockfd,
             buffer,
             sizeof(buffer),
@@ -222,7 +216,7 @@ int main(int argc, char *argv[]) {
             (uint16_t) packet_data.packet_id,
             0
         };
-        s_m_t_c_args_t first_response_args = {
+        message_s_or_r_args_t first_response_args = {
             sockfd,
             &response,
             sizeof(response),
@@ -236,7 +230,7 @@ int main(int argc, char *argv[]) {
         // It will periodically resend the message...
         pthread_t timer_thread;
         timer_thread_args_t timer_args = {
-            &(s_m_t_c_args_t){
+            &(message_s_or_r_args_t){
                 sockfd,
                 &response,
                 sizeof(response),
@@ -247,7 +241,7 @@ int main(int argc, char *argv[]) {
         pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
     
         // ... and start listening for a response toon the main thread.
-        r_m_f_c_args_t receive_res_args = {
+        message_s_or_r_args_t receive_res_args = {
             sockfd,
             buffer,
             sizeof(buffer),
