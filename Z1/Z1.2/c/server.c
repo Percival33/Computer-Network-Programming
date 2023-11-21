@@ -21,15 +21,22 @@
 
 #define RESPONSE_WAIT_TIME_S 1
 
-void send_message_to_client(
-    int sockfd, 
-    char *message,
-    int message_length,
-    struct sockaddr_in *client_address
-) {
-    if (sendto(sockfd, message, message_length, 0,
-            (struct sockaddr*) client_address, 
-            sizeof(*client_address)) == -1) {
+typedef struct {
+    int sockfd;
+    char *message;
+    int message_length;
+    struct sockaddr_in *client_address;
+} s_m_t_c_args_t;
+
+void send_message_to_client(s_m_t_c_args_t *args) {
+    if (sendto(
+        args->sockfd,
+        args->message,
+        args->message_length,
+        0,
+        (struct sockaddr*) args->client_address, 
+        sizeof(*args->client_address)
+    ) == -1) {
         perror("Failed to send a message to the client");
     }
 }
