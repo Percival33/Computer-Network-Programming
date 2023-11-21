@@ -6,7 +6,7 @@ SERVER_PORT = 8888
 BUF_SIZE = 1024
 STR_SIZE = 2
 
-message_t = struct.Struct('H2s2s')
+message_t = struct.Struct('!H2s2s')
 
 if __name__ == "__main__":
     sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     size = 1
     key = 'A'
     value = '1'
-    message_t_packed = message_t.pack(socket.htons(size), key.encode(), value.encode())
+    message_t_packed = message_t.pack(size, key.encode(), value.encode())
 
     sockfd.sendto(message_t_packed, (SERVER_IP, SERVER_PORT))
     print("Data sent to server")
