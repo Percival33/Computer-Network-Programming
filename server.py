@@ -1,0 +1,66 @@
+import socket
+import argparse
+
+BUFFER_SIZE = 1024
+
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("ip", type=str)
+    parser.add_argument("port", type=int)
+    return parser
+
+
+def parse_arguments(parser):
+    return parser.parse_args()
+
+
+def run_server(server_ip, server_port):
+    server_socket = socket.socket(
+        family=socket.AF_INET,
+        type=socket.SOCK_DGRAM
+    )
+
+    try:
+        server_socket.bind((server_ip, server_port))
+        print(
+            f'Server listening on ip: {server_ip} port: {server_port}'
+        )
+
+        while True:
+            try:
+                message, address = server_socket.recvfrom(BUFFER_SIZE)
+            except socket.error as e:
+                print(f"Socket error: {e}")
+                break
+
+            if not message:
+                print("Error in datagram")
+                break
+
+            try:
+                message_to_print = message.decode("utf-8")
+
+            except UnicodeDecodeError as e:
+                print(f"Error while decoding message: {e}")
+                message_to_print = message
+
+            print(f'Client ip address   : {address}')
+            print(f'Message received    : {message_to_print}')
+
+    except socket.error as e:
+        print(f"Socket error: {e}")
+
+    finally:
+        server_socket.close()
+
+
+def main():
+    arguments = parse_arguments(get_parser())
+    run_server(arguments.ip, arguments.port)
+    return 0
+
+
+if __name__ == "__main__":
+    main()
+
