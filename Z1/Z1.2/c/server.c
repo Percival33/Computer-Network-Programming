@@ -167,26 +167,20 @@ int main(int argc, char *argv[]) {
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
-        // if (datagram_is_valid(&packet_data)) {
-        //     printf("Number of pairs: %d\n", packet_data.pair_count);
-        //     printf("Packet id: %d\n", packet_data.packet_id);
-        //     printf("Pairs: \n");
-        //     for (int i = 0; i < packet_data.pair_count; i++) {
-        //         printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
-        //     }
-        // }
-        printf("Number of pairs: %d\n", packet_data.count);
-        printf("Packet id: %d\n", packet_data.id);
-        printf("Pairs: \n");
-        char printable_key[KEY_SIZE + 1];
-        char printable_value[VALUE_SIZE + 1]; 
-        printable_key[KEY_SIZE] = '\0';
-        printable_value[VALUE_SIZE] = '\0';
-        for (int i = 0; i < packet_data.count; i++) {
-            memcpy(printable_key, packet_data.pairs[i].key, KEY_SIZE);
-            memcpy(printable_value, packet_data.pairs[i].value, VALUE_SIZE);
+        if (datagram_is_valid(&packet_data)) {
+            printf("Number of pairs: %d\n", packet_data.count);
+            printf("Packet id: %d\n", packet_data.id);
+            printf("Pairs: \n");
+            char printable_key[KEY_SIZE + 1];
+            char printable_value[VALUE_SIZE + 1]; 
+            printable_key[KEY_SIZE] = '\0';
+            printable_value[VALUE_SIZE] = '\0';
+            for (int i = 0; i < packet_data.count; i++) {
+                memcpy(printable_key, packet_data.pairs[i].key, KEY_SIZE);
+                memcpy(printable_value, packet_data.pairs[i].value, VALUE_SIZE);
 
-            printf("%s:%s\n", printable_key, printable_value);
+                printf("%s:%s\n", printable_key, printable_value);
+            }
         }
 
         response_t response_to_client = {
@@ -225,7 +219,7 @@ int main(int argc, char *argv[]) {
             sizeof(response_from_client),
             &client_address
         };
-        int res_data_length = receive_message_from_client(&receive_res_from_client_args);
+        receive_message_from_client(&receive_res_from_client_args);
         timer_args.message_received = true;
         printf("Handshake completed\n");
     }
