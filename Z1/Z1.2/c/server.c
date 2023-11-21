@@ -119,9 +119,12 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     
     // TODO parametrize
 
+    for (int i = 0; i < buffer_length; i++) {
+        printf("%d \n", buffer[i]);
+    }
+
     // The first 2 bytes are the size
     uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
-    printf("%d\n", pair_count);
     int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
     if (pair_count > max_pair_count) {
         // return false;
@@ -200,6 +203,7 @@ int main(int argc, char *argv[]) {
 
         packet_data_t packet_data;
         // if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
+        datagram_is_valid(buffer, sizeof(buffer), &packet_data);
         if (true) {
             printf("Number of pairs: %d\n", packet_data.pair_count);
             printf("Packet id: %d\n", packet_data.packet_id);
