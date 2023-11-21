@@ -60,12 +60,13 @@ void *timer_thread_function(void *args) {
             return NULL;
         }
         else {
-            send_message_to_client(
+            s_m_t_c_args_t args = {
                 args_parsed->sockfd,
                 args_parsed->message,
                 args_parsed->message_length,
                 args_parsed->client_address
-            );
+            };
+            send_message_to_client(&args);
         }
     }
 }
@@ -100,8 +101,8 @@ int main(int argc, char *argv[]) {
     char buffer[BUFFER_SIZE];
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
-        int data_length = recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_address, &(socklen_t){sizeof(client_address)});
-        if (data_length == -1) {
+        int req_data_length = recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_address, &(socklen_t){sizeof(client_address)});
+        if (req_data_length == -1) {
             printf("Failed to receive data\n");
             exit(ERROR_FAILED_DATA_RECEIVAL);
         }
@@ -126,25 +127,34 @@ int main(int argc, char *argv[]) {
         // TODO check if datagram is valid
 
         char response[] = "test";
-        send_message_to_client(sockfd, response, sizeof(response), &client_address);
+        s_m_t_c_args_t first_response_args = {
+            sockfd,
+            response,
+            sizeof(response),
+            &client_address
+        };
+        send_message_to_client(&first_response_args);
 
         // Wait for the response to the response
-        float start_tick = clock();
-        float current_tick;
+
+        // Start a timer on one thread. 
+        // It will periodically resend the message...
         pthread_t timer_thread;
-        timer_thread_args_t args = {
+        timer_thread_args_t timer_args = {
             sockfd,
             response,
             sizeof(response),
             &client_address,
             false
         };
-        pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&args);
-        data_length = recvfrom(sockfd, buffer, sizeof(buffer),
+        pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
+    
+        // ... and start listening for a response toon the main thread.
+        int res_data_length = recvfrom(sockfd, buffer, sizeof(buffer),
             0, (struct sockaddr*)&client_address, 
             &(socklen_t){sizeof(client_address)});
-        args.message_received = true;
-        if (data_length == -1) {
+        timer_args.message_received = true;
+        if (res_data_length == -1) {
             printf("Failed to receive data\n");
             exit(ERROR_FAILED_DATA_RECEIVAL);
         }
