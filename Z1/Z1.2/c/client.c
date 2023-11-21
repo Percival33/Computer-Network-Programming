@@ -7,20 +7,41 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <assert.h>
 
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
-#define BUF_SIZE 1024 // Buffer size for data
-#define STR_SIZE 2
+
+#define BUF_SIZE 512 // Buffer size for data
+#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
+#define KEY_SIZE 2
+#define VALUE_SIZE 2
+
 typedef struct {
+    uint16_t id;
     uint16_t size;
-    char key[STR_SIZE];
-    char value[STR_SIZE];
+    char payload[MAX_PAYLOAD_SIZE];
 } message_t;
 
-int main(int argc, char* argv[]) {
-    if(argc != 1) {
+typedef struct {
+    uint16_t id;
+    uint8_t status; // if different from 0 then err
+} response_t;
+
+void fillMessage(message_t *msg, uint16_t id, uint16_t size, char *payload) {
+    msg->id = htons(id);
+    msg->size = htons(size);
+    int payloadLength = strlen(payload);
+
+    assert(payloadLength < MAX_PAYLOAD_SIZE);
+
+    memset(msg->payload, '\0', MAX_PAYLOAD_SIZE);
+    strncpy(msg->payload, payload, payloadLength);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 1) {
         perror("Arguments error");
         exit(1);
     }
@@ -42,26 +63,20 @@ int main(int argc, char* argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     message_t a;
-    a.size = htons(1);
-    char str[STR_SIZE];
-    memset(a.key, '\0', STR_SIZE);
-    strncpy(a.key, "A", STR_SIZE - 1);
-    memset(a.value, '\0', STR_SIZE);
-    strncpy(a.value, "1", STR_SIZE - 1);
+    fillMessage(&a, 1, 2, "A 1 B 2"); // A: 1, B: 2
 
-    memcpy(buffer, &a, sizeof(a));
-    sendto(sockfd, buffer, sizeof(a), 0, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+    sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
     printf("Data sent to server\n");
 
     addr_size = sizeof(serverAddr);
-    printf("%d\n", sizeof(buffer));
+    response_t response;
+    recvfrom(sockfd, &response, 3, 0, (struct sockaddr *) &serverAddr, &addr_size);
 
-    recvfrom(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *)&serverAddr, &addr_size);
-    for (int i = 0; i < sizeof(buffer); i++) {
-        printf("%d ", (int)buffer[i]);
-    }
-    printf("\n");
-    printf("Received from server: %s\n", buffer);
+    printf("resp: id(%d) status(%d)\n", htons(response.id), htons(response.status));
+    if(response.status == 0)
+        sendto(sockfd, &response, sizeof(response), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+
+//    printf("Received from server: %s\n", response);
 
     // Close the socket
     close(sockfd);
