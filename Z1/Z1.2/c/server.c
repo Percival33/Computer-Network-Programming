@@ -222,8 +222,15 @@ int main(int argc, char *argv[]) {
         printf("Number of pairs: %d\n", packet_data.pair_count);
         printf("Packet id: %d\n", packet_data.packet_id);
         printf("Pairs: \n");
+        char printable_key[KEY_SIZE + 1];
+        char printable_value[VALUE_SIZE + 1]; 
+        printable_key[KEY_SIZE] = '\0';
+        printable_value[VALUE_SIZE] = '\0';
         for (int i = 0; i < packet_data.pair_count; i++) {
-            printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
+            memcpy(printable_key, packet_data.pairs[i].key, KEY_SIZE);
+            memcpy(printable_value, packet_data.pairs[i].value, VALUE_SIZE);
+
+            printf("%s:%s\n", printable_key, printable_value);
         }
 
         response_t response_to_client = {
