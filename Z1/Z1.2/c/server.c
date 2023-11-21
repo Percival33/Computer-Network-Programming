@@ -159,6 +159,19 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     return true;
 }
 
+bool response_is_valid(char buffer[], int expected_id) {
+    // TODO parametrize
+    int packet_id = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
+    if (packet_id != expected_id) {
+        return false;
+    }
+    int status_code = (int) buffer[2];
+    if (status_code != 0) {
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Invalid argument count\n");
