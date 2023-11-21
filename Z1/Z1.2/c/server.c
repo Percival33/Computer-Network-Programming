@@ -114,9 +114,9 @@ bool response_is_valid(char buffer[], int expected_id) {
     return true;
 }
 
-void ntoh_on_packet_data(packet_data_t *packet_data) {
-    packet_data->pair_count = ntohs(packet_data->pair_count);
-    packet_data->packet_id = ntohs(packet_data->packet_id);
+void ntoh_on_packet_data(data_t *packet_data) {
+    packet_data->count = ntohs(packet_data->count);
+    packet_data->id = ntohs(packet_data->id);
 }
 
 void ntoh_on_response(response_t *response) {
@@ -175,14 +175,14 @@ int main(int argc, char *argv[]) {
         //         printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
         //     }
         // }
-        printf("Number of pairs: %d\n", packet_data.pair_count);
-        printf("Packet id: %d\n", packet_data.packet_id);
+        printf("Number of pairs: %d\n", packet_data.count);
+        printf("Packet id: %d\n", packet_data.id);
         printf("Pairs: \n");
         char printable_key[KEY_SIZE + 1];
         char printable_value[VALUE_SIZE + 1]; 
         printable_key[KEY_SIZE] = '\0';
         printable_value[VALUE_SIZE] = '\0';
-        for (int i = 0; i < packet_data.pair_count; i++) {
+        for (int i = 0; i < packet_data.count; i++) {
             memcpy(printable_key, packet_data.pairs[i].key, KEY_SIZE);
             memcpy(printable_value, packet_data.pairs[i].value, VALUE_SIZE);
 
