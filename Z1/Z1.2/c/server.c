@@ -13,8 +13,8 @@
 #define ERROR_INVALID_ARGC 1
 #define ERROR_FAILED_SOCKET_CREATION 2
 #define ERROR_FAILED_SOCKET_BIND 3
-#define ERROR_FAILED_DATA_RECEIVAL 4
-#define ERROR_FAILED_TO_SEND_RESPONSE 5
+#define ERROR_FAILED_TO_RECEIVE_A_MESSAGE 4
+#define ERROR_FAILED_TO_SEND_A_MESSAGE 5
 
 #define PAIR_SIZE 4
 #define BUFFER_SIZE 1024
@@ -28,17 +28,43 @@ typedef struct {
     struct sockaddr_in *client_address;
 } s_m_t_c_args_t;
 
-void send_message_to_client(s_m_t_c_args_t *args) {
-    if (sendto(
+int send_message_to_client(s_m_t_c_args_t *args) {
+    int data_length = sendto(
         args->sockfd,
         args->message,
         args->message_length,
         0,
         (struct sockaddr*) args->client_address, 
         sizeof(*args->client_address)
-    ) == -1) {
+    );
+    if (data_length == -1) {
         perror("Failed to send a message to the client");
+        exit(ERROR_FAILED_TO_SEND_A_MESSAGE);
     }
+    return data_length;
+}
+
+typedef struct {
+    int sockfd;
+    char *buffer;
+    int buffer_length;
+    struct sockaddr_in *client_address;
+} r_m_f_c_args_t;
+
+int receive_message_from_client(r_m_f_c_args_t *args) {
+    int data_length = recvfrom(
+        args->sockfd,
+        args->buffer, 
+        args->buffer_length,
+        0,
+        (struct sockaddr*) args->client_address, 
+        &(socklen_t){sizeof(args->client_address)}
+    );
+    if (data_length == -1) {
+        printf("Failed to receive data\n");
+        exit(ERROR_FAILED_TO_RECEIVE_A_MESSAGE);
+    }
+    return data_length;
 }
 
 // TODO struct for send_message_to_client args
@@ -101,11 +127,15 @@ int main(int argc, char *argv[]) {
     char buffer[BUFFER_SIZE];
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
-        int req_data_length = recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_address, &(socklen_t){sizeof(client_address)});
-        if (req_data_length == -1) {
-            printf("Failed to receive data\n");
-            exit(ERROR_FAILED_DATA_RECEIVAL);
-        }
+        r_m_f_c_args_t receive_req_args = {
+            sockfd,
+            buffer,
+            sizeof(buffer),
+            &client_address
+        };
+        int req_data_length = receive_message_from_client(&receive_req_args);
+
+        // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
@@ -150,14 +180,14 @@ int main(int argc, char *argv[]) {
         pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
     
         // ... and start listening for a response toon the main thread.
-        int res_data_length = recvfrom(sockfd, buffer, sizeof(buffer),
-            0, (struct sockaddr*)&client_address, 
-            &(socklen_t){sizeof(client_address)});
+        r_m_f_c_args_t receive_res_args = {
+            sockfd,
+            buffer,
+            sizeof(buffer),
+            &client_address
+        };
+        int res_data_length = receive_message_from_client(&receive_res_args);
         timer_args.message_received = true;
-        if (res_data_length == -1) {
-            printf("Failed to receive data\n");
-            exit(ERROR_FAILED_DATA_RECEIVAL);
-        }
         printf("Handshake completed\n");
     }
     exit(0);
