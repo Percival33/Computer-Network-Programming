@@ -32,16 +32,16 @@ typedef struct {
 
 typedef struct {
     int sockfd;
-    void *message;
-    int message_length;
+    void *message_buffer;
+    int message_buffer_length;
     struct sockaddr_in *client_address;
 } message_s_or_r_args_t;
 
 int send_message_to_client(message_s_or_r_args_t *args) {
     int data_length = sendto(
         args->sockfd,
-        args->message,
-        args->message_length,
+        args->message_buffer,
+        args->message_buffer_length,
         0,
         (struct sockaddr*) args->client_address, 
         sizeof(*args->client_address)
@@ -56,8 +56,8 @@ int send_message_to_client(message_s_or_r_args_t *args) {
 int receive_message_from_client(message_s_or_r_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
-        args->buffer, 
-        args->buffer_length,
+        args->message_buffer, 
+        args->message_buffer_length,
         0,
         (struct sockaddr*) args->client_address, 
         &(socklen_t){sizeof(args->client_address)}
