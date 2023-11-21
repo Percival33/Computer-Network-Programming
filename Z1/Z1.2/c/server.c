@@ -21,7 +21,8 @@
 #define MAX_PAYLOAD_SIZE 508 // (512 - 4)
 #define KEY_SIZE 2
 #define VALUE_SIZE 2
-#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)
+#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)\
+#define PAIR_SIZE KEY_SIZE + VALUE_SIZE
 
 #define RESPONSE_WAIT_TIME_S 1
 
@@ -30,6 +31,7 @@ typedef struct {
     uint8_t status; // if different from 0 then err
 } response_t;
 
+// Args for send and receive functions
 typedef struct {
     int sockfd;
     void *message_buffer;
@@ -95,12 +97,12 @@ typedef struct {
 } key_value_pair_t;
 
 typedef struct {
-    int pair_count;
-    int packet_id;
+    uint16_t pair_count;
+    uint16_t packet_id;
     key_value_pair_t pairs[MAX_PAIR_COUNT];
 } packet_data_t;
 
-bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_data) {
+bool datagram_is_valid(packet_data_t *packet_data) {
     // Datagram is valid, if:
     // - After the declared pairs there are only zeroes,
     // - The number of pairs does not exceed the max number of
@@ -108,42 +110,38 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     
     // TODO parametrize
 
-    for (int i = 0; i < buffer_length; i++) {
-        printf("%d \n", buffer[i]);
-    }
+    int pair_count = packet_data->pair_count;
 
-    // The first 2 bytes are the size
-    uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
+    // Size
     int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
     if (pair_count > max_pair_count) {
         printf("aaaa\n");
         return false;
     }
-    packet_data->pair_count = pair_count;
 
-    // The next 2 bytes are the packet id
-    uint16_t packet_id = ntohs(((uint16_t)buffer[2] << 8) + (uint16_t)buffer[3]);
-    packet_data->packet_id = packet_id;
-
+    // Check if the remaining are equal to 0.
+    // IMPORTANT - THERE MUST ONLY BE FULL PAIRS
     char *key;
     char *value;
-    // TODO parmetrize current_byte_no
-    int current_byte_no = 4;
-    for (int i = 0; i < 1; i++) {
+    for (int i = pair_count; i < max_pair_count; i++) {
         key = packet_data->pairs[i].key;
+        if (!text_is_only_zeroes(key, sizeof(key))) {
+            return false;
+        }
         value = packet_data->pairs[i].value;
-        strncpy(key, &buffer[current_byte_no], sizeof(key));
-        strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
-        current_byte_no += sizeof(key) + sizeof(value);
-    }
-
-    // Check if the remaining bytes are equal to 0.
-    for (int i = current_byte_no; i < BUF_SIZE; i++) {
-        if (buffer[i] != 0) {
+        if (!text_is_only_zeroes(value, sizeof(key))) {
             return false;
         }
     }
+    return true;
+}
 
+bool text_is_only_zeroes(char *text, int text_length) {
+    for (int i = 0; i < text_length; i++) {
+        if (text[i] != '\0') {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -187,23 +185,22 @@ int main(int argc, char *argv[]) {
         exit(ERROR_FAILED_SOCKET_BIND);
     }
 
-    char buffer[BUF_SIZE];
+    packet_data_t packet_data;
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
-        message_s_or_r_args_t receive_req_args = {
+        message_s_or_r_args_t receive_msg_from_clients_args = {
             sockfd,
-            buffer,
-            sizeof(buffer),
+            &packet_data,
+            sizeof(packet_data),
             &client_address
         };
-        int req_data_length = receive_message_from_client(&receive_req_args);
+        receive_message_from_client(&receive_msg_from_clients_args);
 
         // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
-        packet_data_t packet_data;
-        if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
+        if (datagram_is_valid(&packet_data)) {
             printf("Number of pairs: %d\n", packet_data.pair_count);
             printf("Packet id: %d\n", packet_data.packet_id);
             printf("Pairs: \n");
@@ -212,42 +209,43 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        response_t response = {
+        response_t response_to_client = {
             (uint16_t) packet_data.packet_id,
             0
         };
-        message_s_or_r_args_t first_response_args = {
+        message_s_or_r_args_t send_res_to_client_args = {
             sockfd,
-            &response,
-            sizeof(response),
+            &response_to_client,
+            sizeof(response_to_client),
             &client_address
         };
-        send_message_to_client(&first_response_args);
+        send_message_to_client(&send_res_to_client_args);
 
         // Wait for the response to the response
 
         // Start a timer on one thread. 
         // It will periodically resend the message...
+        response_t response_from_client;
         pthread_t timer_thread;
         timer_thread_args_t timer_args = {
             &(message_s_or_r_args_t){
                 sockfd,
-                &response,
-                sizeof(response),
+                &response_from_client,
+                sizeof(response_from_client),
                 &client_address
             },
             false
         };
         pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
     
-        // ... and start listening for a response toon the main thread.
-        message_s_or_r_args_t receive_res_args = {
+        // ... and start listening for a response from the main thread.
+        message_s_or_r_args_t receive_res_from_client_args = {
             sockfd,
-            buffer,
-            sizeof(buffer),
+            &response_from_client,
+            sizeof(response_from_client),
             &client_address
         };
-        int res_data_length = receive_message_from_client(&receive_res_args);
+        int res_data_length = receive_message_from_client(&receive_res_from_client_args);
         timer_args.message_received = true;
         printf("Handshake completed\n");
     }
