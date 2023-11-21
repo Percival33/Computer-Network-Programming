@@ -8,36 +8,20 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <assert.h>
-
+#include "common.h"
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
 
-#define BUF_SIZE 512 // Buffer size for data
-#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
-#define KEY_SIZE 2
-#define VALUE_SIZE 2
-
-typedef struct {
-    uint16_t id;
-    uint16_t size;
-    char payload[MAX_PAYLOAD_SIZE];
-} message_t;
-
-typedef struct {
-    uint16_t id;
-    uint8_t status; // if different from 0 then err
-} response_t;
-
-void fillMessage(message_t *msg, uint16_t id, uint16_t size, char *payload) {
+void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payload[]) {
     msg->id = htons(id);
-    msg->size = htons(size);
-    int payloadLength = strlen(payload);
+    msg->count = htons(count);
 
-    assert(payloadLength < MAX_PAYLOAD_SIZE);
+    int payloadLength = PAIR_SIZE * count;
+//    assert(payloadLength < MAX_PAYLOAD_SIZE);
 
-    memset(msg->payload, '\0', MAX_PAYLOAD_SIZE);
-    strncpy(msg->payload, payload, payloadLength);
+    memset(msg->pairs, '\0', MAX_PAYLOAD_SIZE);
+    strncpy(msg->pairs, payload, payloadLength);
 }
 
 int main(int argc, char *argv[]) {
@@ -48,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     int sockfd;
     struct sockaddr_in serverAddr;
-    char buffer[BUF_SIZE];
+    char buffer[BUFFER_SIZE];
     socklen_t addr_size;
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -62,7 +46,7 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
-    message_t a;
+    data_t a;
     fillMessage(&a, 1, 2, "A 1 B 2"); // A: 1, B: 2
 
     sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
@@ -75,6 +59,10 @@ int main(int argc, char *argv[]) {
     printf("resp: id(%d) status(%d)\n", htons(response.id), htons(response.status));
     if(response.status == 0)
         sendto(sockfd, &response, sizeof(response), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+
+    // wysylam
+    // czekam na odpowiedz, jak jej nie dostane po czasie X to wyslij jeszcze raz i zresetuj timer
+    // jak dostaniesz odpowiedz to zakoncz program
 
 //    printf("Received from server: %s\n", response);
 

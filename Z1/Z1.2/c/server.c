@@ -10,36 +10,9 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
+#include "common.h"
 
-#define ERROR_INVALID_ARGC 1
-#define ERROR_FAILED_SOCKET_CREATION 2
-#define ERROR_FAILED_SOCKET_BIND 3
-#define ERROR_FAILED_TO_RECEIVE_A_MESSAGE 4
-#define ERROR_FAILED_TO_SEND_A_MESSAGE 5
-
-#define BUF_SIZE 512 // Buffer size for data
-#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
-#define KEY_SIZE 2
-#define VALUE_SIZE 2
-#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)\
-#define PAIR_SIZE KEY_SIZE + VALUE_SIZE
-
-#define RESPONSE_WAIT_TIME_S 1
-
-typedef struct {
-    uint16_t id;
-    uint8_t status; // if different from 0 then err
-} response_t;
-
-// Args for send and receive functions
-typedef struct {
-    int sockfd;
-    void *message_buffer;
-    int message_buffer_length;
-    struct sockaddr_in *client_address;
-} message_s_or_r_args_t;
-
-int send_message_to_client(message_s_or_r_args_t *args) {
+int send_message_to_client(message_args_t *args) {
     int data_length = sendto(
         args->sockfd,
         args->message_buffer,
@@ -55,7 +28,7 @@ int send_message_to_client(message_s_or_r_args_t *args) {
     return data_length;
 }
 
-int receive_message_from_client(message_s_or_r_args_t *args) {
+int receive_message_from_client(message_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
         args->message_buffer, 
@@ -71,13 +44,8 @@ int receive_message_from_client(message_s_or_r_args_t *args) {
     return data_length;
 }
 
-typedef struct {
-    message_s_or_r_args_t *send_message_args;
-    bool message_received;
-} timer_thread_args_t;
-
-void *timer_thread_function(void *args) {
-    timer_thread_args_t *args_parsed = (timer_thread_args_t*) args;
+void *resender(void *args) {
+    resender_args_t *args_parsed = (resender_args_t*) args;
     while(true) {
         sleep(RESPONSE_WAIT_TIME_S);
         if (args_parsed->message_received) {
@@ -91,18 +59,16 @@ void *timer_thread_function(void *args) {
     }
 }
 
-typedef struct {
-    char key[KEY_SIZE];
-    char value[VALUE_SIZE];
-} key_value_pair_t;
+bool text_is_only_zeroes(char *text, int text_length) {
+    for (int i = 0; i < text_length; i++) {
+        if (text[i] != '\0') {
+            return false;
+        }
+    }
+    return true;
+}
 
-typedef struct {
-    uint16_t pair_count;
-    uint16_t packet_id;
-    key_value_pair_t pairs[MAX_PAIR_COUNT];
-} packet_data_t;
-
-bool datagram_is_valid(packet_data_t *packet_data) {
+bool datagram_is_valid(data_t *packet_data) {
     // Datagram is valid, if:
     // - After the declared pairs there are only zeroes,
     // - The number of pairs does not exceed the max number of
@@ -110,11 +76,10 @@ bool datagram_is_valid(packet_data_t *packet_data) {
     
     // TODO parametrize
 
-    int pair_count = packet_data->pair_count;
+    int count = packet_data->count;
 
     // Size
-    int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
-    if (pair_count > max_pair_count) {
+    if (count > MAX_PAIR_COUNT) {
         printf("aaaa\n");
         return false;
     }
@@ -123,22 +88,13 @@ bool datagram_is_valid(packet_data_t *packet_data) {
     // IMPORTANT - THERE MUST ONLY BE FULL PAIRS
     char *key;
     char *value;
-    for (int i = pair_count; i < max_pair_count; i++) {
+    for (int i = count; i < MAX_PAIR_COUNT; i++) {
         key = packet_data->pairs[i].key;
         if (!text_is_only_zeroes(key, sizeof(key))) {
             return false;
         }
         value = packet_data->pairs[i].value;
         if (!text_is_only_zeroes(value, sizeof(key))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool text_is_only_zeroes(char *text, int text_length) {
-    for (int i = 0; i < text_length; i++) {
-        if (text[i] != '\0') {
             return false;
         }
     }
@@ -185,10 +141,10 @@ int main(int argc, char *argv[]) {
         exit(ERROR_FAILED_SOCKET_BIND);
     }
 
-    packet_data_t packet_data;
+    data_t packet_data;
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
-        message_s_or_r_args_t receive_msg_from_clients_args = {
+        message_args_t receive_msg_from_clients_args = {
             sockfd,
             &packet_data,
             sizeof(packet_data),
@@ -201,19 +157,19 @@ int main(int argc, char *argv[]) {
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
         if (datagram_is_valid(&packet_data)) {
-            printf("Number of pairs: %d\n", packet_data.pair_count);
-            printf("Packet id: %d\n", packet_data.packet_id);
+            printf("Number of pairs: %d\n", packet_data.count);
+            printf("Packet id: %d\n", packet_data.id);
             printf("Pairs: \n");
-            for (int i = 0; i < packet_data.pair_count; i++) {
+            for (int i = 0; i < packet_data.count; i++) {
                 printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
             }
         }
 
         response_t response_to_client = {
-            (uint16_t) packet_data.packet_id,
+            (uint16_t) packet_data.id,
             0
         };
-        message_s_or_r_args_t send_res_to_client_args = {
+        message_args_t send_res_to_client_args = {
             sockfd,
             &response_to_client,
             sizeof(response_to_client),
@@ -226,9 +182,9 @@ int main(int argc, char *argv[]) {
         // Start a timer on one thread. 
         // It will periodically resend the message...
         response_t response_from_client;
-        pthread_t timer_thread;
-        timer_thread_args_t timer_args = {
-            &(message_s_or_r_args_t){
+        pthread_t resender_thread;
+        resender_args_t timer_args = {
+            &(message_args_t){
                 sockfd,
                 &response_from_client,
                 sizeof(response_from_client),
@@ -236,10 +192,10 @@ int main(int argc, char *argv[]) {
             },
             false
         };
-        pthread_create(&timer_thread, NULL, timer_thread_function, (void *)&timer_args);
+        pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
     
         // ... and start listening for a response from the main thread.
-        message_s_or_r_args_t receive_res_from_client_args = {
+        message_args_t receive_res_from_client_args = {
             sockfd,
             &response_from_client,
             sizeof(response_from_client),
