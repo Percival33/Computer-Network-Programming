@@ -9,6 +9,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
 
 #define ERROR_INVALID_ARGC 1
 #define ERROR_FAILED_SOCKET_CREATION 2
@@ -16,8 +17,11 @@
 #define ERROR_FAILED_TO_RECEIVE_A_MESSAGE 4
 #define ERROR_FAILED_TO_SEND_A_MESSAGE 5
 
-#define PAIR_SIZE 4
-#define BUFFER_SIZE 1024
+#define BUF_SIZE 512 // Buffer size for data
+#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
+#define KEY_SIZE 2
+#define VALUE_SIZE 2
+#define MAX_PAIR_COUNT = MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)
 
 #define RESPONSE_WAIT_TIME_S 1
 
@@ -67,8 +71,6 @@ int receive_message_from_client(r_m_f_c_args_t *args) {
     return data_length;
 }
 
-// TODO struct for send_message_to_client args
-
 typedef struct {
     int sockfd;
     char *message;
@@ -82,6 +84,7 @@ void *timer_thread_function(void *args) {
     while(true) {
         sleep(RESPONSE_WAIT_TIME_S);
         if (args_parsed->message_received) {
+            // TODO delete this printf
             printf("timer thread ended\n");
             return NULL;
         }
@@ -95,6 +98,59 @@ void *timer_thread_function(void *args) {
             send_message_to_client(&args);
         }
     }
+}
+
+typedef struct {
+    char key[KEY_SIZE];
+    char value[VALUE_SIZE];
+} key_value_pair_t;
+
+typedef struct {
+    int pair_count;
+    int packet_id;
+    key_value_pair_t pairs[MAX_PAIR_COUNT];
+} packet_data_t;
+
+bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_data) {
+    // Datagram is valid, if:
+    // - After the declared pairs there are only zeroes,
+    // - The number of pairs does not exceed the max number of
+    // pairs that can fit in a packet
+    
+    // TODO parametrize
+
+    // The first 2 bytes are the size
+    uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
+    int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
+    if (pair_count > max_pair_count) {
+        return false;
+    }
+    packet_data->pair_count = pair_count;
+
+    // The next 2 bytes are the packet id
+    uint16_t packet_id = ntohs(((uint16_t)buffer[2] << 8) + (uint16_t)buffer[3]);
+    packet_data->packet_id = packet_id;
+
+    char *key;
+    char *value;
+    // TODO parmetrize current_byte_no
+    int current_byte_no = 4;
+    for (int i = 0; i < 1; i++) {
+        *key = &packet_data->pairs[i].key;
+        *value = &packet_data->pairs[i].value;     
+        strncpy(key, &buffer[current_byte_no], sizeof(key));
+        strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
+        current_byte_no += sizeof(key) + sizeof(value);
+    }
+
+    // Check if the remaining bytes are equal to 0.
+    for (int i = current_byte_no; i < BUF_SIZE; i++) {
+        if (buffer[i] != 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 int main(int argc, char *argv[]) {
@@ -124,7 +180,7 @@ int main(int argc, char *argv[]) {
         exit(ERROR_FAILED_SOCKET_BIND);
     }
 
-    char buffer[BUFFER_SIZE];
+    char buffer[BUF_SIZE];
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
         r_m_f_c_args_t receive_req_args = {
@@ -142,11 +198,15 @@ int main(int argc, char *argv[]) {
         // The first 2 bytes are the size
         uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
 
-        printf("Number of pairs: %d\n", pair_count);
+        // The next 2 bytes are the packet id
+        uint16_t packet_id = ntohs(((uint16_t)buffer[2] << 8) + (uint16_t)buffer[3]);
 
-        int current_byte_no = 2;
-        char key[PAIR_SIZE/2];
-        char value[PAIR_SIZE/2];
+        printf("Number of pairs: %d\n", pair_count);
+        printf("Paccket id: %d\n", packet_id);
+
+        char key[KEY_SIZE];
+        char value[VALUE_SIZE];
+        int current_byte_no = 4;
         for (int i = 0; i < 1; i++) {
             strncpy(key, &buffer[current_byte_no], sizeof(key));
             strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
