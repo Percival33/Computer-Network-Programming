@@ -21,7 +21,7 @@
 #define MAX_PAYLOAD_SIZE 508 // (512 - 4)
 #define KEY_SIZE 2
 #define VALUE_SIZE 2
-#define MAX_PAIR_COUNT = MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)
+#define MAX_PAIR_COUNT MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE)
 
 #define RESPONSE_WAIT_TIME_S 1
 
@@ -121,9 +121,11 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
 
     // The first 2 bytes are the size
     uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
+    printf("%d\n", pair_count);
     int max_pair_count = floor(MAX_PAYLOAD_SIZE / (KEY_SIZE + VALUE_SIZE));
     if (pair_count > max_pair_count) {
-        return false;
+        // return false;
+        ;
     }
     packet_data->pair_count = pair_count;
 
@@ -136,8 +138,8 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     // TODO parmetrize current_byte_no
     int current_byte_no = 4;
     for (int i = 0; i < 1; i++) {
-        *key = &packet_data->pairs[i].key;
-        *value = &packet_data->pairs[i].value;     
+        key = packet_data->pairs[i].key;
+        value = packet_data->pairs[i].value;
         strncpy(key, &buffer[current_byte_no], sizeof(key));
         strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
         current_byte_no += sizeof(key) + sizeof(value);
@@ -146,7 +148,8 @@ bool datagram_is_valid(char buffer[], int buffer_length, packet_data_t *packet_d
     // Check if the remaining bytes are equal to 0.
     for (int i = current_byte_no; i < BUF_SIZE; i++) {
         if (buffer[i] != 0) {
-            return false;
+            // return false;
+            ;
         }
     }
 
@@ -195,26 +198,16 @@ int main(int argc, char *argv[]) {
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
         printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
-        // The first 2 bytes are the size
-        uint16_t pair_count = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
-
-        // The next 2 bytes are the packet id
-        uint16_t packet_id = ntohs(((uint16_t)buffer[2] << 8) + (uint16_t)buffer[3]);
-
-        printf("Number of pairs: %d\n", pair_count);
-        printf("Paccket id: %d\n", packet_id);
-
-        char key[KEY_SIZE];
-        char value[VALUE_SIZE];
-        int current_byte_no = 4;
-        for (int i = 0; i < 1; i++) {
-            strncpy(key, &buffer[current_byte_no], sizeof(key));
-            strncpy(value, &buffer[current_byte_no + sizeof(key)], sizeof(key));
-            current_byte_no += sizeof(key) + sizeof(value);
-            printf("%s : %s\n", key, value);
+        packet_data_t packet_data;
+        // if (datagram_is_valid(buffer, sizeof(buffer), &packet_data)) {
+        if (true) {
+            printf("Number of pairs: %d\n", packet_data.pair_count);
+            printf("Packet id: %d\n", packet_data.packet_id);
+            printf("Pairs: \n");
+            for (int i = 0; i < packet_data.pair_count; i++) {
+                printf("%s:%s", packet_data.pairs[i].key, packet_data.pairs[i].value);
+            }
         }
-
-        // TODO check if datagram is valid
 
         char response[] = "test";
         s_m_t_c_args_t first_response_args = {
