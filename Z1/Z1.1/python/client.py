@@ -8,6 +8,7 @@ STR_SIZE = 2
 
 message_t = struct.Struct('!H2s2s')
 
+
 def main():
     try:
         sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -34,6 +35,7 @@ def main():
 
     finally:
         sockfd.close()
+
 
 if __name__ == "__main__":
     main()
