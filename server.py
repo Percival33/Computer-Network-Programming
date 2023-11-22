@@ -3,6 +3,15 @@ import argparse
 import struct
 
 BUFFER_SIZE = 1024
+message_t = struct.Struct('!H2s2s')
+
+
+def send_to_client(server_socket, address):
+    size = 1
+    key = 'A'
+    value = 'ok'
+    message_t_packed = message_t.pack(size, key.encode(), value.encode())
+    server_socket.sendto(message_t_packed, address)
 
 
 def get_parser():
@@ -45,6 +54,8 @@ def run_server(server_ip, server_port):
 
                 print(f'Client ip address   : {address}')
                 print(f'Message received    : {message_to_print}')
+
+                send_to_client(server_socket, address)
 
             except struct.error as e:
                 print(f"Error while unpacking message: {e}")
