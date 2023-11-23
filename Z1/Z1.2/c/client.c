@@ -19,7 +19,6 @@ void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payl
     msg->count = htons(count);
 
     int payloadLength = PAIR_SIZE * count;
-    printf(LOG_DEBUG"payload len: %d\n", payloadLength);
     assert(payloadLength <= MAX_PAYLOAD_SIZE);
 
     memset(msg->pairs, '\0', MAX_PAYLOAD_SIZE);
@@ -51,16 +50,16 @@ void *resender(void *args) {
     printf("Resender thread has started.\n");
     resender_args_t *args_parsed = (resender_args_t*) args;
     while (true) {
+        send_message(args_parsed->send_message_args);
         sleep(RESPONSE_WAIT_TIME_S);
         if (args_parsed->message_received) {
             printf("Resender thread has ended.\n");
             return NULL;
         }
-        send_message(args_parsed->send_message_args);
     }
 }
 
-void send_message_with_handshake(message_args_t *message) {
+void send_message_with_retry(message_args_t *message) {
     resender_args_t timer_args;
     response_t response_data;
     message_args_t response = {
@@ -75,11 +74,8 @@ void send_message_with_handshake(message_args_t *message) {
     timer_args.send_message_args = message;
     timer_args.message_received = false;
 
-    send_message(message);
-
     pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
-    printf(LOG_INFO"Data sent to server\n");
-    recvfrom(message->sockfd, &response_data, sizeof(response_data), 0, (struct sockaddr *) &message->to_address, &(socklen_t){sizeof(message->to_address)});
+    recvfrom(message->sockfd, &response_data, sizeof(response_data), 0, NULL, 0);
     printf(LOG_INFO"resp: id(%d) status(%d)\n", ntohs(response_data.id), ntohs(response_data.status));
     timer_args.message_received = true;
 
@@ -87,7 +83,6 @@ void send_message_with_handshake(message_args_t *message) {
     if(ntohs(response_data.status) == OK) {
         response.message_buffer = (void *)&response_data;
         response.message_buffer_length = sizeof(response);
-
         send_message(&response);
         printf("Handshake completed.\n");
     }
@@ -95,7 +90,7 @@ void send_message_with_handshake(message_args_t *message) {
         perror("Response status error");
         exit(response_data.status);
     }
-    pthread_join(resender_thread, NULL);
+//    pthread_join(resender_thread, NULL);
 }
 
 int main(int argc, char *argv[]) {
@@ -109,7 +104,6 @@ int main(int argc, char *argv[]) {
     message_args_t message;
 
     fillPairs(pairs, 2);
-    fillPairs(maxPairs, MAX_PAIR_COUNT);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -129,12 +123,13 @@ int main(int argc, char *argv[]) {
     message.message_buffer = (void*) &data;
     message.sockfd = sockfd;
     message.to_address = &serverAddr;
-    send_message_with_handshake(&message);
+    send_message_with_retry(&message);
 
-//    message.message_buffer_length = sizeof(maxData);
-//    message.message_buffer = (void*) &maxData;
-    printf(LOG_DEBUG)
-    send_message_with_handshake(&message);
+    printf(LOG_INFO"Sending second message\n");
+    message.message_buffer_length = sizeof(maxData);
+    message.message_buffer = (void*) &maxData;
+    send_message_with_retry(&message);
+    printf(LOG_INFO"Second message was sent\n");
 
     // Close the socket
     close(sockfd);

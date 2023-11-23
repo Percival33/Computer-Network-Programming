@@ -63,7 +63,6 @@ bool datagram_is_valid(data_t *packet_data) {
     packet_data->count = ntohs(packet_data->count);
     packet_data->id = ntohs(packet_data->id);
     int count = packet_data->count;
-    printf(LOG_DEBUG"count(%d) ntohs(count)(%d)\n", count, ntohs(count));
     // Size
     if (count > MAX_PAIR_COUNT) {
         printf(LOG_ERROR "Datagram is not valid. MAX_PAIR_COUNT(%d) exceeded got: %d\n", MAX_PAIR_COUNT, count);
@@ -117,6 +116,13 @@ int main(int argc, char *argv[]) {
         perror("Failed to create a socket");
         exit(ERROR_FAILED_SOCKET_CREATION);
     }
+    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
+
+    // Set the option
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
+        perror("setsockopt SO_RCVBUF failed");
+        // Handle error
+    }
 
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
@@ -144,7 +150,7 @@ int main(int argc, char *argv[]) {
 
         // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
+        printf(LOG_INFO"Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
         if (datagram_is_valid(&packet_data)) {
             printf("Number of pairs: %d\n", packet_data.count);
@@ -153,6 +159,7 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < packet_data.count; i++) {
                 printf("%s:%s\n", packet_data.pairs[i].key, packet_data.pairs[i].value);
             }
+            printf("\n");
         }
 
         response_t response_to_client = {
@@ -169,7 +176,7 @@ int main(int argc, char *argv[]) {
 
         // Wait for the response to the response
 
-        // Start a timer on one thread. 
+        // Start a timer on one thread.
         // It will periodically resend the message...
         response_t response_from_client;
         pthread_t resender_thread;
@@ -183,7 +190,7 @@ int main(int argc, char *argv[]) {
             false
         };
         pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
-    
+
         // ... and start listening for a response from the main thread.
         message_args_t receive_res_from_client_args = {
             sockfd,
