@@ -147,8 +147,7 @@ int main(int argc, char *argv[]) {
             printf("\n");
         }
         
-        // Start a timer on one thread.
-        // It will periodically resend the message...
+
         response_t response_to_client = {
             (uint16_t) htons(packet_data.id),
             (uint8_t) htons(0)
@@ -159,24 +158,7 @@ int main(int argc, char *argv[]) {
             sizeof(response_to_client),
             &client_address
         };
-        pthread_t resender_thread;
-        resender_args_t resender_args = {
-            &send_res_to_client_args,
-            false
-        };
-        pthread_create(&resender_thread, NULL, resender, (void *)&resender_args);
-        
-        // ... and start listening for a response from the main thread.
-        response_t response_from_client;
-        message_args_t receive_res_from_client_args = {
-            sockfd,
-            &response_from_client,
-            sizeof(response_from_client),
-            &client_address
-        };
-        receive_message(&receive_res_from_client_args);
-        resender_args.message_received = true;
-        printf("Handshake completed\n");
+        send_message(&send_res_to_client_args);3
     }
     exit(0);
 }
