@@ -12,30 +12,14 @@
 #include <math.h>
 #include "common.h"
 
-int send_message_to_client(message_args_t *args) {
-    int data_length = sendto(
-        args->sockfd,
-        args->message_buffer,
-        args->message_buffer_length,
-        0,
-        (struct sockaddr*) args->client_address, 
-        sizeof(*args->client_address)
-    );
-    if (data_length == -1) {
-        perror("Failed to send a message to the client");
-        exit(ERROR_FAILED_TO_SEND_A_MESSAGE);
-    }
-    return data_length;
-}
-
 int receive_message_from_client(message_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
         args->message_buffer, 
         args->message_buffer_length,
         0,
-        (struct sockaddr*) args->client_address, 
-        &(socklen_t){sizeof(args->client_address)}
+        (struct sockaddr*) args->to_address,
+        &(socklen_t){sizeof(args->to_address)}
     );
     if (data_length == -1) {
         printf("Failed to receive data\n");
@@ -54,7 +38,7 @@ void *resender(void *args) {
             return NULL;
         }
         else {
-            send_message_to_client(args_parsed->send_message_args);
+            send_message(args_parsed->send_message_args);
         }
     }
 }
@@ -76,11 +60,12 @@ bool datagram_is_valid(data_t *packet_data) {
     
     // TODO parametrize
 
+    packet_data->count = ntohs(packet_data->count);
+    packet_data->id = ntohs(packet_data->id);
     int count = packet_data->count;
-
     // Size
     if (count > MAX_PAIR_COUNT) {
-        printf("aaaa\n");
+        printf(LOG_ERROR "Datagram is not valid. MAX_PAIR_COUNT(%d) exceeded got: %d\n", MAX_PAIR_COUNT, count);
         return false;
     }
 
@@ -91,10 +76,12 @@ bool datagram_is_valid(data_t *packet_data) {
     for (int i = count; i < MAX_PAIR_COUNT; i++) {
         key = packet_data->pairs[i].key;
         if (!text_is_only_zeroes(key, KEY_SIZE)) {
+            printf(LOG_ERROR"Datagram is not valid. Error parsing key[%d]\n", i);
             return false;
         }
         value = packet_data->pairs[i].value;
         if (!text_is_only_zeroes(value, VALUE_SIZE)) {
+            printf(LOG_ERROR"Datagram is not valid. Error parsing value[%d]=(%s)\n", i, value);
             return false;
         }
     }
@@ -105,10 +92,12 @@ bool response_is_valid(char buffer[], int expected_id) {
     // TODO parametrize
     int packet_id = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
     if (packet_id != expected_id) {
+        printf(LOG_ERROR"parsing datagram id. Got (%d) expected(%d)\n", packet_id, expected_id);
         return false;
     }
     int status_code = (int) buffer[2];
     if (status_code != 0) {
+        printf(LOG_ERROR"status. Got (%d) expected(%d)\n", status_code, 0);
         return false;
     }
     return true;
@@ -127,7 +116,7 @@ void ntoh_on_response(response_t *response) {
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Invalid argument count\n");
-        exit(ERROR_INVALID_ARGC);
+        exit(ERROR_INVALID_ARG);
     }
 
     int port = atoi(argv[1]);
@@ -136,6 +125,13 @@ int main(int argc, char *argv[]) {
     if (sockfd  < 0) {
         perror("Failed to create a socket");
         exit(ERROR_FAILED_SOCKET_CREATION);
+    }
+    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
+
+    // Set the option
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
+        perror("setsockopt SO_RCVBUF failed");
+        // Handle error
     }
 
     struct sockaddr_in server_address;
@@ -165,7 +161,7 @@ int main(int argc, char *argv[]) {
 
         // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
+        printf(LOG_INFO"Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
         if (datagram_is_valid(&packet_data)) {
             printf("Number of pairs: %d\n", packet_data.count);
@@ -181,11 +177,12 @@ int main(int argc, char *argv[]) {
 
                 printf("%s:%s\n", printable_key, printable_value);
             }
+            printf("\n");
         }
 
         response_t response_to_client = {
-            (uint16_t) packet_data.id,
-            0
+            (uint16_t) htons(packet_data.id),
+            (uint8_t) htons(0)
         };
         message_args_t send_res_to_client_args = {
             sockfd,
@@ -193,11 +190,11 @@ int main(int argc, char *argv[]) {
             sizeof(response_to_client),
             &client_address
         };
-        send_message_to_client(&send_res_to_client_args);
+        send_message(&send_res_to_client_args);
 
         // Wait for the response to the response
 
-        // Start a timer on one thread. 
+        // Start a timer on one thread.
         // It will periodically resend the message...
         response_t response_from_client;
         pthread_t resender_thread;
@@ -211,7 +208,7 @@ int main(int argc, char *argv[]) {
             false
         };
         pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
-    
+
         // ... and start listening for a response from the main thread.
         message_args_t receive_res_from_client_args = {
             sockfd,

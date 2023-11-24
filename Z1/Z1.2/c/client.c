@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <assert.h>
+#include <pthread.h>
 #include "common.h"
 
 #define SERVER_IP "127.0.0.1" // Server IP address
@@ -18,22 +19,91 @@ void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payl
     msg->count = htons(count);
 
     int payloadLength = PAIR_SIZE * count;
-//    assert(payloadLength < MAX_PAYLOAD_SIZE);
+    assert(payloadLength <= MAX_PAYLOAD_SIZE);
 
     memset(msg->pairs, '\0', MAX_PAYLOAD_SIZE);
-    strncpy(msg->pairs, payload, payloadLength);
+    memcpy(msg->pairs, payload, payloadLength);
+}
+
+void fillPairs(key_value_pair_t pairs[], int size) {
+    if (size > MAX_PAIR_COUNT) {
+        printf(LOG_ERROR "Datagram is not valid. MAX_PAIR_COUNT(%d) exceeded got: %d\n", MAX_PAIR_COUNT, size);
+        exit(ERROR_INVALID_ARG);
+    }
+
+    // filling all bytes to make constant size of datagram
+    for(int i = 0; i < MAX_PAIR_COUNT; i++) {
+        memset(pairs[i].key, '\0', KEY_SIZE);
+        memset(pairs[i].value, '\0', VALUE_SIZE);
+    }
+
+    for(int i = 0; i < size; i++) {
+        char key[] = {'A', 'A'};
+        char value[] = {i/10 + '0', i%10 + '0'};
+
+        strncpy(pairs[i].key, key, sizeof(key));
+        strncpy(pairs[i].value, value, sizeof(value));
+    }
+}
+
+void *resender(void *args) {
+    printf("Resender thread has started.\n");
+    resender_args_t *args_parsed = (resender_args_t*) args;
+    while (true) {
+        send_message(args_parsed->send_message_args);
+        sleep(RESPONSE_WAIT_TIME_S);
+        if (args_parsed->message_received) {
+            printf("Resender thread has ended.\n");
+            return NULL;
+        }
+    }
+}
+
+void send_message_with_retry(message_args_t *message) {
+    resender_args_t timer_args;
+    response_t response_data;
+    message_args_t response = {
+        message->sockfd,
+        NULL,
+        0,
+        message->to_address,
+    };
+    pthread_t resender_thread;
+
+    // send message and if response is absent then periodically resend the message
+    timer_args.send_message_args = message;
+    timer_args.message_received = false;
+
+    pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
+    recvfrom(message->sockfd, &response_data, sizeof(response_data), 0, NULL, 0);
+    printf(LOG_INFO"resp: id(%d) status(%d)\n", ntohs(response_data.id), ntohs(response_data.status));
+    timer_args.message_received = true;
+
+
+    if(ntohs(response_data.status) == OK) {
+        response.message_buffer = (void *)&response_data;
+        response.message_buffer_length = sizeof(response);
+        send_message(&response);
+        printf("Handshake completed.\n");
+    }
+    else {
+        perror("Response status error");
+        exit(response_data.status);
+    }
+//    pthread_join(resender_thread, NULL);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 1) {
-        perror("Arguments error");
-        exit(1);
-    }
-
     int sockfd;
     struct sockaddr_in serverAddr;
-    char buffer[BUFFER_SIZE];
     socklen_t addr_size;
+
+    char buffer[BUFFER_SIZE];
+    data_t data, maxData;
+    key_value_pair_t pairs[MAX_PAIR_COUNT], maxPairs[MAX_PAIR_COUNT];
+    message_args_t message;
+
+    fillPairs(pairs, 2);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -46,25 +116,20 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
-    data_t a;
-    fillMessage(&a, 1, 2, "A 1 B 2"); // A: 1, B: 2
+    fillMessage(&data, 1, 2, pairs);
+    fillMessage(&maxData, 2, MAX_PAIR_COUNT, maxPairs);
 
-    sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-    printf("Data sent to server\n");
+    message.message_buffer_length = sizeof(data);
+    message.message_buffer = (void*) &data;
+    message.sockfd = sockfd;
+    message.to_address = &serverAddr;
+    send_message_with_retry(&message);
 
-    addr_size = sizeof(serverAddr);
-    response_t response;
-    recvfrom(sockfd, &response, 3, 0, (struct sockaddr *) &serverAddr, &addr_size);
-
-    printf("resp: id(%d) status(%d)\n", htons(response.id), htons(response.status));
-    if(response.status == 0)
-        sendto(sockfd, &response, sizeof(response), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-
-    // wysylam
-    // czekam na odpowiedz, jak jej nie dostane po czasie X to wyslij jeszcze raz i zresetuj timer
-    // jak dostaniesz odpowiedz to zakoncz program
-
-//    printf("Received from server: %s\n", response);
+    printf(LOG_INFO"Sending second message\n");
+    message.message_buffer_length = sizeof(maxData);
+    message.message_buffer = (void*) &maxData;
+    send_message_with_retry(&message);
+    printf(LOG_INFO"Second message was sent\n");
 
     // Close the socket
     close(sockfd);
