@@ -7,6 +7,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <stdint.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+#include <unistd.h>
 // Error codes
 #define OK 0
 #define ERROR_INVALID_ARG 1
@@ -64,20 +68,8 @@ typedef struct {
     bool message_received;
 } resender_args_t;
 
-int send_message(message_args_t *args) {
-    int data_length = sendto(
-            args->sockfd,
-            args->message_buffer,
-            args->message_buffer_length,
-            0,
-            (struct sockaddr*) args->to_address,
-            (socklen_t) sizeof(*args->to_address)
-    );
-    if (data_length == -1) {
-        perror("Failed to send a message to the client");
-        exit(ERROR_FAILED_TO_SEND_A_MESSAGE);
-    }
-    return data_length;
-}
+int send_message(message_args_t *args);
+
+void *resender(void *args);
 
 #endif //COMPUTER_NETWORK_PROGRAMMING_TODO_H

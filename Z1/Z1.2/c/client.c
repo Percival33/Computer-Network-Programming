@@ -46,19 +46,6 @@ void fillPairs(key_value_pair_t pairs[], int size) {
     }
 }
 
-void *resender(void *args) {
-    printf("Resender thread has started.\n");
-    resender_args_t *args_parsed = (resender_args_t*) args;
-    while (true) {
-        send_message(args_parsed->send_message_args);
-        sleep(RESPONSE_WAIT_TIME_S);
-        if (args_parsed->message_received) {
-            printf("Resender thread has ended.\n");
-            return NULL;
-        }
-    }
-}
-
 void send_message_with_retry(message_args_t *message) {
     resender_args_t timer_args;
     response_t response_data;

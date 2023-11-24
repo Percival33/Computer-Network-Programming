@@ -28,21 +28,6 @@ int receive_message_from_client(message_args_t *args) {
     return data_length;
 }
 
-void *resender(void *args) {
-    resender_args_t *args_parsed = (resender_args_t*) args;
-    while(true) {
-        sleep(RESPONSE_WAIT_TIME_S);
-        if (args_parsed->message_received) {
-            // TODO delete this printf
-            printf("timer thread ended\n");
-            return NULL;
-        }
-        else {
-            send_message(args_parsed->send_message_args);
-        }
-    }
-}
-
 bool text_is_only_zeroes(char *text, int text_length) {
     for (int i = 0; i < text_length; i++) {
         if (text[i] != '\0') {
@@ -177,7 +162,9 @@ int main(int argc, char *argv[]) {
             }
             printf("\n");
         }
-
+        
+        // Start a timer on one thread.
+        // It will periodically resend the message...
         response_t response_to_client = {
             (uint16_t) htons(packet_data.id),
             (uint8_t) htons(0)
@@ -188,26 +175,15 @@ int main(int argc, char *argv[]) {
             sizeof(response_to_client),
             &client_address
         };
-        send_message(&send_res_to_client_args);
-
-        // Wait for the response to the response
-
-        // Start a timer on one thread.
-        // It will periodically resend the message...
-        response_t response_from_client;
         pthread_t resender_thread;
-        resender_args_t timer_args = {
-            &(message_args_t){
-                sockfd,
-                &response_from_client,
-                sizeof(response_from_client),
-                &client_address
-            },
+        resender_args_t resender_args = {
+            &send_res_to_client_args,
             false
         };
-        pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
-
+        pthread_create(&resender_thread, NULL, resender, (void *)&resender_args);
+        
         // ... and start listening for a response from the main thread.
+        response_t response_from_client;
         message_args_t receive_res_from_client_args = {
             sockfd,
             &response_from_client,
@@ -215,7 +191,7 @@ int main(int argc, char *argv[]) {
             &client_address
         };
         receive_message_from_client(&receive_res_from_client_args);
-        timer_args.message_received = true;
+        resender_args.message_received = true;
         printf("Handshake completed\n");
     }
     exit(0);
