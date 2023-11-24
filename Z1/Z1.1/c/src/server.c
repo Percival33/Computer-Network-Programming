@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
             sizeof(response_to_client),
             &client_address
         };
-        send_message(&send_res_to_client_args);3
+        send_message(&send_res_to_client_args);
     }
     exit(0);
 }
