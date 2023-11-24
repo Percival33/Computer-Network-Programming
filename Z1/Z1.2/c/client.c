@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
     message_args_t message;
 
     fillPairs(pairs, 2);
+    fillPairs(maxPairs, MAX_PAIR_COUNT);
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
