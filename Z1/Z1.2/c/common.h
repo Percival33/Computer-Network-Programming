@@ -69,7 +69,7 @@ typedef struct {
 } resender_args_t;
 
 int send_message(message_args_t *args);
-
+int receive_message(message_args_t *args);
 void *resender(void *args);
 
 #endif //COMPUTER_NETWORK_PROGRAMMING_TODO_H

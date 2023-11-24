@@ -12,22 +12,6 @@
 #include <math.h>
 #include "common.h"
 
-int receive_message_from_client(message_args_t *args) {
-    int data_length = recvfrom(
-        args->sockfd,
-        args->message_buffer, 
-        args->message_buffer_length,
-        0,
-        (struct sockaddr*) args->to_address,
-        &(socklen_t){sizeof(args->to_address)}
-    );
-    if (data_length == -1) {
-        printf("Failed to receive data\n");
-        exit(ERROR_FAILED_TO_RECEIVE_A_MESSAGE);
-    }
-    return data_length;
-}
-
 bool text_is_only_zeroes(char *text, int text_length) {
     for (int i = 0; i < text_length; i++) {
         if (text[i] != '\0') {
@@ -139,7 +123,7 @@ int main(int argc, char *argv[]) {
             sizeof(packet_data),
             &client_address
         };
-        receive_message_from_client(&receive_msg_from_clients_args);
+        receive_message(&receive_msg_from_clients_args);
         ntoh_on_packet_data(&packet_data);
 
         // Parse the client's address
@@ -190,7 +174,7 @@ int main(int argc, char *argv[]) {
             sizeof(response_from_client),
             &client_address
         };
-        receive_message_from_client(&receive_res_from_client_args);
+        receive_message(&receive_res_from_client_args);
         resender_args.message_received = true;
         printf("Handshake completed\n");
     }

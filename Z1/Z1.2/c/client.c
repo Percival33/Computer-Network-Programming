@@ -51,8 +51,8 @@ void send_message_with_retry(message_args_t *message) {
     response_t response_data;
     message_args_t response = {
         message->sockfd,
-        NULL,
-        0,
+        &response_data,
+        sizeof(response_data),
         message->to_address,
     };
     pthread_t resender_thread;
@@ -62,7 +62,7 @@ void send_message_with_retry(message_args_t *message) {
     timer_args.message_received = false;
 
     pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
-    recvfrom(message->sockfd, &response_data, sizeof(response_data), 0, NULL, 0);
+    receive_message(&response);
     printf(LOG_INFO"resp: id(%d) status(%d)\n", ntohs(response_data.id), ntohs(response_data.status));
     timer_args.message_received = true;
 
