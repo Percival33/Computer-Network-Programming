@@ -10,7 +10,7 @@ int send_message(message_args_t *args) {
             (socklen_t) sizeof(*args->to_address)
     );
     if (data_length == -1) {
-        perror("Failed to send a message to the client");
+        perror("Failed to send the message");
         exit(ERROR_FAILED_TO_SEND_A_MESSAGE);
     }
     return data_length;
