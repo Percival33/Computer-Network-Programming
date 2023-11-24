@@ -60,8 +60,6 @@ bool datagram_is_valid(data_t *packet_data) {
     
     // TODO parametrize
 
-    packet_data->count = ntohs(packet_data->count);
-    packet_data->id = ntohs(packet_data->id);
     int count = packet_data->count;
     // Size
     if (count > MAX_PAIR_COUNT) {
