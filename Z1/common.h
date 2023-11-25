@@ -2,8 +2,8 @@
 // Created by Marcin Jarczewski on 21/11/2023.
 //
 
-#ifndef COMPUTER_NETWORK_PROGRAMMING_TODO_H
-#define COMPUTER_NETWORK_PROGRAMMING_TODO_H
+#ifndef COMMON_H
+#define COMMON_H
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/socket.h>

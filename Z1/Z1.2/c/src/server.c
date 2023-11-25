@@ -11,8 +11,8 @@
 #include <unistd.h>
 #include <math.h>
 #include "common.h"
-
-#define MAX_THREADS 512
+#include "client_threads_data_t.h"
+#include "one_use_socket.h"
 
 bool text_is_only_zeroes(char *text, int text_length) {
     for (int i = 0; i < text_length; i++) {
@@ -82,26 +82,6 @@ void ntoh_on_response(response_t *response) {
     response->status = ntohs(response->status);
 }
 
-// A struct containing the data that identifies
-// A transmission between server and a client
-typedef struct {
-    struct sockaddr_in client_address;
-    int packet_id;
-} transmission_id_t;
-
-typedef struct {
-    transmission_id_t id;
-    void *message;
-    int message_lenght;
-    bool confirmation_received;
-} client_thread_data_t;
-
-client_thread_data_t *get_client_thread_data(
-        client_threads_data_t *thread_data_list,
-        int index) {
-    return &thread_data_list->data[index];
-}
-
 // A function for managing a connection with a client.
 // Used in a thread.
 // Each client thread is characterised by the 
@@ -120,163 +100,6 @@ void handle_client(void *args) {
     }
 }
 
-typedef struct {
-    data_t *data;
-    struct sockaddr_in *client_address;
-} data_and_client_address_t;
-
-// Create a one time socket to send a packet
-void one_time_socket_send_message(int port, data_and_client_address_t *data_and_client_address){
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd  < 0) {
-        perror("Failed to create a socket");
-        exit(ERROR_FAILED_SOCKET_CREATION);
-    }
-    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
-
-    // Set the option
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
-        perror("setsockopt SO_RCVBUF failed");
-        // Handle error
-    }
-
-    struct sockaddr_in server_address;
-
-    memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-        perror("Failed to bind a socket");
-        exit(ERROR_FAILED_SOCKET_BIND);
-    }
-    char client_ip_str[INET_ADDRSTRLEN];
-
-    message_args_t receive_msg_from_clients_args = {
-        sockfd,
-        (void*) data_and_sender->data,
-        sizeof(data_and_sender->data),
-        &data_and_sender->client_address
-    };
-    receive_message(&receive_msg_from_clients_args);
-    close(sockfd);
-}
-
-// Create a one time socket to receive a packet
-void one_time_socket_receive_msg(int port, data_and_client_address_t *data_and_sender) {
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd  < 0) {
-        perror("Failed to create a socket");
-        exit(ERROR_FAILED_SOCKET_CREATION);
-    }
-    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
-
-    // Set the option
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
-        perror("setsockopt SO_RCVBUF failed");
-        // Handle error
-    }
-
-    struct sockaddr_in server_address;
-
-    memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-        perror("Failed to bind a socket");
-        exit(ERROR_FAILED_SOCKET_BIND);
-    }
-    char client_ip_str[INET_ADDRSTRLEN];
-
-    message_args_t receive_msg_from_clients_args = {
-        sockfd,
-        (void*) data_and_sender->data,
-        sizeof(data_and_sender->data),
-        &data_and_sender->client_address
-    };
-    receive_message(&receive_msg_from_clients_args);
-    close(sockfd);
-}
-
-// Return the index of the first free index in the
-// client_threads array of client_threads_data_t
-int first_free_index(client_threads_data_t *list) {
-    for (int i = 0; i < sizeof(list->data); i++) {
-        if (!list->data_array_index_occupied[i]) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-int add_client_thread_data_to_list(
-        client_threads_data_t *list,
-        client_thread_data_t client_thread_data) {
-    int index = first_free_index(list);
-    if (index == -1) {
-        printf(LOG_ERROR"Client thread buffer is too small.\n");
-        exit(ERROR_CLIENT_THREAD_BUFFER_TOO_SMALL);
-    }
-    list->data[index] = client_thread_data;
-    list->data_array_index_occupied[index] = true;
-    return index;
-}
-
-// Returns the index of the thread
-// characterized by given thread id
-int get_client_thread_data_index(
-        client_threads_data_t *client_threads_data,
-        transmission_id_t *thread_id) {
-    for (int i = 0; i < sizeof(client_threads_data->data_array_index_occupied); i++) {
-        if (client_threads_data->data_array_index_occupied[i]) {
-            // Compare thread id's
-            transmission_id_t i_thread_id = client_threads_data->data[i].id;
-            // First the datagram id
-            if (!thread_id->packet_id == i_thread_id.packet_id) {
-                continue;
-            }
-            // Compare client IPs
-            if (!thread_id->client_address.sin_addr.s_addr == i_thread_id.client_address.sin_addr.s_addr) {
-                continue;
-            }
-            // Compare client ports
-            if (!thread_id->client_address.sin_port == i_thread_id.client_address.sin_port) {
-                continue;
-            }
-            return i;
-        }
-    }
-    return -1;
-}
-
-void init_client_thread_data_list(client_threads_data_t *list) {
-    for (int i = 0; i < sizeof(list->data_array_index_occupied); i++) {
-        list->data_array_index_occupied[i] = false;
-    }
-}
-
-
-
-typedef struct {
-    client_thread_data_t data[MAX_THREADS];
-    bool data_array_index_occupied[MAX_THREADS];
-} client_threads_data_t;
-
-void *one_time_socket_resender(void *args) {
-    printf("Resender thread has started.\n");
-    client_thread_data_t *args_parsed = (client_thread_data_t*) args;
-    while (true) {
-        one_time_socket_send_message(args_parsed->);
-        sleep(RESPONSE_WAIT_TIME_S);
-        if (args_parsed->confirmation_received) {
-            printf("Resender thread has ended.\n");
-            return NULL;
-        }
-    }
-}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -301,7 +124,7 @@ int main(int argc, char *argv[]) {
             &packet_data,
             &client_address
         };
-        one_time_socket_receive_msg(port, &data_and_sender);
+        one_use_socket_receive_message(port, &data_and_sender);
         
         ntoh_on_packet_data(&packet_data);
 
@@ -349,22 +172,16 @@ int main(int argc, char *argv[]) {
                 (uint16_t) htons(packet_data.id),
                 (uint8_t) htons(0)
             };
-            client_thread_data_t thread_data = {
+            client_thread_data_t client_thread_data = {
                 (transmission_id_t){
                     client_address,
                     packet_data.id
                 },
                 response_to_client,
-                sizeof(response_to_client)
                 false
             };
-            add_client_thread_data_to_list(&client_threads_data_list, thread_data);
-
-            response_t response_to_client = {
-                (uint16_t) htons(packet_data.id),
-                (uint8_t) htons(0)
-            };
-            pthread_create(&resender_thread, NULL, one_time_socket_resender, (void *)&resender_args);
+            add_client_thread_data_to_list(&client_threads_data_list, client_thread_data);
+            pthread_create(&one_use_socket_resender, NULL, one_use_socket_resender, (void *)&client_thread_data);
         }
     }
     exit(0);
