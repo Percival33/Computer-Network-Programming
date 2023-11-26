@@ -1,4 +1,5 @@
 #include "response.h"
+#include "common.h"
 
 
 bool response_is_valid(response_t *response, int expected_id) {

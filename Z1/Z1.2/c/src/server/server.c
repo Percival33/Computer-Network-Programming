@@ -11,10 +11,13 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
-#include "common.h"
-#include "client_threads_data_t.h"
-#include "one_use_socket.h"
 
+#include "common.h"
+#include "client_threads_data.h"
+#include "one_use_socket.h"
+#include "datagram.h"
+#include "response.h"
+#include "packet_utils.h"
 
 
 int main(int argc, char *argv[]) {
@@ -41,8 +44,6 @@ int main(int argc, char *argv[]) {
             BUFFER_SIZE
         };
         int received_data_length = one_use_socket_receive_message(port, &message_contents, &client_address);
-        
-        // ntoh_on_datagram(&datagram);
 
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];

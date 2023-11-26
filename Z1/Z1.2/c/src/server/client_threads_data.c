@@ -1,4 +1,4 @@
-#include "client_threads_data_t.h"
+#include "client_threads_data.h"
 
 int first_free_index(client_thread_list_t *list) {
     for (size_t i = 0; i < sizeof(list->data); i++) {

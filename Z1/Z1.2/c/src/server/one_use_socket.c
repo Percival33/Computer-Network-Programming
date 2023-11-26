@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include "one_use_socket.h"
 #include "common.h"
-#include "client_threads_data_t.h"
+#include "client_threads_data.h"
 
 int create_one_use_socket(int port) {
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);

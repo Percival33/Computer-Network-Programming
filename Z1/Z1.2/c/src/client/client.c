@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <pthread.h>
 #include "common.h"
+#include "datagram.h"
+#include "response.h"
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port

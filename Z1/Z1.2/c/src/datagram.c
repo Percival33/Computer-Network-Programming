@@ -1,4 +1,16 @@
 #include "datagram.h"
+#include "string.h"
+
+
+bool text_is_only_zeroes(char *text, int text_length) {
+    for (int i = 0; i < text_length; i++) {
+        if (text[i] != '\0') {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 bool datagram_is_valid(data_t *datagram) {
     // Datagram is valid, if:
