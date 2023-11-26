@@ -70,7 +70,7 @@ bool response_is_valid(char buffer[], int expected_id) {
     return true;
 }
 
-void ntoh_on_packet_data(data_t *packet_data) {
+void ntoh_on_datagram(data_t *packet_data) {
     packet_data->count = ntohs(packet_data->count);
     packet_data->id = ntohs(packet_data->id);
 }
@@ -93,13 +93,13 @@ int main(int argc, char *argv[]) {
         perror("Failed to create a socket");
         exit(ERROR_FAILED_SOCKET_CREATION);
     }
-    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
+    // int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
 
-    // Set the option
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
-        perror("setsockopt SO_RCVBUF failed");
-        // Handle error
-    }
+    // // Set the option
+    // if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
+    //     perror("setsockopt SO_RCVBUF failed");
+    //     // Handle error
+    // }
 
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
             &client_address
         };
         receive_message(&receive_msg_from_clients_args);
-        ntoh_on_packet_data(&packet_data);
+        ntoh_on_datagram(&packet_data);
 
         // Parse the client's address
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));

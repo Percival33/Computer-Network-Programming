@@ -86,10 +86,10 @@ int return_packet_type(int data_length) {
     if (data_length == BUFFER_SIZE) {
         return DATAGRAM_PACKET;
     }
-    else if (data_length == 3) {
+    else if (data_length == 4) {
         return RESPONSE_PACKET;
     }
-    printf("Unknown packet type\n");
+    printf("Unknown packet type, length: %d\n", data_length);
     exit(ERROR_UNKNOWN_PACKET_TYPE);
 }
 
@@ -118,7 +118,7 @@ void print_response_data(response_t *response) {
 }
 
 
-void ntoh_on_packet_data(data_t *datagram) {
+void ntoh_on_datagram(data_t *datagram) {
     datagram->count = ntohs(datagram->count);
     datagram->id = ntohs(datagram->id);
 }
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 
         // 1. Receive
 
-        void *data_buffer;
+        char data_buffer[BUFFER_SIZE];
         struct sockaddr_in client_address;
 
         message_contents_t message_contents = {
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
         };
         int received_data_length = one_use_socket_receive_message(port, &message_contents, &client_address);
         
-        // ntoh_on_packet_data(&datagram);
+        // ntoh_on_datagram(&datagram);
 
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];
@@ -167,6 +167,10 @@ int main(int argc, char *argv[]) {
         int packet_type = return_packet_type(received_data_length);
         if (packet_type == DATAGRAM_PACKET) {
             data_t *datagram = (data_t *) data_buffer;
+
+            // Perform an ntoh function on datagram's numeric fields
+            ntoh_on_datagram(datagram);
+
             if (datagram_is_valid(datagram)) {
                 print_datagram_data(datagram);
             }
@@ -193,6 +197,9 @@ int main(int argc, char *argv[]) {
         }
         else if (packet_type == RESPONSE_PACKET) {
             response_t *response = (response_t *) data_buffer;
+
+            // Perform an ntoh function on response's numeric fields
+            ntoh_on_response(response);
 
             // The thread for this transmission exists.
             // Find it and inform it, that the transmission has ended

@@ -1,13 +1,15 @@
+#include <stdio.h>
+#include <string.h>
 #include "common.h"
 
 int send_message(message_args_t *args) {
     int data_length = sendto(
-            args->sockfd,
-            args->message_buffer,
-            args->message_buffer_length,
-            0,
-            (struct sockaddr*) args->to_address,
-            (socklen_t) sizeof(*args->to_address)
+        args->sockfd,
+        args->message_buffer,
+        args->message_buffer_length,
+        0,
+        (struct sockaddr *) args->to_address,
+        (socklen_t){sizeof(*args->to_address)}
     );
     if (data_length == -1) {
         perror("Failed to send the message");
@@ -22,12 +24,11 @@ int receive_message(message_args_t *args) {
         args->message_buffer, 
         args->message_buffer_length,
         0,
-        (struct sockaddr*) args->to_address,
-        &(socklen_t){sizeof(args->to_address)}
+        (struct sockaddr *) args->to_address,
+        &(socklen_t){sizeof(*args->to_address)}
     );
-    printf("bbb\n");
     if (data_length == -1) {
-        printf("Failed to receive the message\n");
+        perror("Failed to receive the message");
         exit(ERROR_FAILED_TO_RECEIVE_A_MESSAGE);
     }
     return data_length;

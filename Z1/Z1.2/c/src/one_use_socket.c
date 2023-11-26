@@ -11,13 +11,20 @@ int create_one_use_socket(int port) {
         perror("Failed to create a socket");
         exit(ERROR_FAILED_SOCKET_CREATION);
     }
-    int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
 
-    // Set the option
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
-        perror("setsockopt SO_RCVBUF failed");
-        // Handle error
-    }
+    // int recvBufferSize = 1024 * 1024 * 2; // example buffer size: 2 MB
+    // // Set the option
+    // if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &recvBufferSize, sizeof(recvBufferSize)) < 0) {
+    //     perror("setsockopt SO_RCVBUF failed");
+    //     // Handle error
+    // }
+
+    // int reuse = 1;
+    // // Set the option
+    // if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+    //     perror("setsockopt SO_RESUSEADDR failed");
+    //     // Handle error
+    // }
 
     struct sockaddr_in server_address;
 
