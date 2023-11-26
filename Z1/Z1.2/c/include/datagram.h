@@ -3,9 +3,6 @@
 
 #include "common.h"
 
-#define DATAGRAM_PACKET 0
-#define RESPONSE_PACKET 1
-
 typedef struct {
     uint16_t id;
     uint16_t count;

@@ -46,10 +46,7 @@ typedef struct {
     char value[VALUE_SIZE];
 } key_value_pair_t;
 
-typedef struct {
-    uint16_t id;
-    uint8_t status;
-} response_t;
+
 
 // Args for send and receive functions
 typedef struct {

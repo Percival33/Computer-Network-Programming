@@ -15,55 +15,6 @@
 #include "client_threads_data_t.h"
 #include "one_use_socket.h"
 
-bool text_is_only_zeroes(char *text, int text_length) {
-    for (int i = 0; i < text_length; i++) {
-        if (text[i] != '\0') {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-bool response_is_valid(response_t *response, int expected_id) {
-    // TODO parametrize
-    int packet_id = response->id;
-    if (packet_id != expected_id) {
-        printf(LOG_ERROR"parsing datagram id. Got (%d) expected(%d)\n", packet_id, expected_id);
-        return false;
-    }
-    int status_code = response->status;
-    if (status_code != 0) {
-        printf(LOG_ERROR"status. Got (%d) expected(%d)\n", status_code, 0);
-        return false;
-    }
-    return true;
-}
-
-
-// Returns what the packet is: a datagram or a response
-int return_packet_type(int data_length) {
-    if (data_length == BUFFER_SIZE) {
-        return DATAGRAM_PACKET;
-    }
-    else if (data_length == 4) {
-        return RESPONSE_PACKET;
-    }
-    printf("Unknown packet type, length: %d\n", data_length);
-    exit(ERROR_UNKNOWN_PACKET_TYPE);
-}
-
-
-void print_response_data(response_t *response) {
-    printf("Response's packet id: %d\n", response->id);
-    printf("Response status: %d\n", response->status);
-}
-
-
-void ntoh_on_response(response_t *response) {
-    response->id = ntohs(response->id);
-    response->status = ntohs(response->status);
-}
 
 
 int main(int argc, char *argv[]) {
