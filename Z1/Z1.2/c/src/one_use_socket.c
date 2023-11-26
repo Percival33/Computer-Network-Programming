@@ -57,7 +57,7 @@ int one_use_socket_receive_message(
     int sockfd = create_one_use_socket(port);
     message_args_t receive_message_args = {
         sockfd,
-        (void*) message_contents->data,
+        (void *) message_contents->data,
         message_contents->length,
         client_address
     };

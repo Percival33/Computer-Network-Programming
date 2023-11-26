@@ -20,6 +20,67 @@
 #define RESPONSE_PACKET 1
 
 
+bool text_is_only_zeroes(char *text, int text_length) {
+    for (int i = 0; i < text_length; i++) {
+        if (text[i] != '\0') {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+bool datagram_is_valid(data_t *datagram) {
+    // Datagram is valid, if:
+    // - After the declared pairs there are only zeroes,
+    // - The number of pairs does not exceed the max number of
+    // pairs that can fit in a packet
+    
+    // TODO parametrize
+
+    int count = datagram->count;
+    // Size
+    if (count > MAX_PAIR_COUNT) {
+        printf(LOG_ERROR "Datagram is not valid. MAX_PAIR_COUNT(%d) exceeded got: %d\n", MAX_PAIR_COUNT, count);
+        return false;
+    }
+
+    // Check if the remaining are equal to 0.
+    // IMPORTANT - THERE MUST ONLY BE FULL PAIRS
+    char *key;
+    char *value;
+    for (int i = count; i < MAX_PAIR_COUNT; i++) {
+        key = datagram->pairs[i].key;
+        if (!text_is_only_zeroes(key, KEY_SIZE)) {
+            printf(LOG_ERROR"Datagram is not valid. Error parsing key[%d]\n", i);
+            return false;
+        }
+        value = datagram->pairs[i].value;
+        if (!text_is_only_zeroes(value, VALUE_SIZE)) {
+            printf(LOG_ERROR"Datagram is not valid. Error parsing value[%d]=(%s)\n", i, value);
+            return false;
+        }
+    }
+    return true;
+}
+
+
+bool response_is_valid(response_t *response, int expected_id) {
+    // TODO parametrize
+    int packet_id = response->id;
+    if (packet_id != expected_id) {
+        printf(LOG_ERROR"parsing datagram id. Got (%d) expected(%d)\n", packet_id, expected_id);
+        return false;
+    }
+    int status_code = response->status;
+    if (status_code != 0) {
+        printf(LOG_ERROR"status. Got (%d) expected(%d)\n", status_code, 0);
+        return false;
+    }
+    return true;
+}
+
+
 // Returns what the packet is: a datagram or a response
 int return_packet_type(int data_length) {
     if (data_length == BUFFER_SIZE) {
@@ -33,98 +94,33 @@ int return_packet_type(int data_length) {
 }
 
 
-void print_datagram_data(data_t *packet_data) {
-    if (datagram_is_valid(packet_data)) {
-        printf("Number of pairs: %d\n", packet_data->count);
-        printf("Packet id: %d\n", packet_data->id);
-        printf("Pairs: \n");
-        char printable_key[KEY_SIZE + 1];
-        char printable_value[VALUE_SIZE + 1]; 
-        printable_key[KEY_SIZE] = '\0';
-        printable_value[VALUE_SIZE] = '\0';
-        for (int i = 0; i < packet_data->count; i++) {
-            memcpy(printable_key, packet_data->pairs[i].key, KEY_SIZE);
-            memcpy(printable_value, packet_data->pairs[i].value, VALUE_SIZE);
+void print_datagram_data(data_t *datagram) {
+    printf("Number of pairs: %d\n", datagram->count);
+    printf("Packet id: %d\n", datagram->id);
+    printf("Pairs: \n");
+    char printable_key[KEY_SIZE + 1];
+    char printable_value[VALUE_SIZE + 1]; 
+    printable_key[KEY_SIZE] = '\0';
+    printable_value[VALUE_SIZE] = '\0';
+    for (int i = 0; i < datagram->count; i++) {
+        memcpy(printable_key, datagram->pairs[i].key, KEY_SIZE);
+        memcpy(printable_value, datagram->pairs[i].value, VALUE_SIZE);
 
-            printf("%s:%s\n", printable_key, printable_value);
-        }
-        printf("\n");
+        printf("%s:%s\n", printable_key, printable_value);
     }
+    printf("\n");
 }
 
 
 void print_response_data(response_t *response) {
-    if (response_is_valid(response)) {
-        printf("Response's packet id: %d\n", response->id);
-        printf("Response status: %d\n", response->status);
-    }
+    printf("Response's packet id: %d\n", response->id);
+    printf("Response status: %d\n", response->status);
 }
 
 
-bool text_is_only_zeroes(char *text, int text_length) {
-    for (int i = 0; i < text_length; i++) {
-        if (text[i] != '\0') {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-bool datagram_is_valid(data_t *packet_data) {
-    // Datagram is valid, if:
-    // - After the declared pairs there are only zeroes,
-    // - The number of pairs does not exceed the max number of
-    // pairs that can fit in a packet
-    
-    // TODO parametrize
-
-    int count = packet_data->count;
-    // Size
-    if (count > MAX_PAIR_COUNT) {
-        printf(LOG_ERROR "Datagram is not valid. MAX_PAIR_COUNT(%d) exceeded got: %d\n", MAX_PAIR_COUNT, count);
-        return false;
-    }
-
-    // Check if the remaining are equal to 0.
-    // IMPORTANT - THERE MUST ONLY BE FULL PAIRS
-    char *key;
-    char *value;
-    for (int i = count; i < MAX_PAIR_COUNT; i++) {
-        key = packet_data->pairs[i].key;
-        if (!text_is_only_zeroes(key, KEY_SIZE)) {
-            printf(LOG_ERROR"Datagram is not valid. Error parsing key[%d]\n", i);
-            return false;
-        }
-        value = packet_data->pairs[i].value;
-        if (!text_is_only_zeroes(value, VALUE_SIZE)) {
-            printf(LOG_ERROR"Datagram is not valid. Error parsing value[%d]=(%s)\n", i, value);
-            return false;
-        }
-    }
-    return true;
-}
-
-
-bool response_is_valid(char buffer[], int expected_id) {
-    // TODO parametrize
-    int packet_id = ntohs(((uint16_t)buffer[0] << 8) + (uint16_t)buffer[1]);
-    if (packet_id != expected_id) {
-        printf(LOG_ERROR"parsing datagram id. Got (%d) expected(%d)\n", packet_id, expected_id);
-        return false;
-    }
-    int status_code = (int) buffer[2];
-    if (status_code != 0) {
-        printf(LOG_ERROR"status. Got (%d) expected(%d)\n", status_code, 0);
-        return false;
-    }
-    return true;
-}
-
-
-void ntoh_on_packet_data(data_t *packet_data) {
-    packet_data->count = ntohs(packet_data->count);
-    packet_data->id = ntohs(packet_data->id);
+void ntoh_on_packet_data(data_t *datagram) {
+    datagram->count = ntohs(datagram->count);
+    datagram->id = ntohs(datagram->id);
 }
 
 
@@ -159,7 +155,7 @@ int main(int argc, char *argv[]) {
         };
         int received_data_length = one_use_socket_receive_message(port, &message_contents, &client_address);
         
-        // ntoh_on_packet_data(&packet_data);
+        // ntoh_on_packet_data(&datagram);
 
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];
@@ -171,7 +167,9 @@ int main(int argc, char *argv[]) {
         int packet_type = return_packet_type(received_data_length);
         if (packet_type == DATAGRAM_PACKET) {
             data_t *datagram = (data_t *) data_buffer;
-            print_datagram_data(datagram);
+            if (datagram_is_valid(datagram)) {
+                print_datagram_data(datagram);
+            }
 
             // The datagram is the first packet in a transmission.
             // Make a new transmission handling thread.
@@ -195,7 +193,6 @@ int main(int argc, char *argv[]) {
         }
         else if (packet_type == RESPONSE_PACKET) {
             response_t *response = (response_t *) data_buffer;
-            print_response_data(response);
 
             // The thread for this transmission exists.
             // Find it and inform it, that the transmission has ended
@@ -206,6 +203,11 @@ int main(int argc, char *argv[]) {
             int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
             client_thread_data_t *thread_data = get_client_thread_data(&client_threads_data_list, index);
             thread_data->confirmation_received = true;
+            
+            int expected_packet_id = thread_data->id.packet_id;
+            if (response_is_valid(response, expected_packet_id)) {
+                print_response_data(response);
+            }
         }
     }
     exit(0);
