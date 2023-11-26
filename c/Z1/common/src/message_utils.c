@@ -1,6 +1,8 @@
+#include "message_utils.h"
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
+
 
 int send_message(message_args_t *args) {
     int data_length = sendto(
@@ -18,6 +20,7 @@ int send_message(message_args_t *args) {
     return data_length;
 }
 
+
 int receive_message(message_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
@@ -33,6 +36,7 @@ int receive_message(message_args_t *args) {
     }
     return data_length;
 }
+
 
 void *resender(void *args) {
     printf("Resender thread has started.\n");

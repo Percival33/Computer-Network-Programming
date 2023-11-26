@@ -12,6 +12,8 @@
 #include "common.h"
 #include "datagram.h"
 #include "response.h"
+#include "message_utils.h"
+
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port

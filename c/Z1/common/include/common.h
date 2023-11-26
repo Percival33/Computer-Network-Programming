@@ -42,26 +42,4 @@
 #define LOG_INFO BLUE_TEXT "INFO: " RESET_COLOR
 #define LOG_DEBUG WHITE_TEXT "DEBUG: " RESET_COLOR
 
-// Args for send and receive functions
-typedef struct {
-    int sockfd;
-    void *message_buffer;
-    int message_buffer_length;
-    struct sockaddr_in *to_address;
-} message_args_t;
-
-typedef struct {
-    message_args_t *send_message_args;
-    bool message_received;
-} resender_args_t;
-
-typedef struct {
-    void *data;
-    int length;
-} message_contents_t;
-
-int send_message(message_args_t *args);
-int receive_message(message_args_t *args);
-void *resender(void *args);
-
 #endif

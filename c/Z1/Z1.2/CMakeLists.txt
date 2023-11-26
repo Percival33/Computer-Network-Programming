@@ -29,7 +29,7 @@ add_executable(${SERVER_TARGET}
     src/server/one_use_socket.c
     src/server/packet_utils.c
     src/server/server.c
-    ${C_Z1_FOLDER_DIR}/common/src/common.c
+    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
     ${C_Z1_FOLDER_DIR}/common/src/datagram.c
     ${C_Z1_FOLDER_DIR}/common/src/response.c
 )
@@ -37,7 +37,7 @@ target_link_libraries(${SERVER_TARGET} PRIVATE pthread)
 
 add_executable(${CLIENT_TARGET}
     src/client/client.c
-    ${C_Z1_FOLDER_DIR}/common/src/common.c
+    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
     ${C_Z1_FOLDER_DIR}/common/src/datagram.c
     ${C_Z1_FOLDER_DIR}/common/src/response.c
 )

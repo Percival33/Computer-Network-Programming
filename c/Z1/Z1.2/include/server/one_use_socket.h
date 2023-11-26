@@ -2,6 +2,7 @@
 #define ONE_USE_SOCKET_H
 
 #include "common.h"
+#include "message_utils.h"
 
 // Create a one use socket to send a packet
 void one_use_socket_send_message(

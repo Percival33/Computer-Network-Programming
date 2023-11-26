@@ -3,6 +3,7 @@
 
 #include <arpa/inet.h>
 #include "common.h"
+#include "message_utils.h"
 #include "response.h"
 
 #define MAX_THREADS 512
