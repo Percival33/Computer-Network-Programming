@@ -14,10 +14,6 @@
 #include "response.h"
 #include "message_utils.h"
 
-
-#define SERVER_IP "127.0.0.1" // Server IP address
-#define SERVER_PORT 8888 // Server port
-
 void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payload[]) {
     msg->id = htons(id);
     msg->count = htons(count);
@@ -88,7 +84,15 @@ void send_message_with_retry(message_args_t *message) {
 //    pthread_join(resender_thread, NULL);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        printf("Invalid argument count\n");
+        exit(ERROR_INVALID_ARG);
+    }
+
+    char *ip = argv[1];
+    int port = atoi(argv[2]);
+
     int sockfd;
     struct sockaddr_in serverAddr;
     // socklen_t addr_size;
@@ -109,8 +113,8 @@ int main() {
 
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
-    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     fillMessage(&data, 1, 2, pairs);
     fillMessage(&maxData, 2, MAX_PAIR_COUNT, maxPairs);
