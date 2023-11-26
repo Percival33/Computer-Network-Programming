@@ -48,12 +48,6 @@ typedef struct {
 
 typedef struct {
     uint16_t id;
-    uint16_t count;
-    key_value_pair_t pairs[MAX_PAYLOAD_SIZE];
-} data_t;
-
-typedef struct {
-    uint16_t id;
     uint8_t status;
 } response_t;
 
