@@ -81,26 +81,6 @@ void ntoh_on_response(response_t *response) {
     response->id = ntohs(response->id);
     response->status = ntohs(response->status);
 }
-
-// A function for managing a connection with a client.
-// Used in a thread.
-// Each client thread is characterised by the 
-// client's address and the packet id number.
-void handle_client(void *args) {
-    client_thread_data_t *parsed_args = (client_thread_data_t *) args;
-    while(true) {
-        // if (!parsed_args->confirmation_received) {
-        //     // The datagram was received 
-            
-        // }
-        // else {
-
-        // }
-        ;
-    }
-}
-
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Invalid argument count\n");
@@ -109,7 +89,7 @@ int main(int argc, char *argv[]) {
 
     int port = atoi(argv[1]);
 
-    client_threads_data_t client_threads_data_list;
+    client_thread_list_t client_threads_data_list;
     init_client_thread_data_list(&client_threads_data_list);
     while(true) {
         // This loop will receive UDP packets
@@ -120,11 +100,11 @@ int main(int argc, char *argv[]) {
         data_t packet_data;
         struct sockaddr_in client_address;
 
-        data_and_client_address_t data_and_sender = {
-            &packet_data,
-            &client_address
+        message_contents_t message_contents = {
+            (void *) &packet_data,
+            sizeof(packet_data)
         };
-        one_use_socket_receive_message(port, &data_and_sender);
+        one_use_socket_receive_message(&message_contents, &client_address);
         
         ntoh_on_packet_data(&packet_data);
 
@@ -153,8 +133,8 @@ int main(int argc, char *argv[]) {
         // 2. Decide which thread should the package be forwarded to
 
         transmission_id_t client_thread_id = {
-            &client_address,
-            &packet_data.id
+            client_address,
+            packet_data.id
         };
         int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
         if (index >= 0) {
@@ -181,7 +161,8 @@ int main(int argc, char *argv[]) {
                 false
             };
             add_client_thread_data_to_list(&client_threads_data_list, client_thread_data);
-            pthread_create(&one_use_socket_resender, NULL, one_use_socket_resender, (void *)&client_thread_data);
+            pthread_t resender_thread;
+            pthread_create(&resender_thread, NULL, one_use_socket_resender, (void *)&client_thread_data);
         }
     }
     exit(0);

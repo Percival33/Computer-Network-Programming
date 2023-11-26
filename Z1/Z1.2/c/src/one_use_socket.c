@@ -34,25 +34,31 @@ int create_one_use_socket(int port) {
     return sockfd;
 }
 
-void one_use_socket_send_message(int port, datagram_and_client_address_t *response_and_client_address){
-    int sockfd = create_one_use_socket(port);
+void one_use_socket_send_message(
+    message_contents_t *message_contents,
+    struct sockaddr_in *client_address
+) {
+    int sockfd = create_one_use_socket(client_address->sin_port);
     message_args_t send_message_args = {
         sockfd,
-        (void*) response_and_client_address->data,
-        sizeof(response_and_client_address->data),
-        response_and_client_address->client_address
+        (void*) message_contents->data,
+        message_contents->length,
+        client_address
     };
     send_message(&send_message_args);
     close(sockfd);
 }
 
-void one_use_socket_receive_message(int port, response_and_client_address_t *message_and_client_address) {
-    int sockfd = create_one_use_socket(port);
+void one_use_socket_receive_message(
+    message_contents_t *message_contents,
+    struct sockaddr_in *client_address
+) {
+    int sockfd = create_one_use_socket(client_address->sin_port);
     message_args_t receive_message_args = {
         sockfd,
-        (void*) response_and_client_address->response,
-        sizeof(response_and_client_address->response),
-        response_and_client_address->client_address
+        (void*) message_contents->data,
+        message_contents->length,
+        client_address
     };
     receive_message(&receive_message_args);
     close(sockfd);
@@ -62,12 +68,12 @@ void *one_use_socket_resender(void *args) {
     printf("Resender thread has started.\n");
     client_thread_data_t *client_thread_data = (client_thread_data_t *) args;
     while (true) {
-        response_and_client_address_t response_and_client_address = {
+        message_contents_t message_contents = {
             &client_thread_data->response,
-            &client_thread_data->id.client_address
+            sizeof(client_thread_data->response),
         };
-        int port = client_thread_data->id.client_address.sin_port;
-        one_use_socket_send_message(port, &response_and_client_address);
+
+        one_use_socket_send_message(&message_contents, &client_thread_data->id.client_address);
         sleep(RESPONSE_WAIT_TIME_S);
         if (client_thread_data->confirmation_received) {
             printf("Resender thread has ended.\n");

@@ -69,6 +69,11 @@ typedef struct {
     bool message_received;
 } resender_args_t;
 
+typedef struct {
+    void *data;
+    int length;
+} message_contents_t;
+
 int send_message(message_args_t *args);
 int receive_message(message_args_t *args);
 void *resender(void *args);

@@ -1,6 +1,6 @@
 #include "client_threads_data_t.h"
 
-int first_free_index(client_threads_data_t *list) {
+int first_free_index(client_thread_list_t *list) {
     for (int i = 0; i < sizeof(list->data); i++) {
         if (!list->data_array_index_occupied[i]) {
             return i;
@@ -10,7 +10,7 @@ int first_free_index(client_threads_data_t *list) {
 }
 
 int add_client_thread_data_to_list(
-        client_threads_data_t *list,
+        client_thread_list_t *list,
         client_thread_data_t client_thread_data) {
     int index = first_free_index(list);
     if (index == -1) {
@@ -23,7 +23,7 @@ int add_client_thread_data_to_list(
 }
 
 int get_client_thread_data_index(
-        client_threads_data_t *client_threads_data,
+        client_thread_list_t *client_threads_data,
         transmission_id_t *thread_id) {
     for (int i = 0; i < sizeof(client_threads_data->data_array_index_occupied); i++) {
         if (client_threads_data->data_array_index_occupied[i]) {
@@ -47,14 +47,14 @@ int get_client_thread_data_index(
     return -1;
 }
 
-void init_client_thread_data_list(client_threads_data_t *list) {
+void init_client_thread_data_list(client_thread_list_t *list) {
     for (int i = 0; i < sizeof(list->data_array_index_occupied); i++) {
         list->data_array_index_occupied[i] = false;
     }
 }
 
 client_thread_data_t *get_client_thread_data(
-        client_threads_data_t *thread_data_list,
+        client_thread_list_t *thread_data_list,
         int index) {
     return &thread_data_list->data[index];
 }
