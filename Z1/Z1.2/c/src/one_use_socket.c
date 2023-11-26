@@ -49,7 +49,7 @@ void one_use_socket_send_message(
     close(sockfd);
 }
 
-void one_use_socket_receive_message(
+int one_use_socket_receive_message(
     int port,
     message_contents_t *message_contents,
     struct sockaddr_in *client_address
@@ -61,8 +61,9 @@ void one_use_socket_receive_message(
         message_contents->length,
         client_address
     };
-    receive_message(&receive_message_args);
+    int data_length = receive_message(&receive_message_args);
     close(sockfd);
+    return data_length;
 }
 
 void *one_use_socket_resender(void *args) {

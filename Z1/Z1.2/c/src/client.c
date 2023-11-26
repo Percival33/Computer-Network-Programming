@@ -47,30 +47,34 @@ void fillPairs(key_value_pair_t pairs[], int size) {
 }
 
 void send_message_with_retry(message_args_t *message) {
+    // Send message and if response is absent then periodically resend the message
+    
     resender_args_t timer_args;
+    timer_args.send_message_args = message;
+    timer_args.message_received = false;
+
+    pthread_t resender_thread;
+    pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
+
     response_t response_data;
     message_args_t response = {
         message->sockfd,
         &response_data,
         sizeof(response_data),
-        message->to_address,
+        NULL,
     };
-    pthread_t resender_thread;
-
-    // send message and if response is absent then periodically resend the message
-    timer_args.send_message_args = message;
-    timer_args.message_received = false;
-
-    pthread_create(&resender_thread, NULL, resender, (void *)&timer_args);
     receive_message(&response);
     printf(LOG_INFO"resp: id(%d) status(%d)\n", ntohs(response_data.id), ntohs(response_data.status));
     timer_args.message_received = true;
 
-
     if(ntohs(response_data.status) == OK) {
-        response.message_buffer = (void *)&response_data;
-        response.message_buffer_length = sizeof(response);
-        send_message(&response);
+        message_args_t confirmation = {
+            message->sockfd,
+            &response_data,
+            sizeof(response_data),
+            message->to_address,
+        };
+        send_message(&confirmation);
         printf("Handshake completed.\n");
     }
     else {
