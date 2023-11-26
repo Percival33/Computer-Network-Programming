@@ -3,19 +3,24 @@ project(Z1.2_C)
 
 set(CMAKE_C_STANDARD 11)
 
+set(SERVER_TARGET server)
+set(CLIENT_TARGET client)
+
 include_directories(../.. include)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 
-add_executable(server
+add_executable(${SERVER_TARGET}
     ../../common.c
     src/client_threads_data_t.c
-    src/client.c
     src/one_use_socket.c
     src/server.c
 )
+# target_compile_options(${SERVER_TARGET} PRIVATE -lpthread)
+target_link_libraries(${SERVER_TARGET} PRIVATE pthread)
 
-add_executable(client
+add_executable(${CLIENT_TARGET}
     src/client.c
     ../../common.c    
 )
+target_link_libraries(${CLIENT_TARGET} PRIVATE pthread)
