@@ -11,6 +11,7 @@ void one_use_socket_send_message(
 
 // Create a one use socket to receive a packet
 void one_use_socket_receive_message(
+    int port,
     message_contents_t *message_contents,
     struct sockaddr_in *client_address
 );

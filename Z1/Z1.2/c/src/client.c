@@ -113,11 +113,11 @@ int main(int argc, char *argv[]) {
     message.to_address = &serverAddr;
     send_message_with_retry(&message);
 
-    printf(LOG_INFO"Sending second message\n");
-    message.message_buffer_length = sizeof(maxData);
-    message.message_buffer = (void*) &maxData;
-    send_message_with_retry(&message);
-    printf(LOG_INFO"Second message was sent\n");
+    // printf(LOG_INFO"Sending second message\n");
+    // message.message_buffer_length = sizeof(maxData);
+    // message.message_buffer = (void*) &maxData;
+    // send_message_with_retry(&message);
+    // printf(LOG_INFO"Second message was sent\n");
 
     // Close the socket
     close(sockfd);

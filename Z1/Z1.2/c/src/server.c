@@ -104,7 +104,8 @@ int main(int argc, char *argv[]) {
             (void *) &packet_data,
             sizeof(packet_data)
         };
-        one_use_socket_receive_message(&message_contents, &client_address);
+        printf("aaa\n");
+        one_use_socket_receive_message(port, &message_contents, &client_address);
         
         ntoh_on_packet_data(&packet_data);
 
@@ -137,6 +138,7 @@ int main(int argc, char *argv[]) {
             packet_data.id
         };
         int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
+        printf("INDEX: %d\n", index);
         if (index >= 0) {
             // Thread for this transmission exists.
             // That means this packet is a response from the client,

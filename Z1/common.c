@@ -25,6 +25,7 @@ int receive_message(message_args_t *args) {
         (struct sockaddr*) args->to_address,
         &(socklen_t){sizeof(args->to_address)}
     );
+    printf("bbb\n");
     if (data_length == -1) {
         printf("Failed to receive the message\n");
         exit(ERROR_FAILED_TO_RECEIVE_A_MESSAGE);

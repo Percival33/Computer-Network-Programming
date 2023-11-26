@@ -50,10 +50,11 @@ void one_use_socket_send_message(
 }
 
 void one_use_socket_receive_message(
+    int port,
     message_contents_t *message_contents,
     struct sockaddr_in *client_address
 ) {
-    int sockfd = create_one_use_socket(client_address->sin_port);
+    int sockfd = create_one_use_socket(port);
     message_args_t receive_message_args = {
         sockfd,
         (void*) message_contents->data,
@@ -72,7 +73,6 @@ void *one_use_socket_resender(void *args) {
             &client_thread_data->response,
             sizeof(client_thread_data->response),
         };
-
         one_use_socket_send_message(&message_contents, &client_thread_data->id.client_address);
         sleep(RESPONSE_WAIT_TIME_S);
         if (client_thread_data->confirmation_received) {
