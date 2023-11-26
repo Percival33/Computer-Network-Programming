@@ -14,8 +14,10 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -Werror")
 set(SERVER_TARGET server)
 set(CLIENT_TARGET client)
 
+set(C_FOLDER_DIR ../..)
+
 include_directories(
-    ../..
+    ${C_FOLDER_DIR}/Z1/common
     include
     include/server
 )
@@ -26,17 +28,16 @@ add_executable(${SERVER_TARGET}
     src/server/client_threads_data.c
     src/server/one_use_socket.c
     src/server/server.c
-    ../../common.c
+    ${C_FOLDER_DIR}/Z1/common/common.c
     src/datagram.c
     src/packet_utils.c
     src/response.c
 )
-# target_compile_options(${SERVER_TARGET} PRIVATE -lpthread)
 target_link_libraries(${SERVER_TARGET} PRIVATE pthread)
 
 add_executable(${CLIENT_TARGET}
     src/client/client.c
-    ../../common.c
+    ${C_FOLDER_DIR}/Z1/common/common.c
     src/datagram.c
     src/packet_utils.c
     src/response.c
