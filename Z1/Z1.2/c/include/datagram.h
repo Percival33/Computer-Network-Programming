@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+// Custom types
+typedef struct {
+    char key[KEY_SIZE];
+    char value[VALUE_SIZE];
+} key_value_pair_t;
+
 typedef struct {
     uint16_t id;
     uint16_t count;

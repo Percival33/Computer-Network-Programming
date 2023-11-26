@@ -14,7 +14,11 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -Werror")
 set(SERVER_TARGET server)
 set(CLIENT_TARGET client)
 
-include_directories(../.. include)
+include_directories(
+    ../..
+    include
+    include/server
+)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 

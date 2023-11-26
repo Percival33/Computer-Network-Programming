@@ -1,7 +1,6 @@
 #ifndef PACKET_UTILS_H
 #define PACKET_UTILS_H
 
-#
 #define DATAGRAM_PACKET 0
 #define RESPONSE_PACKET 1
 

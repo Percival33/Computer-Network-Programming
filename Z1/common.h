@@ -4,6 +4,7 @@
 
 #ifndef COMMON_H
 #define COMMON_H
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -11,6 +12,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 // Error codes
 #define OK 0
 #define ERROR_INVALID_ARG 1
@@ -40,14 +42,6 @@
 #define LOG_INFO BLUE_TEXT "INFO: " RESET_COLOR
 #define LOG_DEBUG WHITE_TEXT "DEBUG: " RESET_COLOR
 
-// Custom types
-typedef struct {
-    char key[KEY_SIZE];
-    char value[VALUE_SIZE];
-} key_value_pair_t;
-
-
-
 // Args for send and receive functions
 typedef struct {
     int sockfd;
@@ -70,4 +64,4 @@ int send_message(message_args_t *args);
 int receive_message(message_args_t *args);
 void *resender(void *args);
 
-#endif //COMPUTER_NETWORK_PROGRAMMING_TODO_H
+#endif
