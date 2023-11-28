@@ -4,6 +4,8 @@
 #include "common.h"
 #include "message_utils.h"
 
+int create_one_use_socket(int port);
+
 // Create a one use socket to send a packet
 void one_use_socket_send_message(
     message_contents_t *message_contents,
