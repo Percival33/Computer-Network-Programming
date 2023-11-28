@@ -13,31 +13,21 @@
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
 
-#define BUF_SIZE 512 // Buffer size for data
+#define BUF_SIZE 2048 // Buffer size for data
 #define MAX_PAYLOAD_SIZE 508 // (512 - 4)
 #define KEY_SIZE 2
 #define VALUE_SIZE 2
 
 typedef struct {
-    uint16_t id;
-    uint16_t size;
-    char payload[MAX_PAYLOAD_SIZE];
+    char payload[BUF_SIZE];
 } message_t;
 
-typedef struct {
-    uint16_t id;
-    uint8_t status; // if different from 0 then err
-} response_t;
-
-void fillMessage(message_t *msg, uint16_t id, uint16_t size, char *payload) {
-    msg->id = htons(id);
-    msg->size = htons(size);
-    int payloadLength = strlen(payload);
-
-    assert(payloadLength < MAX_PAYLOAD_SIZE);
-
-    memset(msg->payload, '\0', MAX_PAYLOAD_SIZE);
-    strncpy(msg->payload, payload, payloadLength);
+void fillMessage(message_t *msg, int packet_size) {
+    memset(msg->payload, '\0', BUF_SIZE);
+    assert(packet_size < BUF_SIZE);
+    for(int i = 0; i < packet_size; i++) {
+        msg->payload[i] = 'A';
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -63,18 +53,19 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     message_t a;
-    fillMessage(&a, 1, 2, "A 1 B 2"); // A: 1, B: 2
+    int N[] = {1, 100, 200, 1000, 1050, 2000};
+    for(int x = 0; x < sizeof(N)/sizeof(N[0]); x++) {
+        fillMessage(&a, N[x]);
 
-    sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-    printf("Data sent to server\n");
+        sendto(sockfd, &a, N[x], 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+        printf("Sent packet of %d bytes to server\n", N[x]);
 
-    addr_size = sizeof(serverAddr);
-    response_t response;
-    recvfrom(sockfd, &response, 3, 0, (struct sockaddr *) &serverAddr, &addr_size);
+        char response[5];
+        recvfrom(sockfd, &response, 5, 0, NULL, 0);
+        int len = ntohs(atoi(response));
+        printf("resp: %d\n", len);
+    }
 
-    printf("resp: id(%d) status(%d)\n", htons(response.id), htons(response.status));
-    if(response.status == 0)
-        sendto(sockfd, &response, sizeof(response), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
 
 //    printf("Received from server: %s\n", response);
 
