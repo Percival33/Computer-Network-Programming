@@ -62,10 +62,7 @@ int main(int argc, char *argv[]) {
             ntohs(client_address.sin_port),
             data_length
         );
-//        printf("Got data: %s\n", buffer);
         char response[5];
-//        int len = htons(strlen(buffer));
-//        sprintf(response, "%d", len);
         sprintf(response, "ok");
         printf("Sending response (network encoded): %s\n", response);
         if (sendto(sockfd, response, sizeof(response), 0,

@@ -12,11 +12,6 @@
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
 
-#define BUF_SIZE 2048 // Buffer size for data
-#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
-#define KEY_SIZE 2
-#define VALUE_SIZE 2
-
 typedef struct {
     char* payload;
 } message_t;
