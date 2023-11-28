@@ -7,8 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <assert.h>
-
+#include <signal.h>
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
@@ -19,14 +18,26 @@
 #define VALUE_SIZE 2
 
 typedef struct {
-    char payload[BUF_SIZE];
+    char* payload;
 } message_t;
 
+int packet_size;
+
 void fillMessage(message_t *msg, int packet_size) {
+    if(msg->payload != NULL)
+        free(msg->payload);
+
+    msg->payload = (char*)malloc(packet_size * sizeof(char));
     memset(msg->payload, '\0', BUF_SIZE);
-    assert(packet_size < BUF_SIZE);
     for(int i = 0; i < packet_size; i++) {
         msg->payload[i] = 'A';
+    }
+}
+
+void handle_idle(int sig) {
+    if (sig == SIGALRM) {
+        printf("Timeout expired. Maximum packet size is %d bytes.\n", packet_size);
+        exit(0);
     }
 }
 
@@ -35,6 +46,8 @@ int main(int argc, char *argv[]) {
         perror("Arguments error");
         exit(1);
     }
+    signal(SIGALRM, handle_idle);
+    alarm(1);
 
     int sockfd;
     struct sockaddr_in serverAddr;
@@ -53,21 +66,19 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     message_t a;
-    int N[] = {1, 100, 200, 1000, 1050, 2000};
-    for(int x = 0; x < sizeof(N)/sizeof(N[0]); x++) {
-        fillMessage(&a, N[x]);
+    a.payload = NULL;
+    for(packet_size = 200; packet_size < (1<<16); packet_size++) {
+        fillMessage(&a, packet_size);
 
-        sendto(sockfd, &a, N[x], 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-        printf("Sent packet of %d bytes to server\n", N[x]);
+        sendto(sockfd, &a, packet_size, 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+        printf("Sent packet of %d bytes to server. Waiting for a response...\n", packet_size);
 
         char response[5];
-        recvfrom(sockfd, &response, 5, 0, NULL, 0);
-        int len = ntohs(atoi(response));
-        printf("resp: %d\n", len);
+        int data_received = recvfrom(sockfd, &response, 5, 0, NULL, 0);
+        if (data_received <= 0) {
+            perror("Recvfrom failed:");
+        }
     }
-
-
-//    printf("Received from server: %s\n", response);
 
     // Close the socket
     close(sockfd);

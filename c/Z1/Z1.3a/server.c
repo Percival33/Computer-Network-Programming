@@ -14,7 +14,7 @@
 #define ERROR_FAILED_TO_SEND_RESPONSE 5
 
 #define PAIR_SIZE 4
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE (1<<16)
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -64,8 +64,9 @@ int main(int argc, char *argv[]) {
         );
 //        printf("Got data: %s\n", buffer);
         char response[5];
-        int len = htons(strlen(buffer));
-        sprintf(response, "%d", len);
+//        int len = htons(strlen(buffer));
+//        sprintf(response, "%d", len);
+        sprintf(response, "ok");
         printf("Sending response (network encoded): %s\n", response);
         if (sendto(sockfd, response, sizeof(response), 0,
             (struct sockaddr*) &client_address, 
