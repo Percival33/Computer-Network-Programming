@@ -2,7 +2,7 @@ import socket
 import struct
 
 SERVER_IP = '127.0.0.1'
-SERVER_PORT = 8088
+SERVER_PORT = 8883
 BUF_SIZE = 1024
 STR_SIZE = 2
 
