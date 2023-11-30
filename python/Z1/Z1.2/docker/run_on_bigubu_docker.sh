@@ -49,7 +49,6 @@ scp $EXERCISE_DIR/Z1.2/client.py \
 ssh $USERNAME@$SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x docker_python_server_startup.sh
-    chmod +x server_container_config.sh
     chmod +x server.py
     sed -i -e 's/\r$//' server_container_config.sh
     sed -i -e 's/\r$//' docker_python_server_startup.sh
@@ -57,7 +56,6 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
 
     cd $SCP_DEST_DIR/client
     chmod +x docker_python_client_startup.sh
-    chmod +x docker_client_container_config.sh
     chmod +x client.py
     sed -i -e 's/\r$//' client_container_config.sh
     sed -i -e 's/\r$//' docker_python_client_startup.sh
