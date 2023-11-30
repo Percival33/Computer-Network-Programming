@@ -28,6 +28,24 @@ int main(int argc, char *argv[]) {
 
     int port = atoi(argv[1]);
 
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd  < 0) {
+        perror("Failed to create a socket");
+        exit(ERROR_FAILED_SOCKET_CREATION);
+    }
+
+    struct sockaddr_in server_address;
+
+    memset(&server_address, 0, sizeof(server_address));
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address.sin_port = htons(port);
+
+    if (bind(sockfd, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
+        perror("Failed to bind a socket");
+        exit(ERROR_FAILED_SOCKET_BIND);
+    }
+
     client_thread_list_t client_threads_data_list;
     init_client_thread_data_list(&client_threads_data_list);
     while(true) {
@@ -39,11 +57,13 @@ int main(int argc, char *argv[]) {
         char data_buffer[BUFFER_SIZE];
         struct sockaddr_in client_address;
 
-        message_contents_t message_contents = {
+        message_args_t message_args = {
+            sockfd,
             data_buffer,
-            BUFFER_SIZE
+            sizeof(data_buffer),
+            &client_address
         };
-        int received_data_length = one_use_socket_receive_message(port, &message_contents, &client_address);
+        int received_data_length = receive_message(&message_args);
 
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];

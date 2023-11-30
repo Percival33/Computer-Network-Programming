@@ -4,7 +4,7 @@
 #include "common.h"
 #include "message_utils.h"
 
-int create_one_use_socket(int port);
+int create_one_use_socket();
 
 // Create a one use socket to send a packet
 void one_use_socket_send_message(
@@ -14,7 +14,6 @@ void one_use_socket_send_message(
 
 // Create a one use socket to receive a packet
 int one_use_socket_receive_message(
-    int port,
     message_contents_t *message_contents,
     struct sockaddr_in *client_address
 );
