@@ -73,7 +73,7 @@ int one_use_socket_receive_message(
 }
 
 void *one_use_socket_resender(void *args) {
-    printf("Resender thread has started.\n");
+    printf("Resender thread has started. \n");
     client_thread_data_t *client_thread_data = (client_thread_data_t *) args;
     while (true) {
         message_contents_t message_contents = {

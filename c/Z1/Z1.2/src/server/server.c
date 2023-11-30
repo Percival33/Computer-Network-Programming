@@ -21,18 +21,6 @@
 #include "socket.h"
 
 
-
-// void test(client_thread_list_t *client_threads_data_list) {
-//     int sum = 0;
-//     for (int i = 0; i < MAX_THREADS; i++) {
-//         if (client_threads_data_list->data_array_index_occupied[i]) {
-//             sum++;
-//         }
-//     }
-//     printf("ILE WATKOW: %d\n", sum);
-// }
-
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Invalid argument count\n");

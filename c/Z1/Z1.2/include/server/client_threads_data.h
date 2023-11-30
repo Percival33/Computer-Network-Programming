@@ -53,4 +53,6 @@ client_thread_data_t *get_client_thread_data(
     int index
 );
 
+int get_client_thread_count(client_thread_list_t *client_threads_data_list);
+
 #endif

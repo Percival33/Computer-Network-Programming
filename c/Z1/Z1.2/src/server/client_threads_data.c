@@ -68,3 +68,13 @@ void remove_client_thread_data_from_list(
 ) {
     list->data_array_index_occupied[index] = false;
 }
+
+int get_client_thread_count(client_thread_list_t *client_threads_data_list) {
+    int sum = 0;
+    for (int i = 0; i < MAX_THREADS; i++) {
+        if (client_threads_data_list->data_array_index_occupied[i]) {
+            sum++;
+        }
+    }
+    return sum;
+}
