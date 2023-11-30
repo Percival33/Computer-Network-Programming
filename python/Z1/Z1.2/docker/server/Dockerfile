@@ -6,8 +6,11 @@ WORKDIR /server
 RUN apt-get update
 RUN apt-get install -y iproute2
 
-COPY ./server .
-COPY ./server_container_config.sh .
+# COPY ./server .
+# COPY ./server_container_config.sh .
+COPY ../server.py .
+COPY server_container_config.sh .
+
 RUN chmod 777 ./server_container_config.sh
 
 RUN apt-get update && apt-get install -y netcat-openbsd
