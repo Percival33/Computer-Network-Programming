@@ -24,21 +24,24 @@ include_directories(
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 
+set(COMMON_SOURCES
+    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
+    ${C_Z1_FOLDER_DIR}/common/src/datagram.c
+    ${C_Z1_FOLDER_DIR}/common/src/response.c
+    ${C_Z1_FOLDER_DIR}/common/src/socket.c
+)
+
 add_executable(${SERVER_TARGET}
     src/server/client_threads_data.c
     src/server/one_use_socket.c
     src/server/packet_utils.c
     src/server/server.c
-    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
-    ${C_Z1_FOLDER_DIR}/common/src/datagram.c
-    ${C_Z1_FOLDER_DIR}/common/src/response.c
+    ${COMMON_SOURCES}
 )
 target_link_libraries(${SERVER_TARGET} PRIVATE pthread)
 
 add_executable(${CLIENT_TARGET}
     src/client/client.c
-    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
-    ${C_Z1_FOLDER_DIR}/common/src/datagram.c
-    ${C_Z1_FOLDER_DIR}/common/src/response.c
+    ${COMMON_SOURCES}
 )
 target_link_libraries(${CLIENT_TARGET} PRIVATE pthread)

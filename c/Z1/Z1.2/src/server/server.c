@@ -18,6 +18,7 @@
 #include "datagram.h"
 #include "response.h"
 #include "packet_utils.h"
+#include "socket.h"
 
 
 int main(int argc, char *argv[]) {
@@ -28,23 +29,7 @@ int main(int argc, char *argv[]) {
 
     int port = atoi(argv[1]);
 
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd  < 0) {
-        perror("Failed to create a socket");
-        exit(ERROR_FAILED_SOCKET_CREATION);
-    }
-
-    struct sockaddr_in server_address;
-
-    memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr*) &server_address, sizeof(server_address)) == -1) {
-        perror("Failed to bind a socket");
-        exit(ERROR_FAILED_SOCKET_BIND);
-    }
+    int sockfd = create_binded_socket(port);
 
     client_thread_list_t client_threads_data_list;
     init_client_thread_data_list(&client_threads_data_list);
