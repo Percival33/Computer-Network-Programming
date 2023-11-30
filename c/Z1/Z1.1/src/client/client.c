@@ -22,7 +22,7 @@ void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payl
     int payloadLength = PAIR_SIZE * count;
     assert(payloadLength <= MAX_PAYLOAD_SIZE);
 
-    memset(msg->pairs, '\0', count * PAIR_SIZE);
+    memset(msg->pairs, '\0', sizeof(msg->pairs));
     memcpy(msg->pairs, payload, payloadLength);
 }
 

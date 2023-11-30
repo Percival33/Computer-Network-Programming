@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 
+#include "common.h"
+
 
 void print_address(
     struct sockaddr_in *client_address,
@@ -10,7 +12,7 @@ void print_address(
     int client_ip_str_size
 ) {
     inet_ntop(AF_INET, &(client_address->sin_addr), client_ip_str, client_ip_str_size);
-    printf("Data received from %s:%d.\n",
+    printf(LOG_INFO"Data received from %s:%d.\n",
         client_ip_str,
         ntohs(client_address->sin_port)
     );
