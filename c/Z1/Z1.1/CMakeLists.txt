@@ -3,16 +3,39 @@ project(Z1.1_C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(../..)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+
+# For a very clean compile
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -Werror")
+
+set(SERVER_TARGET server)
+set(CLIENT_TARGET client)
+
+set(C_Z1_FOLDER_DIR ../../Z1)
+
+include_directories(
+    ${C_Z1_FOLDER_DIR}/common/include
+)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 
-add_executable(server
-    src/server.c
-    ../../common.c    
+set(COMMON_SOURCES
+    ${C_Z1_FOLDER_DIR}/common/src/datagram.c
+    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
+    ${C_Z1_FOLDER_DIR}/common/src/print_address.c
+    ${C_Z1_FOLDER_DIR}/common/src/response.c
+    ${C_Z1_FOLDER_DIR}/common/src/socket.c
 )
 
-add_executable(client
-    src/client.c
-    ../../common.c    
+add_executable(${SERVER_TARGET}
+    src/server/server.c
+    ${COMMON_SOURCES}
+)
+
+add_executable(${CLIENT_TARGET}
+    src/client/client.c
+    ${COMMON_SOURCES}
 )

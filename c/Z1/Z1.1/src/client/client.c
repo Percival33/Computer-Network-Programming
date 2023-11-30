@@ -9,10 +9,11 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <pthread.h>
-#include "common.h"
 
-#define SERVER_IP "127.0.0.1" // Server IP address
-#define SERVER_PORT 8888 // Server port
+#include "common.h"
+#include "message_utils.h"
+#include "datagram.h"
+
 
 void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payload[]) {
     msg->id = htons(id);
@@ -21,9 +22,10 @@ void fillMessage(data_t *msg, uint16_t id, uint16_t count, key_value_pair_t payl
     int payloadLength = PAIR_SIZE * count;
     assert(payloadLength <= MAX_PAYLOAD_SIZE);
 
-    memset(msg->pairs, '\0', MAX_PAYLOAD_SIZE);
+    memset(msg->pairs, '\0', count * PAIR_SIZE);
     memcpy(msg->pairs, payload, payloadLength);
 }
+
 
 void fillPairs(key_value_pair_t pairs[], int size) {
     if (size > MAX_PAIR_COUNT) {
@@ -46,42 +48,53 @@ void fillPairs(key_value_pair_t pairs[], int size) {
     }
 }
 
+
 int main(int argc, char *argv[]) {
-    int sockfd;
-    struct sockaddr_in serverAddr;
-    socklen_t addr_size;
+    if (argc != 3) {
+        printf("Invalid argument count\n");
+        exit(ERROR_INVALID_ARG);
+    }
 
-    char buffer[BUFFER_SIZE];
-    data_t data, maxData;
-    key_value_pair_t pairs[MAX_PAIR_COUNT], maxPairs[MAX_PAIR_COUNT];
-    message_args_t message;
+    char *ip = argv[1];
+    int port = atoi(argv[2]);
 
-    fillPairs(pairs, 2);
-    fillPairs(maxPairs, MAX_PAIR_COUNT);
-
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    // Socket
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
+    // Server address
+    struct sockaddr_in serverAddr;
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
-    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = inet_addr(ip);
 
+    // Prepare the data
+    key_value_pair_t pairs[MAX_PAIR_COUNT], maxPairs[MAX_PAIR_COUNT];
+    fillPairs(pairs, 2);
+    fillPairs(maxPairs, MAX_PAIR_COUNT);
+
+    // Prepare the message
+    data_t data, maxData;
     fillMessage(&data, 1, 2, pairs);
     fillMessage(&maxData, 2, MAX_PAIR_COUNT, maxPairs);
 
-    message.message_buffer_length = sizeof(data);
-    message.message_buffer = (void*) &data;
-    message.sockfd = sockfd;
-    message.to_address = &serverAddr;
+    // Send the first message
+    message_args_t message = {
+        sockfd,
+        (void*) &data,
+        sizeof(data),
+        &serverAddr
+    };
     send_message(&message);
 
+    // Send the second message
     printf(LOG_INFO"Sending second message\n");
-    message.message_buffer_length = sizeof(maxData);
     message.message_buffer = (void*) &maxData;
+    message.message_buffer_length = sizeof(maxData);
     send_message(&message);
     printf(LOG_INFO"Second message was sent\n");
 

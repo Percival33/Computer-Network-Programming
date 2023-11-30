@@ -27,6 +27,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 set(COMMON_SOURCES
     ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
     ${C_Z1_FOLDER_DIR}/common/src/datagram.c
+    ${C_Z1_FOLDER_DIR}/common/src/print_address.c
     ${C_Z1_FOLDER_DIR}/common/src/response.c
     ${C_Z1_FOLDER_DIR}/common/src/socket.c
 )
