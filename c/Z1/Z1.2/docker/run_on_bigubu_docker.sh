@@ -31,10 +31,10 @@ echo "You will be connecting to $SERVER_ADDRESS by SSH."
 
 ssh $SERVER_ADDRESS << EOF
     if [ ! -d $SCP_DEST_DIR/server ]; then
-        mkdir $SCP_DEST_DIR/server
+        mkdir -p $SCP_DEST_DIR/server
     fi
     if [ ! -d $SCP_DEST_DIR/client ]; then
-        mkdir $SCP_DEST_DIR/client
+        mkdir -p $SCP_DEST_DIR/client
     fi
 EOF
 
@@ -53,12 +53,14 @@ scp $EXERCISE_DIR/Z1.2/build/output/client \
 ssh $SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x docker_c_server_startup.sh
+    sed -i -e 's/\r$//' server_container_config.sh
     sed -i -e 's/\r$//' docker_c_server_startup.sh
-    ./docker_c_server_startup.sh &
+    ./docker_c_server_startup.sh
 
     cd $SCP_DEST_DIR/client
     chmod +x docker_c_client_startup.sh
+    sed -i -e 's/\r$//' client_container_config.sh
     sed -i -e 's/\r$//' docker_c_client_startup.sh
-    ./docker_c_client_startup.sh &
+    ./docker_c_client_startup.sh
 EOF
  

@@ -2,15 +2,13 @@ FROM ubuntu:22.04
 
 WORKDIR /client
 
-# RUN apt-get update
-# RUN apt-get install -y iproute2
-
 COPY ./client .
 COPY ./client_container_config.sh .
 RUN chmod 777 ./client_container_config.sh
 
-RUN apt-get update && apt-get install -y netcat
-EXPOSE 8888/udp
-EXPOSE 8889/udp
+# RUN apt-get update
+# RUN apt-get install -y netcat
+# RUN apt-get install -y iputils-ping
+# RUN apt-get install -y iproute2
 
 CMD ["/bin/sh", "./client_container_config.sh"]
