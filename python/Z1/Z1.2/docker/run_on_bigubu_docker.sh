@@ -18,8 +18,7 @@ SCP_DEST_DIR=${2:-$DEFAULT_SCP_DEST_DIR}
 SERVER_ADDRESS="bigubu.ii.pw.edu.pl"
 EXERCISE_DIR="$PWD/../../../Z1"
 
-
-echo "You will be connecting to $USERNAME@$SERVER_ADDRESS by SSH."
+echo "You will be connecting to $SERVER_ADDRESS by SSH."
 
 read -p "Username: " USERNAME
 
@@ -47,15 +46,17 @@ scp $EXERCISE_DIR/Z1.2/client.py \
     $EXERCISE_DIR/Z1.2/docker/client/docker_python_client_startup.sh \
     $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/client
 
-ssh $USERNAME@$SERVER_ADDRESS << EOF
+ssh $SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x docker_python_server_startup.sh
+    sed -i -e 's/\r$//' server_container_config.sh
     sed -i -e 's/\r$//' docker_python_server_startup.sh
-    ./docker_python_server_startup.sh &
+    ./docker_python_server_startup.sh
 
     cd $SCP_DEST_DIR/client
     chmod +x docker_python_client_startup.sh
+    sed -i -e 's/\r$//' client_container_config.sh
     sed -i -e 's/\r$//' docker_python_client_startup.sh
-    ./docker_python_client_startup.sh &
+    ./docker_python_client_startup.sh
 EOF
  

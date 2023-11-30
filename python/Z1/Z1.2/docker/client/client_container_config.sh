@@ -1,4 +1,9 @@
-# ./client z41_z_1_c_server 8888
-# python3 ./client.py
-# echo "hello World"
-python3 ./client.py '127.0.0.1' 8888
+#!/bin/bash
+
+# SERVER_IP is an env var
+echo $SERVER_IP > test.txt
+
+while true; do
+    ./client.py $SERVER_IP 8888
+    sleep 3
+done
