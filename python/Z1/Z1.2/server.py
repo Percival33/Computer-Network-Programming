@@ -68,7 +68,7 @@ def run_server(server_ip, server_port):
 
 def main():
     arguments = parse_arguments(get_parser())
-    run_server('localhost', arguments.port)
+    run_server('0.0.0.0', arguments.port)
     return 0
 
 

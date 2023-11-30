@@ -34,6 +34,7 @@ def main():
 
         sockfd.sendto(message_t_packed, (arguments.ip, arguments.port))
         print("Data sent to server:")
+        # print(f"Data sent to ip: {arguments.ip} port: {arguments.port}")
         print(f'Size: {size}, Key: "{key}", Value: "{value}"')
 
         message, address = sockfd.recvfrom(BUF_SIZE)
