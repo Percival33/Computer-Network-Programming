@@ -1,5 +1,6 @@
 import socket
 import struct
+import argparse
 
 SERVER_IP = '127.0.0.1'
 SERVER_PORT = 8088
@@ -7,6 +8,17 @@ BUF_SIZE = 1024
 STR_SIZE = 2
 
 message_t = struct.Struct('!H2s2s')
+
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("ip", type=str)
+    parser.add_argument("port", type=int)
+    return parser
+
+
+def parse_arguments(parser):
+    return parser.parse_args()
 
 
 def main():
@@ -18,7 +30,9 @@ def main():
         value = '1'
         message_t_packed = message_t.pack(size, key.encode(), value.encode())
 
-        sockfd.sendto(message_t_packed, (SERVER_IP, SERVER_PORT))
+        arguments = parse_arguments(get_parser())
+
+        sockfd.sendto(message_t_packed, (arguments.ip, arguments.port))
         print("Data sent to server:")
         print(f'Size: {size}, Key: "{key}", Value: "{value}"')
 

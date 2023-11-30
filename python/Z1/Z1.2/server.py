@@ -16,7 +16,6 @@ def send_to_client(server_socket, address):
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("ip", type=str)
     parser.add_argument("port", type=int)
     return parser
 
@@ -69,7 +68,7 @@ def run_server(server_ip, server_port):
 
 def main():
     arguments = parse_arguments(get_parser())
-    run_server(arguments.ip, arguments.port)
+    run_server('localhost', arguments.port)
     return 0
 
 
