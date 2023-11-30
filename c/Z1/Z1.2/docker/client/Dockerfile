@@ -11,4 +11,4 @@ RUN chmod 777 ./client_container_config.sh
 # RUN apt-get install -y iputils-ping
 # RUN apt-get install -y iproute2
 
-CMD ["/bin/sh", "./client_container_config.sh"]
+CMD ["sleep", "infinity"]
