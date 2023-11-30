@@ -17,4 +17,4 @@ RUN apt-get update && apt-get install -y netcat
 EXPOSE 8888/udp
 EXPOSE 8889/udp
 
-CMD ["/bin/sh", "./client_container_config.sh"]
+CMD ["sleep", "infinity"]
