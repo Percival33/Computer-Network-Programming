@@ -12,7 +12,7 @@ typedef struct {
 typedef struct {
     uint16_t id;
     uint16_t count;
-    key_value_pair_t pairs[MAX_PAYLOAD_SIZE];
+    key_value_pair_t pairs[MAX_PAIR_COUNT];
 } data_t;
 
 bool text_is_only_zeroes(char *text, int text_length);
