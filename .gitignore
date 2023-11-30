@@ -1,0 +1,14 @@
+venv
+
+c/Z1/Z1.1/build/*
+!c/Z1/Z1.1/build/.gitkeep
+
+c/Z1/Z1.2/build/*
+!c/Z1/Z1.2/build/.gitkeep
+
+c/Z1/Z1.3a/build/*
+!c/Z1/Z1.3a/build/.gitkeep
+
+.vscode/
+
+**/.idea
