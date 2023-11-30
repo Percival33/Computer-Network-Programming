@@ -9,7 +9,7 @@ int first_free_index(client_thread_list_t *list) {
     return -1;
 }
 
-int add_client_thread_data_to_list(
+client_thread_data_t *add_client_thread_data_to_list(
         client_thread_list_t *list,
         client_thread_data_t client_thread_data) {
     int index = first_free_index(list);
@@ -19,7 +19,7 @@ int add_client_thread_data_to_list(
     }
     list->data[index] = client_thread_data;
     list->data_array_index_occupied[index] = true;
-    return index;
+    return &list->data[index];
 }
 
 int get_client_thread_data_index(
@@ -60,4 +60,11 @@ client_thread_data_t *get_client_thread_data(
         client_thread_list_t *thread_data_list,
         int index) {
     return &thread_data_list->data[index];
+}
+
+void remove_client_thread_data_from_list(
+    client_thread_list_t *list,
+    int index
+) {
+    list->data_array_index_occupied[index] = false;
 }

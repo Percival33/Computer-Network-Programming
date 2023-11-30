@@ -30,9 +30,14 @@ typedef struct {
 // Returns the first free index in the thread list
 int first_free_index(client_thread_list_t *list);
 
-int add_client_thread_data_to_list(
+client_thread_data_t *add_client_thread_data_to_list(
     client_thread_list_t *list,
     client_thread_data_t client_thread_data
+);
+
+void remove_client_thread_data_from_list(
+    client_thread_list_t *list,
+    int index
 );
 
 // Returns the index of the thread characterized by given thread id

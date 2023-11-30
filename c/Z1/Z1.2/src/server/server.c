@@ -21,6 +21,18 @@
 #include "socket.h"
 
 
+
+// void test(client_thread_list_t *client_threads_data_list) {
+//     int sum = 0;
+//     for (int i = 0; i < MAX_THREADS; i++) {
+//         if (client_threads_data_list->data_array_index_occupied[i]) {
+//             sum++;
+//         }
+//     }
+//     printf("ILE WATKOW: %d\n", sum);
+// }
+
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Invalid argument count\n");
@@ -76,17 +88,20 @@ int main(int argc, char *argv[]) {
                 (uint16_t) htons(datagram->id),
                 (uint8_t) htons(0)
             };
-            client_thread_data_t client_thread_data = {
-                (transmission_id_t){
-                    client_address,
-                    datagram->id
-                },
-                response_to_client,
-                false
-            };
-            add_client_thread_data_to_list(&client_threads_data_list, client_thread_data);
+            
+            client_thread_data_t *client_thread_data = add_client_thread_data_to_list(
+                &client_threads_data_list,
+                (client_thread_data_t) {
+                    (transmission_id_t){
+                        client_address,
+                        datagram->id
+                    },
+                    response_to_client,
+                    false
+                }
+            );
             pthread_t resender_thread;
-            pthread_create(&resender_thread, NULL, one_use_socket_resender, (void *)&client_thread_data);
+            pthread_create(&resender_thread, NULL, one_use_socket_resender, (void *)client_thread_data);
         }
         else if (packet_type == RESPONSE_PACKET) {
             response_t *response = (response_t *) data_buffer;
@@ -102,7 +117,9 @@ int main(int argc, char *argv[]) {
             };
             int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
             client_thread_data_t *thread_data = get_client_thread_data(&client_threads_data_list, index);
+            
             thread_data->confirmation_received = true;
+            remove_client_thread_data_from_list(&client_threads_data_list, index);
             
             int expected_packet_id = thread_data->id.packet_id;
             if (response_is_valid(response, expected_packet_id)) {

@@ -42,8 +42,10 @@ void *resender(void *args) {
     printf("Resender thread has started.\n");
     resender_args_t *args_parsed = (resender_args_t*) args;
     while (true) {
+        printf("Resend\n");
         send_message(args_parsed->send_message_args);
         sleep(RESPONSE_WAIT_TIME_S);
+        args_parsed = (resender_args_t*) args;
         if (args_parsed->message_received) {
             printf("Resender thread has ended.\n");
             return NULL;

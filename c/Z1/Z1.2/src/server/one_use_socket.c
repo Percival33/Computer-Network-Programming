@@ -82,6 +82,7 @@ void *one_use_socket_resender(void *args) {
         };
         one_use_socket_send_message(&message_contents, &client_thread_data->id.client_address);
         sleep(RESPONSE_WAIT_TIME_S);
+        client_thread_data = (client_thread_data_t *) args;
         if (client_thread_data->confirmation_received) {
             printf("Resender thread has ended.\n");
             return NULL;
