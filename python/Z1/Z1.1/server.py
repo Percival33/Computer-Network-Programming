@@ -3,9 +3,9 @@ import argparse
 import struct
 
 BUFFER_SIZE = 1024
-MAX_PAYLOAD_SIZE = 4
+MAX_PAYLOAD_SIZE = 2
 key_value_pair_t = struct.Struct('!2s2s')
-message_t = struct.Struct('!HH' + '4s4s' * MAX_PAYLOAD_SIZE)
+message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 
 
 def parse_key_value_from_data(data, index, size):
@@ -57,18 +57,20 @@ def run_server(server_ip, server_port):
             try:
                 message_unpacked = message_t.unpack(message[:message_t.size])
                 id, count = message_unpacked[:2]
-                pairs = message_unpacked[2:]
+                pairs = message_unpacked[2:][0]
 
+                print(pairs)
                 for i in range(count):
-                    key, value = key_value_pair_t.unpack(pairs[i * 8:(i + 1) * 8])
+
+                    key, value = key_value_pair_t.unpack(pairs[i * 4:(i + 1) * 4])
                     print(f'Key: {key.decode()}, Value: {value.decode()}')
 
                 # for i in range(count):
                 #     key, value = parse_key_value_from_data(pairs, i, 8)
                 #     print(f'Key: {key.decode()}, Value: {value.decode()}')
-                    # message_to_print = f'Key: {key.decode("utf-8")}, Value: {value.decode("utf-8")}'
-                    # print(f'Client ip address   : {address}')
-                    # print(f'Message received    : {message_to_print}')
+                #     message_to_print = f'Key: {key.decode("utf-8")}, Value: {value.decode("utf-8")}'
+                #     print(f'Client ip address   : {address}')
+                #     print(f'Message received    : {message_to_print}')
 
 
                 send_to_client(server_socket, address)

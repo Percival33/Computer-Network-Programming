@@ -8,9 +8,9 @@ BUF_SIZE = 1024
 STR_SIZE = 2
 
 
-MAX_PAYLOAD_SIZE = 4
+MAX_PAYLOAD_SIZE = 2
 key_value_pair_t = struct.Struct('!2s2s')
-message_t = struct.Struct('!HH' + '4s4s' * MAX_PAYLOAD_SIZE)
+message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 
 
 
@@ -47,7 +47,7 @@ def main():
 
         pairs_packed = b''.join(few_pairs_packed)
 
-        message_t_packed = message_t.pack(id, count, *pairs_packed)
+        message_t_packed = message_t.pack(id, count, pairs_packed)
 
 
         arguments = parse_arguments(get_parser())

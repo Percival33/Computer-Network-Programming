@@ -22,19 +22,19 @@ cd $EXERCISE_DIR/Z1.2/build
 cmake ..
 make clean server client -j$(nproc)
 
-echo "You will be connecting to $SERVER_ADDRESS by SSH."
+echo "You will be connecting to $USERNAME@$SERVER_ADDRESS by SSH."
 
-# read -p "Username: " USERNAME
+read -p "Username: " USERNAME
 
 # This also overrides the previous files
 # scp -r $EXERCISE_DIR $SERVER_ADDRESS:$SCP_DEST_DIR
 
-ssh $SERVER_ADDRESS << EOF
+ssh $USERNAME@$SERVER_ADDRESS << EOF
     if [ ! -d $SCP_DEST_DIR/server ]; then
-        mkdir $SCP_DEST_DIR/server
+        mkdir -p $SCP_DEST_DIR/server
     fi
     if [ ! -d $SCP_DEST_DIR/client ]; then
-        mkdir $SCP_DEST_DIR/client
+        mkdir -p $SCP_DEST_DIR/client
     fi
 EOF
 
@@ -42,7 +42,7 @@ scp $EXERCISE_DIR/Z1.2/build/output/server \
     $EXERCISE_DIR/Z1.2/docker/server/Dockerfile \
     $EXERCISE_DIR/Z1.2/docker/server/docker_c_server_startup.sh \
     $EXERCISE_DIR/Z1.2/docker/server/server_container_config.sh \
-    $SERVER_ADDRESS:$SCP_DEST_DIR/server
+    $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/server
 
 scp $EXERCISE_DIR/Z1.2/build/output/client \
     $EXERCISE_DIR/Z1.2/docker/client/Dockerfile \
@@ -50,7 +50,7 @@ scp $EXERCISE_DIR/Z1.2/build/output/client \
     $EXERCISE_DIR/Z1.2/docker/client/docker_c_client_startup.sh \
     $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/client
 
-ssh $SERVER_ADDRESS << EOF
+ssh $USERNAME@$SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x docker_c_server_startup.sh
     sed -i -e 's/\r$//' docker_c_server_startup.sh
@@ -61,4 +61,3 @@ ssh $SERVER_ADDRESS << EOF
     sed -i -e 's/\r$//' docker_c_client_startup.sh
     ./docker_c_client_startup.sh &
 EOF
- 
