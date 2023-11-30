@@ -14,7 +14,7 @@
 #define ERROR_FAILED_TO_SEND_RESPONSE 5
 
 #define PAIR_SIZE 4
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE (1<<16)
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     }
 
     char buffer[BUFFER_SIZE];
+    memset(buffer, '\0', BUFFER_SIZE-1);
     char client_ip_str[INET_ADDRSTRLEN];
     while(true) {
         int data_length = recvfrom(
@@ -61,9 +62,10 @@ int main(int argc, char *argv[]) {
             ntohs(client_address.sin_port),
             data_length
         );
-
-        char response[] = "ok";
-        if (sendto(sockfd, response, sizeof(response), 0, 
+        char response[5];
+        sprintf(response, "ok");
+        printf("Sending response (network encoded): %s\n", response);
+        if (sendto(sockfd, response, sizeof(response), 0,
             (struct sockaddr*) &client_address, 
             sizeof(client_address)) == -1
         ) {

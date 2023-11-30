@@ -7,37 +7,33 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <assert.h>
-
+#include <signal.h>
 
 #define SERVER_IP "127.0.0.1" // Server IP address
 #define SERVER_PORT 8888 // Server port
 
-#define BUF_SIZE 512 // Buffer size for data
-#define MAX_PAYLOAD_SIZE 508 // (512 - 4)
-#define KEY_SIZE 2
-#define VALUE_SIZE 2
-
 typedef struct {
-    uint16_t id;
-    uint16_t size;
-    char payload[MAX_PAYLOAD_SIZE];
+    char* payload;
 } message_t;
 
-typedef struct {
-    uint16_t id;
-    uint8_t status; // if different from 0 then err
-} response_t;
+int packet_size;
 
-void fillMessage(message_t *msg, uint16_t id, uint16_t size, char *payload) {
-    msg->id = htons(id);
-    msg->size = htons(size);
-    int payloadLength = strlen(payload);
+void fillMessage(message_t *msg, int packet_size) {
+    if(msg->payload != NULL)
+        free(msg->payload);
 
-    assert(payloadLength < MAX_PAYLOAD_SIZE);
+    msg->payload = (char*)malloc(packet_size * sizeof(char));
+    memset(msg->payload, '\0', BUF_SIZE);
+    for(int i = 0; i < packet_size; i++) {
+        msg->payload[i] = 'A';
+    }
+}
 
-    memset(msg->payload, '\0', MAX_PAYLOAD_SIZE);
-    strncpy(msg->payload, payload, payloadLength);
+void handle_idle(int sig) {
+    if (sig == SIGALRM) {
+        printf("Timeout expired. Maximum packet size is %d bytes.\n", packet_size);
+        exit(0);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -45,6 +41,8 @@ int main(int argc, char *argv[]) {
         perror("Arguments error");
         exit(1);
     }
+    signal(SIGALRM, handle_idle);
+    alarm(1);
 
     int sockfd;
     struct sockaddr_in serverAddr;
@@ -63,20 +61,19 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     message_t a;
-    fillMessage(&a, 1, 2, "A 1 B 2"); // A: 1, B: 2
+    a.payload = NULL;
+    for(packet_size = 200; packet_size < (1<<16); packet_size++) {
+        fillMessage(&a, packet_size);
 
-    sendto(sockfd, &a, sizeof(a), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-    printf("Data sent to server\n");
+        sendto(sockfd, &a, packet_size, 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+        printf("Sent packet of %d bytes to server. Waiting for a response...\n", packet_size);
 
-    addr_size = sizeof(serverAddr);
-    response_t response;
-    recvfrom(sockfd, &response, 3, 0, (struct sockaddr *) &serverAddr, &addr_size);
-
-    printf("resp: id(%d) status(%d)\n", htons(response.id), htons(response.status));
-    if(response.status == 0)
-        sendto(sockfd, &response, sizeof(response), 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-
-//    printf("Received from server: %s\n", response);
+        char response[5];
+        int data_received = recvfrom(sockfd, &response, 5, 0, NULL, 0);
+        if (data_received <= 0) {
+            perror("Recvfrom failed:");
+        }
+    }
 
     // Close the socket
     close(sockfd);

@@ -10,3 +10,5 @@ c/Z1/Z1.3a/build/*
 !c/Z1/Z1.3a/build/.gitkeep
 
 .vscode/
+
+**/.idea
