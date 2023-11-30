@@ -14,7 +14,7 @@
 #define ERROR_FAILED_TO_SEND_RESPONSE 5
 
 #define PAIR_SIZE 4
-#define BUFFER_SIZE (1<<16)
+#define BUFFER_SIZE 2048
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
