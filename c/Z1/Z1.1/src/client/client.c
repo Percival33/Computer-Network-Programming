@@ -90,13 +90,13 @@ int main(int argc, char *argv[]) {
         &serverAddr
     };
     send_message(&message);
+    printf(LOG_INFO"The first message was sent\n");
 
     // Send the second message
-    printf(LOG_INFO"Sending second message\n");
     message.message_buffer = (void*) &maxData;
     message.message_buffer_length = sizeof(maxData);
     send_message(&message);
-    printf(LOG_INFO"Second message was sent\n");
+    printf(LOG_INFO"The second message was sent\n");
 
     // Close the socket
     close(sockfd);
