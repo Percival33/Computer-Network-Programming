@@ -23,7 +23,7 @@ void fillMessage(message_t *msg, int packet_size) {
         free(msg->payload);
 
     msg->payload = (char*)malloc(packet_size * sizeof(char));
-    memset(msg->payload, '\0', BUF_SIZE);
+    memset(msg->payload, '\0', packet_size);
     for(int i = 0; i < packet_size; i++) {
         msg->payload[i] = 'A';
     }
@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
 
     int sockfd;
     struct sockaddr_in serverAddr;
-    char buffer[BUF_SIZE];
     socklen_t addr_size;
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
