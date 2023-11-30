@@ -14,6 +14,8 @@ fi
 
 docker build --tag $CONTAINER_NAME:v1 .
 
-docker create -p 8888:8888/udp -p 8889:8889/udp -it --name $CONTAINER_NAME --network z41_network --cap-add NET_ADMIN $CONTAINER_NAME:v1
-
-docker start -ai $CONTAINER_NAME
+docker run -d \
+    --name $CONTAINER_NAME \
+    --network z41_network \
+    --cap-add NET_ADMIN \
+    $CONTAINER_NAME:v1
