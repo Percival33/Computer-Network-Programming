@@ -4,6 +4,6 @@
 echo $SERVER_IP > test.txt
 
 while true; do
-    ./client.py $SERVER_IP 8888
+    python3 ./client.py $SERVER_IP 8888
     sleep 3
 done
