@@ -8,11 +8,6 @@ key_value_pair_t = struct.Struct('!2s2s')
 message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 
 
-def parse_key_value_from_data(data, index, size):
-    beggin = index * size
-    end = beggin + size
-    return key_value_pair_t.unpack(data[beggin:end])
-
 def send_to_client(server_socket, address):
     id = 1
     status_code = 0
@@ -64,14 +59,6 @@ def run_server(server_ip, server_port):
                     key, value = key_value_pair_t.unpack(pairs[i * 4:(i + 1) * 4])
                     print(f'Key: {key.decode()}, Value: {value.decode()}')
 
-                # for i in range(count):
-                #     key, value = parse_key_value_from_data(pairs, i, 8)
-                #     print(f'Key: {key.decode()}, Value: {value.decode()}')
-                #     message_to_print = f'Key: {key.decode("utf-8")}, Value: {value.decode("utf-8")}'
-                #     print(f'Client ip address   : {address}')
-                #     print(f'Message received    : {message_to_print}')
-
-
                 send_to_client(server_socket, address)
 
             except struct.error as e:
@@ -86,7 +73,7 @@ def run_server(server_ip, server_port):
 
 def main():
     arguments = parse_arguments(get_parser())
-    run_server('localhost', arguments.port)
+    run_server('0.0.0.0', arguments.port)
     return 0
 
 

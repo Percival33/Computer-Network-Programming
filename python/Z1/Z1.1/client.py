@@ -13,7 +13,6 @@ key_value_pair_t = struct.Struct('!2s2s')
 message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 
 
-
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("ip", type=str)
