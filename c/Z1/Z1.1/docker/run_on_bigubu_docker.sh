@@ -9,8 +9,8 @@
 
 set -e
 
-DEFAULT_CONTAINER_NAME="z41_z_1_2_c_server"
-DEFAULT_SCP_DEST_DIR="~/PSI/lab_1/Z1.2"
+DEFAULT_CONTAINER_NAME="z41_z_1_1_c_server"
+DEFAULT_SCP_DEST_DIR="~/PSI/lab_1/Z1.1"
 
 CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
 SCP_DEST_DIR=${2:-$DEFAULT_SCP_DEST_DIR}
@@ -18,7 +18,7 @@ SCP_DEST_DIR=${2:-$DEFAULT_SCP_DEST_DIR}
 SERVER_ADDRESS="bigubu.ii.pw.edu.pl"
 EXERCISE_DIR="$PWD/../../../Z1"
 
-cd $EXERCISE_DIR/Z1.2/build
+cd $EXERCISE_DIR/Z1.1/build
 cmake ..
 make clean server client -j$(nproc)
 
@@ -38,16 +38,16 @@ ssh $SERVER_ADDRESS << EOF
     fi
 EOF
 
-scp $EXERCISE_DIR/Z1.2/build/output/server \
-    $EXERCISE_DIR/Z1.2/docker/server/Dockerfile \
-    $EXERCISE_DIR/Z1.2/docker/server/docker_c_server_startup.sh \
-    $EXERCISE_DIR/Z1.2/docker/server/server_container_config.sh \
+scp $EXERCISE_DIR/Z1.1/build/output/server \
+    $EXERCISE_DIR/Z1.1/docker/server/Dockerfile \
+    $EXERCISE_DIR/Z1.1/docker/server/docker_c_server_startup.sh \
+    $EXERCISE_DIR/Z1.1/docker/server/server_container_config.sh \
     $SERVER_ADDRESS:$SCP_DEST_DIR/server
 
-scp $EXERCISE_DIR/Z1.2/build/output/client \
-    $EXERCISE_DIR/Z1.2/docker/client/Dockerfile \
-    $EXERCISE_DIR/Z1.2/docker/client/client_container_config.sh \
-    $EXERCISE_DIR/Z1.2/docker/client/docker_c_client_startup.sh \
+scp $EXERCISE_DIR/Z1.1/build/output/client \
+    $EXERCISE_DIR/Z1.1/docker/client/Dockerfile \
+    $EXERCISE_DIR/Z1.1/docker/client/client_container_config.sh \
+    $EXERCISE_DIR/Z1.1/docker/client/docker_c_client_startup.sh \
     $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/client
 
 ssh $SERVER_ADDRESS << EOF

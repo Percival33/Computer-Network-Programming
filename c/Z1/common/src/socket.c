@@ -1,3 +1,7 @@
+//
+// Created by Michał Sobiech on 30.11.2023
+//
+
 #include "socket.h"
 #include <arpa/inet.h>
 #include "string.h"

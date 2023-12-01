@@ -1,3 +1,8 @@
+//
+// Created by Michał Sobiech on 30.11.2023
+//
+
+
 #ifndef CLIENT_THREADS_DATA_H
 #define CLIENT_THREADS_DATA_H
 
@@ -30,9 +35,14 @@ typedef struct {
 // Returns the first free index in the thread list
 int first_free_index(client_thread_list_t *list);
 
-int add_client_thread_data_to_list(
+client_thread_data_t *add_client_thread_data_to_list(
     client_thread_list_t *list,
     client_thread_data_t client_thread_data
+);
+
+void remove_client_thread_data_from_list(
+    client_thread_list_t *list,
+    int index
 );
 
 // Returns the index of the thread characterized by given thread id
@@ -47,5 +57,7 @@ client_thread_data_t *get_client_thread_data(
     client_thread_list_t *thread_data_list,
     int index
 );
+
+int get_client_thread_count(client_thread_list_t *client_threads_data_list);
 
 #endif

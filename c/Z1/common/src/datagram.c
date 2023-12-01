@@ -1,5 +1,12 @@
+//
+// Created by Michał Sobiech on 30.11.2023
+//
+
+
 #include "datagram.h"
 #include "string.h"
+
+#include "common.h"
 
 
 bool text_is_only_zeroes(char *text, int text_length) {
@@ -48,6 +55,7 @@ bool datagram_is_valid(data_t *datagram) {
 
 
 void print_datagram_data(data_t *datagram) {
+    printf(LOG_INFO"Datagram received\n");
     printf("Number of pairs: %d\n", datagram->count);
     printf("Packet id: %d\n", datagram->id);
     printf("Pairs: \n");
