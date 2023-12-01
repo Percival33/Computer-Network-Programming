@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
+        printf(LOG_INFO"Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
 
         // Debug
         // printf("Thread count: %d\n", get_client_thread_count(&client_threads_data_list));
