@@ -9,11 +9,6 @@ message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 response_t = struct.Struct('!HB')
 
 
-def parse_key_value_from_data(data, index, size):
-    beggin = index * size
-    end = beggin + size
-    return key_value_pair_t.unpack(data[beggin:end])
-
 def send_to_client(server_socket, address):
     id = 1
     status_code = 0
@@ -42,9 +37,7 @@ def send_to_client_and_wait_for_response(server_socket, address):
 
             server_socket.sendto(message_t_packed, address)
 
-
             server_socket.settimeout(5.0)
-
 
             try:
                 response, client_address = server_socket.recvfrom(BUFFER_SIZE)
@@ -69,17 +62,15 @@ def run_server(server_ip, server_port):
         while True:
             try:
                 message, address = server_socket.recvfrom(BUFFER_SIZE)
-                print(message)
+                print(f'INFO: Received message: message')
 
                 message_unpacked = message_t.unpack(message[:message_t.size])
                 id, count = message_unpacked[:2]
                 pairs = message_unpacked[2:][0]
 
-                print(pairs)
                 for i in range(count):
                     key, value = key_value_pair_t.unpack(pairs[i * 4:(i + 1) * 4])
                     print(f'Key: {key.decode()}, Value: {value.decode()}')
-
 
                 new_message = send_to_client_and_wait_for_response(server_socket, address)
                 if new_message:
@@ -98,7 +89,7 @@ def run_server(server_ip, server_port):
 
 def main():
     arguments = parse_arguments(get_parser())
-    run_server('localhost', arguments.port)
+    run_server('0.0.0.0', arguments.port)
     return 0
 
 

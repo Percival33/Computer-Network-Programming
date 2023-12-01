@@ -11,14 +11,17 @@ key_value_pair_t = struct.Struct('!2s2s')
 message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 response_t = struct.Struct('!HB')
 
+
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("ip", type=str)
     parser.add_argument("port", type=int)
     return parser
 
+
 def parse_arguments(parser):
     return parser.parse_args()
+
 
 def main():
     try:
@@ -42,9 +45,7 @@ def main():
 
         while True:
             try:
-
                 sockfd.sendto(message_t_packed, (arguments.ip,arguments.port))
-
 
                 response, server = sockfd.recvfrom(8088)
                 print(f"INFO: Response received from server: {response}")
@@ -57,9 +58,7 @@ def main():
             except socket.timeout:
                 print("INFO: No response from the server, sending again....")
 
-
         print(f"INFO: Data sent to server: {message_t_packed}")
-
 
     except struct.error as e:
         print(f"ERROR: An error occurred with the struct: {e}")
@@ -67,6 +66,7 @@ def main():
         print(f"ERROR: An error occurred with the socket: {e}")
     finally:
         sockfd.close()
+
 
 if __name__ == "__main__":
     main()
