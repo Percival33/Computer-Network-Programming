@@ -19,8 +19,8 @@ bool response_is_valid(response_t *response, int expected_id) {
 
 
 void print_response_data(response_t *response) {
-    printf("Response's packet id: %d\n", response->id);
-    printf("Response status: %d\n", response->status);
+    printf(LOG_INFO"resp: id(%d) status(%d)\n", response->id, response->status);
+    printf("\n");
 }
 
 

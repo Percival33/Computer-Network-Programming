@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
             exit(ERROR_FAILED_DATA_RECEIVAL);
         }
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf("Data received from %s:%d. Size: %d\n",
+        printf(LOG_INFO"Data received from %s:%d. Size: %d\n",
             client_ip_str,
             ntohs(client_address.sin_port),
             data_length
