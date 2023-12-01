@@ -30,21 +30,33 @@ def get_parser():
 def parse_arguments(parser):
     return parser.parse_args()
 
+
 def send_to_client_and_wait_for_response(server_socket, address):
     id = 1
     status_code = 0
     message_t_packed = struct.pack('!HB', id, status_code)
-    server_socket.sendto(message_t_packed, address)
 
-    # Oczekiwanie na odpowiedź od klienta
-    try:
-        response, client_address = server_socket.recvfrom(BUFFER_SIZE)
-        response_id, response_status = response_t.unpack(response)
-        print(f"Received response from client: Id: {response_id}, Status: {response_status}")
-    except struct.error as e:
-        print(f"Error while unpacking client response: {e}")
-    except socket.error as e:
-        print(f"Error while receiving from client: {e}")
+    while True:
+        try:
+            print("INFO: Sending a reply to the client")
+
+            server_socket.sendto(message_t_packed, address)
+
+
+            server_socket.settimeout(5.0)
+
+
+            try:
+                response, client_address = server_socket.recvfrom(BUFFER_SIZE)
+                if client_address == address:
+                    print("INFO: Received new message from the client.")
+                    return response
+            except socket.timeout:
+                print("INFO: No new message received, sending response again...")
+
+        except socket.error as e:
+            print(f"Error while sending to/receiving from client: {e}")
+            break
 
 
 def run_server(server_ip, server_port):
@@ -52,7 +64,7 @@ def run_server(server_ip, server_port):
 
     try:
         server_socket.bind((server_ip, server_port))
-        print(f'Server listening on ip: {server_ip} port: {server_port}')
+        print(f'INFO: Server listening on ip: {server_ip} port: {server_port}')
 
         while True:
             try:
@@ -68,14 +80,17 @@ def run_server(server_ip, server_port):
                     key, value = key_value_pair_t.unpack(pairs[i * 4:(i + 1) * 4])
                     print(f'Key: {key.decode()}, Value: {value.decode()}')
 
-                # Wysyłanie odpowiedzi do klienta i oczekiwanie na jego potwierdzenie
-                send_to_client_and_wait_for_response(server_socket, address)
+
+                new_message = send_to_client_and_wait_for_response(server_socket, address)
+                if new_message:
+                    print(new_message)
+                    break
 
             except socket.error as e:
-                print(f"Socket error: {e}")
+                print(f"ERROR: Socket error: {e}")
 
     except socket.error as e:
-        print(f"Socket binding error: {e}")
+        print(f"ERROR: Socket binding error: {e}")
 
     finally:
         server_socket.close()
