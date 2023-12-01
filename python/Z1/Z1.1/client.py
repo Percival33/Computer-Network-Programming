@@ -25,8 +25,6 @@ def parse_arguments(parser):
 
 
 def main():
-
-
     try:
         sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -47,7 +45,6 @@ def main():
         pairs_packed = b''.join(few_pairs_packed)
 
         message_t_packed = message_t.pack(id, count, pairs_packed)
-
 
         arguments = parse_arguments(get_parser())
 
