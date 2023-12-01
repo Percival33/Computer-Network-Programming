@@ -8,8 +8,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <signal.h>
+#include <netdb.h>
 
-#define SERVER_IP "127.0.0.1" // Server IP address
+#define SERVER_IP "z1_server" // Server IP address
 #define SERVER_PORT 8888 // Server port
 
 typedef struct {
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     signal(SIGALRM, handle_idle);
-    alarm(1);
+    alarm(5);
 
     int sockfd;
     struct sockaddr_in serverAddr;
@@ -54,10 +55,20 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    struct hostent *he;
+    struct in_addr **addr_list;
+
+    if ((he = gethostbyname(SERVER_IP)) == NULL) {
+        perror("gethostbyname");
+        return 2;
+    }
+
+    addr_list = (struct in_addr **)he->h_addr_list;
+
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
-    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    serverAddr.sin_addr = *addr_list[0];
 
     message_t a;
     a.payload = NULL;

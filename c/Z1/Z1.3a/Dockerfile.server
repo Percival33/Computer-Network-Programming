@@ -1,0 +1,7 @@
+FROM ubuntu:22.04
+COPY ./server.c ./server.c
+COPY Makefile.docker Makefile
+RUN apt-get update
+RUN apt-get install -y netcat make gcc
+RUN make server
+CMD ["sleep", "infinity"]
