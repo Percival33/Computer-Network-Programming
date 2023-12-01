@@ -1,3 +1,8 @@
+//
+// Created by Michał Sobiech on 30.11.2023
+//
+
+
 #include "client_threads_data.h"
 
 int first_free_index(client_thread_list_t *list) {

@@ -1,3 +1,8 @@
+//
+// Created by Michał Sobiech on 30.11.2023
+//
+
+
 #ifndef CLIENT_THREADS_DATA_H
 #define CLIENT_THREADS_DATA_H
 
