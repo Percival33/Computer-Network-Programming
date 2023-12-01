@@ -53,7 +53,10 @@ int main(int argc, char *argv[]) {
         // Parse the client's address
         char client_ip_str[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf(LOG_INFO"Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
+        printf("Data received from %s:%d\n", client_ip_str, ntohs(client_address.sin_port));
+
+        // Debug
+        // printf("Thread count: %d\n", get_client_thread_count(&client_threads_data_list));
 
         // 2. Decide which thread should the package be forwarded to
 
@@ -63,6 +66,19 @@ int main(int argc, char *argv[]) {
 
             // Perform an ntoh function on datagram's numeric fields
             ntoh_on_datagram(datagram);
+
+            // The datagram might be aduplicated one. Check if a thread for it exits:
+            transmission_id_t client_thread_id = {
+                client_address,
+                datagram->id
+            };
+            int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
+            if (index != -1) {
+                printf("DUPLICATE!\n");
+                continue;
+            }
+
+            // The datagram is not duplicated. Proceed.
 
             if (datagram_is_valid(datagram)) {
                 print_datagram_data(datagram);
@@ -97,13 +113,21 @@ int main(int argc, char *argv[]) {
             // Perform an ntoh function on response's numeric fields
             ntoh_on_response(response);
 
-            // The thread for this transmission exists.
-            // Find it and inform it, that the transmission has ended
+            // The response might be duplicated. Check if it has a transmission.
             transmission_id_t client_thread_id = {
                 client_address,
                 response->id
             };
             int index = get_client_thread_data_index(&client_threads_data_list, &client_thread_id);
+            if (index == -1) {
+                printf("DUPLICATE!\n");
+                continue;
+            }
+
+            // Response belongs to a thread. Proceed.
+            
+            // The thread for this transmission exists.
+            // Find it and inform it, that the transmission has ended
             client_thread_data_t *thread_data = get_client_thread_data(&client_threads_data_list, index);
             
             thread_data->confirmation_received = true;

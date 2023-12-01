@@ -43,6 +43,7 @@ void *resender(void *args) {
     resender_args_t *args_parsed = (resender_args_t*) args;
     while (true) {
         send_message(args_parsed->send_message_args);
+        printf("Resent!\n");
         sleep(RESPONSE_WAIT_TIME_S);
         args_parsed = (resender_args_t*) args;
         if (args_parsed->message_received) {
