@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Created by Marcin Jarczewski on 30/11/2023.
 set -e
 
 CONTAINER_NAMES=("z1_server" "z1_client")

@@ -1,3 +1,4 @@
+# Created by Marcin Jarczewski on 29/11/2023.
 FROM ubuntu:22.04
 COPY ./client.c ./client.c
 COPY Makefile.docker Makefile

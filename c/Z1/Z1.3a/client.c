@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
     message_t a;
     a.payload = NULL;
-    for(packet_size = 200; packet_size < (1<<16); packet_size++) {
+    for(packet_size = 2000; packet_size < (1<<16); packet_size++) {
         fillMessage(&a, packet_size);
 
         sendto(sockfd, &a, packet_size, 0, (struct sockaddr *) &serverAddr, sizeof(serverAddr));

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Created by Marcin Jarczewski on 30/11/2023.
 
 # Find the container ID of the z1_server container
 CONTAINER_ID=$(docker ps -qf "name=z1_client")

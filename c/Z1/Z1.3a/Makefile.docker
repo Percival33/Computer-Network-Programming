@@ -1,5 +1,5 @@
 all: client server
-
+# Created by Marcin Jarczewski on 29/11/2023.
 client: client.c
 	gcc -o client client.c -g -lpthread -std=c11
 
