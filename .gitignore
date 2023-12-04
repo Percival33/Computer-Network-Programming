@@ -12,3 +12,10 @@ c/Z1/Z1.3a/build/*
 .vscode/
 
 **/.idea
+
+# Cmake
+**/CMakeFiles
+**/output
+**/cmake_install.cmake
+**/CMakeCache.txt
+**/*.dSYM
