@@ -83,8 +83,10 @@ int main(int argc, char *argv[]) {
 
     char test_text[] = "AAAAA";
 
-    if (write(sockfd, test_text, sizeof(test_text)) == -1)
+    if (write(sockfd, test_text, sizeof(test_text)) == -1) {
+        LOG_ERROR("writing on stream socket");
         perror("writing on stream socket");
+    }
 
 //     Prepare the data
 //    Node* root = prepare_data(root);

@@ -24,9 +24,9 @@
 #define WHITE_TEXT "\033[1;37m"
 #define RESET_COLOR "\033[0m"
 
-#define LOG_ERROR(message) printf(RED_TEXT "ERROR: %s" RESET_COLOR "\n", message)
-#define LOG_INFO(message) printf(BLUE_TEXT "INFO: %s" RESET_COLOR "\n", message)
-#define LOG_DEBUG(message) printf(WHITE_TEXT "DEBUG: %s" RESET_COLOR "\n", message)
+#define LOG_ERROR(message) printf(RED_TEXT "ERROR:\t" RESET_COLOR "%s\n", message)
+#define LOG_INFO(message) printf(BLUE_TEXT "INFO:\t" RESET_COLOR "%s\n", message)
+#define LOG_DEBUG(message) printf(WHITE_TEXT "DEBUG:\t" RESET_COLOR "%s\n", message)
 
 
 #endif //COMPUTER_NETWORK_PROGRAMMING_COMMON_H
