@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <stdint.h>
+#include <inttypes.h>
+
 #include "common.h"
 typedef struct Node Node;
 
@@ -19,16 +22,40 @@ struct Node {
     char* text; // max size MAX_TEXT_SIZE;
 };
 
-void add_node(Node* root, uint16_t a, uint32_t b, char* text) {
-    while(root->next != NULL) root = root->next;
+Node* create_node() {
     Node* new_node = (Node*)malloc(sizeof(Node));
+    assert(new_node != NULL);
 
-    new_node->a = a;
-    new_node->b = b;
-    new_node->text = text;
-    assert(strlen(text) < MAX_TEXT_SIZE);
+    new_node->next = NULL;
+    new_node->a = 0;
+    new_node->b = 0;
+//    new_node->text = NULL;
+    new_node->text = (char*)malloc(5 * sizeof(char));
+    strncpy(new_node->text, "abc\0", 4);
+    return new_node;
+}
 
-    strncpy(new_node->text, text, strlen(text));
+void print_nodes(Node* node) {
+    while(node != NULL) {
+        printf("%d %d %s\n", node->a, node->b, node->text);
+        node = node->next;
+    }
+}
+
+void assign_text(Node* node, char* new_text, int len) {
+    if(node->text != NULL) {
+        free(node->text);
+    }
+
+    node->text = (char*)malloc(len * sizeof(char));
+    strncpy(node->text, new_text, len);
+}
+
+void add_node(Node* root, Node *new_node) {
+    assert(root != NULL);
+
+    while(root->next != NULL) root = root->next;
+    root->next = new_node;
 }
 
 int length(Node* root) {
@@ -41,17 +68,110 @@ int length(Node* root) {
 }
 
 Node* prepare_data(Node* root) {
+    assert(root != NULL);
     char* text = (char*)malloc(10 * sizeof(char));
     strncpy(text, "testVal", 7);
-    add_node(root, 1, 1, text);
+//    add_node(root, 1, 1, text);
     LOG_INFO("added new node");
+    return root;
+}
+
+void packu16(uint8_t* buf, uint16_t i) {
+    printf("before: %d\t", i);
+    i = htons(i);
+    printf("after: %d\n", i);
+    *buf++ = i >> 8; *buf++ = i;
+}
+
+void packu32(uint8_t* buf, uint32_t i) {
+    i = htonl(i);
+    *buf++ = i>>24; *buf++ = i>>16;
+    *buf++ = i>>8;  *buf++ = i;
+}
+
+uint16_t pack(uint8_t* buf, Node* node) {
+    packu16(buf, length(node));
+    buf += 2;
+    uint16_t size = 2;
+    // need to move pointer manually as pack* moves its copy
+    for(; node != NULL; node = node->next) {
+        size += 2 + 4 + 2 + strlen(node->text);
+        packu16(buf, node->a);
+        buf += 2;
+
+        packu32(buf, node->b);
+        buf += 4;
+
+        uint16_t len = strlen(node->text);
+        packu16(buf, len);
+        buf += 2;
+
+        for(uint16_t j = 0; j < len; j++) {
+            *buf++ = node->text[j];
+        }
+    }
+    char log_msg[MAX_TEXT_SIZE];
+    sprintf(log_msg, "Packed size: %d", size);
+    LOG_INFO(log_msg);
+    return size;
+}
+
+uint16_t unpacku16(uint8_t* buf) {
+    uint16_t i = ((uint16_t)buf[0]<<8) | buf[1];
+    printf("unpack: %d\tntohs: %d\n",i, ntohs(i));
+    return ntohs(i);
+}
+
+uint32_t unpacku32(uint8_t* buf) {
+    return  ntohl(((uint32_t)buf[0]<<24)  |
+            ((uint32_t)buf[1]<<16)  |
+            ((uint32_t)buf[2]<<8)   |
+            buf[3]);
+}
+
+Node* unpack(uint8_t* buf) {
+    Node *root = NULL, *curr_node = NULL, *prev_node = NULL;
+    uint16_t str_len;
+
+    uint16_t size = unpacku16(buf);
+
+    buf += 2;
+
+    char log_msg[MAX_TEXT_SIZE];
+    sprintf(log_msg, "No of nodes to deserialize: %d", size);
+    LOG_INFO(log_msg);
+
+    for(uint16_t i = 0; i < size; i++) {
+        curr_node = create_node();
+        if(prev_node == NULL) {
+            root = curr_node;
+            prev_node = curr_node;
+        } else {
+            prev_node->next = curr_node;
+        }
+
+        curr_node->a = unpacku16(buf);
+        buf += 2;
+
+        curr_node->b = unpacku32(buf);
+        buf += 4;
+
+        str_len = unpacku16(buf);
+        buf += 2;
+
+        char* str = (char*)malloc(str_len * sizeof(char));
+        for(uint16_t j = 0; j < str_len; j++) {
+            str[j] = (unsigned char)*buf++;
+        }
+        str[str_len] = '\0';
+        assign_text(curr_node, str, str_len);
+    }
+
     return root;
 }
 
 int main(int argc, char *argv[]) {
     /* TODO:
-     * convert to tcp
-     * send whole list
      * create a server
      * */
     if (argc != 3) {
@@ -76,33 +196,26 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
+    Node* B = create_node();
+    B->a = 3;
+    B->b = 4;
+    strncpy(B->text, "def\0", 4);
+    print_nodes(B);
+    uint8_t buf[1024];
+    uint16_t size = pack(buf, B);
+
     if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
         LOG_ERROR("connect() failed");
         perror("connect failed");
     }
 
-    char test_text[] = "AAAAA";
-
-    if (write(sockfd, test_text, sizeof(test_text)) == -1) {
+    if (write(sockfd, buf, size) == -1) {
         LOG_ERROR("writing on stream socket");
         perror("writing on stream socket");
     }
 
-//     Prepare the data
-//    Node* root = prepare_data(root);
-
-//    // Prepare message
-//
-//
-//    // Send message
-//    message_args_t message = {
-//            sockfd,
-//            (void*) &data,
-//            sizeof(data),
-//            &serverAddr
-//    };
-//    send_message(&message);
-//    LOG_INFO("Message was sent\n");
+    Node* C = unpack(buf);
+    print_nodes(C);
 
     // Close the socket
     close(sockfd);

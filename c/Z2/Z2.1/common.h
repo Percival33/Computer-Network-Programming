@@ -17,7 +17,7 @@
 #define ERROR_INVALID_DATAGRAM 8
 
 // Constants
-#define MAX_TEXT_SIZE 12
+#define MAX_TEXT_SIZE 255
 
 #define RED_TEXT "\033[1;31m"
 #define BLUE_TEXT "\033[1;34m"
