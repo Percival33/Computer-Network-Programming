@@ -16,6 +16,9 @@
 #define ERROR_UNKNOWN_PACKET_TYPE 7
 #define ERROR_INVALID_DATAGRAM 8
 
+// Constants
+#define MAX_TEXT_SIZE 12
+
 #define RED_TEXT "\033[1;31m"
 #define BLUE_TEXT "\033[1;34m"
 #define WHITE_TEXT "\033[1;37m"

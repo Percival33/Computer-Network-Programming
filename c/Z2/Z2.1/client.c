@@ -6,14 +6,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include "common.h"
+typedef struct Node Node;
 
-typedef struct {
-    Node* next;
+struct Node {
+    struct Node* next;
     uint16_t a;
     uint32_t b;
-    char* text; // max size = 10;
-} Node;
+    char* text; // max size MAX_TEXT_SIZE;
+};
 
 void add_node(Node* root, uint16_t a, uint32_t b, char* text) {
     while(root->next != NULL) root = root->next;
@@ -22,7 +26,7 @@ void add_node(Node* root, uint16_t a, uint32_t b, char* text) {
     new_node->a = a;
     new_node->b = b;
     new_node->text = text;
-    assert(strlen(text) < 10);
+    assert(strlen(text) < MAX_TEXT_SIZE);
 
     strncpy(new_node->text, text, strlen(text));
 }
@@ -59,7 +63,7 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]);
 
     // Socket
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
@@ -72,25 +76,34 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
-    // Prepare the data
-    Node* root = prepare_data(root);
+    if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
+        LOG_ERROR("connect() failed");
+        perror("connect failed");
+    }
 
-    // Prepare message
+    char test_text[] = "AAAAA";
 
+    if (write(sockfd, test_text, sizeof(test_text)) == -1)
+        perror("writing on stream socket");
 
-    // Send message
-    message_args_t message = {
-            sockfd,
-            (void*) &data,
-            sizeof(data),
-            &serverAddr
-    };
-    send_message(&message);
-    LOG_INFO("Message was sent\n");
+//     Prepare the data
+//    Node* root = prepare_data(root);
+
+//    // Prepare message
+//
+//
+//    // Send message
+//    message_args_t message = {
+//            sockfd,
+//            (void*) &data,
+//            sizeof(data),
+//            &serverAddr
+//    };
+//    send_message(&message);
+//    LOG_INFO("Message was sent\n");
 
     // Close the socket
     close(sockfd);
-    return 0;
 
     return 0;
 }
