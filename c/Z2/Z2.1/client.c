@@ -77,14 +77,12 @@ Node* prepare_data(Node* root) {
 }
 
 void packu16(uint8_t* buf, uint16_t i) {
-    printf("before: %d\t", i);
-    i = htons(i);
-    printf("after: %d\n", i);
+//    i = htons(i);
     *buf++ = i >> 8; *buf++ = i;
 }
 
 void packu32(uint8_t* buf, uint32_t i) {
-    i = htonl(i);
+//    i = htonl(i);
     *buf++ = i>>24; *buf++ = i>>16;
     *buf++ = i>>8;  *buf++ = i;
 }
@@ -119,14 +117,14 @@ uint16_t pack(uint8_t* buf, Node* node) {
 uint16_t unpacku16(uint8_t* buf) {
     uint16_t i = ((uint16_t)buf[0]<<8) | buf[1];
     printf("unpack: %d\tntohs: %d\n",i, ntohs(i));
-    return ntohs(i);
+    return i;
 }
 
 uint32_t unpacku32(uint8_t* buf) {
-    return  ntohl(((uint32_t)buf[0]<<24)  |
+    return  ((uint32_t)buf[0]<<24)  |
             ((uint32_t)buf[1]<<16)  |
             ((uint32_t)buf[2]<<8)   |
-            buf[3]);
+            buf[3];
 }
 
 Node* unpack(uint8_t* buf) {
@@ -203,6 +201,10 @@ int main(int argc, char *argv[]) {
     print_nodes(B);
     uint8_t buf[1024];
     uint16_t size = pack(buf, B);
+
+    for(int i = 0; i < size; i++) {
+        printf("i: %d, bajt: %d\n", i, buf[i]);
+    }
 
     if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
         LOG_ERROR("connect() failed");
