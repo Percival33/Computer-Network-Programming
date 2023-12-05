@@ -10,21 +10,18 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
 #set(SERVER_TARGET server)
 set(CLIENT_TARGET client)
 
-set(C_Z2_FOLDER_DIR ./)
+set(C_Z2_FOLDER_DIR ../)
 
-#include_directories(
-#    ${C_Z1_FOLDER_DIR}/common/include
-#)
+include_directories(
+    ${C_Z2_FOLDER_DIR}/common/include
+)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 
-#set(COMMON_SOURCES
-#    ${C_Z1_FOLDER_DIR}/common/src/datagram.c
-#    ${C_Z1_FOLDER_DIR}/common/src/message_utils.c
-#    ${C_Z1_FOLDER_DIR}/common/src/print_address.c
-#    ${C_Z1_FOLDER_DIR}/common/src/response.c
-#    ${C_Z1_FOLDER_DIR}/common/src/socket.c
-#)
+set(COMMON_SOURCES
+    ${C_Z2_FOLDER_DIR}/common/src/node.c
+    ${C_Z2_FOLDER_DIR}/common/src/serialize.c
+)
 
 #add_executable(${SERVER_TARGET}
 #    src/server/server.c
@@ -33,5 +30,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 
 add_executable(${CLIENT_TARGET}
     client.c
-#    ${COMMON_SOURCES}
+    ${COMMON_SOURCES}
 )
