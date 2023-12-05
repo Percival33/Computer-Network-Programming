@@ -2,8 +2,8 @@
 
 set -e
 
-CLIENT_CONTAINER_NAME='z41_z_11_python_client'
-SERVER_CONTAINER_NAME='z41_z_11_python_server'
+CLIENT_CONTAINER_NAME='z41_z_1_1_python_client'
+SERVER_CONTAINER_NAME='z41_z_1_1_python_server'
 
 # Stop if running
 if [[ "$(docker ps | grep $CLIENT_CONTAINER_NAME)" ]]; then

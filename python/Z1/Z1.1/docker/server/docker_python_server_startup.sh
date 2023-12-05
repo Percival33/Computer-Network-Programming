@@ -2,7 +2,7 @@
 
 set -e
 
-CONTAINER_NAME='z41_z_11_python_server'
+CONTAINER_NAME='z41_z_1_1_python_server'
 
 if [[ "$(docker ps | grep $CONTAINER_NAME)" ]]; then
     docker stop $CONTAINER_NAME
