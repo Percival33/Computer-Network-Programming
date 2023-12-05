@@ -58,6 +58,25 @@ void add_node(Node* root, Node *new_node) {
     root->next = new_node;
 }
 
+void delete_node(Node* node) {
+    if(node == NULL)
+        return;
+
+    if(node->text != NULL)
+        free(node->text);
+
+    free(node);
+}
+
+void delete_list(Node* last) {
+    Node* prev;
+    while(last->next != NULL) {
+        prev = last;
+        last = last->next;
+        delete_node(prev);
+    }
+}
+
 int length(Node* root) {
     int ret = 0;
     while (root != NULL) {
@@ -219,6 +238,8 @@ int main(int argc, char *argv[]) {
     Node* C = unpack(buf);
     print_nodes(C);
 
+    delete_node(B);
+    delete_node(C);
     // Close the socket
     close(sockfd);
 
