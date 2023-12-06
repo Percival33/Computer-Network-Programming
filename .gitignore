@@ -12,8 +12,8 @@ c/Z1/Z1.3a/build/*
 c/Z2/Z2.1/build/*
 !c/Z2/Z2.1/build/.gitkeep
 
-c/Z2/Z2.1/build/*
-!c/Z2/Z2.1/build/.gitkeep
+c/Z2/Z2.2/build/*
+!c/Z2/Z2.2/build/.gitkeep
 
 .vscode/
 
