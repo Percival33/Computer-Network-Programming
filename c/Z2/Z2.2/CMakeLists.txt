@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Z2.1_C)
+project(Z2.2_C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -21,6 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./output)
 set(COMMON_SOURCES
     ${C_Z2_FOLDER_DIR}/common/src/node.c
     ${C_Z2_FOLDER_DIR}/common/src/serialize.c
+    ${C_Z2_FOLDER_DIR}/common/src/check_ip_type.c
 )
 
 #add_executable(${SERVER_TARGET}
