@@ -40,32 +40,39 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     Node* B = create_node();
-    B->a = 3;
-    B->b = 4;
-    strncpy(B->text, "def\0", 4);
-    print_nodes(B);
-    uint8_t buf[1024];
-    uint16_t size = pack(buf, B, length(B));
+    set_values(B, 3, 4, "def\0", 4);
+    Node* C = create_node();
+    set_values(C, 5, 6, "test\0", 5);
+    add_node(B, C);
 
-    for(int i = 0; i < size; i++) {
-        printf("i: %d, bajt: %d\n", i, buf[i]);
+    print_nodes(B);
+
+    uint8_t buf[1024];
+    uint16_t size = pack(buf, B);
+    delete_list(B);
+
+//    for(int i = 0; i < size; i++) {
+//        printf("i: %d, bajt: %d\n", i, buf[i]);
+//    }
+
+    if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
+        LOG_ERROR("connect() failed");
+        perror("connect failed");
     }
 
-    // if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
-    //     LOG_ERROR("connect() failed");
-    //     perror("connect failed");
-    // }
+    if (write(sockfd, buf, size) == -1) {
+        LOG_ERROR("writing on stream socket");
+        perror("writing on stream socket");
+    }
 
-    // if (write(sockfd, buf, size) == -1) {
-    //     LOG_ERROR("writing on stream socket");
-    //     perror("writing on stream socket");
-    // }
+    if (read(sockfd, buf, 100) == -1) {
+        LOG_ERROR("reading on stream socket");
+        perror("reading on stream socket");
+    }
 
-    Node* C = unpack(buf);
-    print_nodes(C);
+    Node* X = unpack(buf);
+    print_nodes(X);
 
-    delete_node(B);
-    delete_node(C);
     // Close the socket
     close(sockfd);
 
