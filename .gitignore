@@ -25,3 +25,4 @@ c/Z2/Z2.2/build/*
 **/cmake_install.cmake
 **/CMakeCache.txt
 **/*.dSYM
+**/cmake-build-debug

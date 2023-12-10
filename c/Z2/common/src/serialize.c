@@ -12,12 +12,13 @@ void packu32(uint8_t* buf, uint32_t i) {
     *buf++ = i>>8;  *buf++ = i;
 }
 
-uint16_t pack(uint8_t* buf, Node* node, int length) {
-    packu16(buf, length);
+uint16_t pack(uint8_t* buf, Node* node) {
+    uint8_t* buf_start = buf;
+    uint16_t length = 0;
     buf += 2;
     uint16_t size = 2;
     // need to move pointer manually as pack* moves its copy
-    for(; node != NULL; node = node->next) {
+    for(; node != NULL; node = node->next, length++) {
         size += 2 + 4 + 2 + strlen(node->text);
         packu16(buf, node->a);
         buf += 2;
@@ -33,6 +34,7 @@ uint16_t pack(uint8_t* buf, Node* node, int length) {
             *buf++ = node->text[j];
         }
     }
+    packu16(buf_start, length);
     char log_msg[MAX_TEXT_SIZE];
     sprintf(log_msg, "Packed size: %d", size);
     LOG_INFO(log_msg);

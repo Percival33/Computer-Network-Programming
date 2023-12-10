@@ -23,7 +23,7 @@ void print_nodes(Node* node) {
     }
 }
 
-void assign_text(Node* node, char* new_text, int len) {
+void assign_text(Node* node, char* new_text, uint16_t len) {
     if(node->text != NULL) {
         free(node->text);
     }
@@ -31,6 +31,13 @@ void assign_text(Node* node, char* new_text, int len) {
     node->text = (char*)malloc(len * sizeof(char));
     strncpy(node->text, new_text, len);
 }
+
+void set_values(Node* node, uint16_t a, uint32_t b, char* text, uint16_t len) {
+    node->a = a;
+    node->b = b;
+    assign_text(node, text, len);
+}
+
 
 void add_node(Node* root, Node *new_node) {
     assert(root != NULL);
@@ -49,29 +56,20 @@ void delete_node(Node* node) {
     free(node);
 }
 
-void delete_list(Node* last) {
+void delete_list(Node* root) {
     Node* prev;
-    while(last->next != NULL) {
-        prev = last;
-        last = last->next;
+    while(root->next != NULL) {
+        prev = root;
+        root = root->next;
         delete_node(prev);
     }
 }
 
-int length(Node* root) {
+int list_length(Node* root) {
     int ret = 0;
     while (root != NULL) {
         root = root->next;
         ret++;
     }
     return ret;
-}
-
-Node* prepare_data(Node* root) {
-    assert(root != NULL);
-    char* text = (char*)malloc(10 * sizeof(char));
-    strncpy(text, "testVal", 7);
-//    add_node(root, 1, 1, text);
-    LOG_INFO("added new node");
-    return root;
 }
