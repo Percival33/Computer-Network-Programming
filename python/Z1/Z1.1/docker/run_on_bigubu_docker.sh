@@ -9,8 +9,8 @@
 
 set -e
 
-DEFAULT_CONTAINER_NAME="z41_z_1_2_python_server"
-DEFAULT_SCP_DEST_DIR="~/PSI/lab_1/Z1.2"
+DEFAULT_CONTAINER_NAME="z41_z_1_1_python_server"
+DEFAULT_SCP_DEST_DIR="~/PSI/lab_1/Z1.1"
 
 CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
 SCP_DEST_DIR=${2:-$DEFAULT_SCP_DEST_DIR}
@@ -34,16 +34,16 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
     fi
 EOF
 
-scp $EXERCISE_DIR/Z1.2/server.py \
-    $EXERCISE_DIR/Z1.2/docker/server/Dockerfile \
-    $EXERCISE_DIR/Z1.2/docker/server/docker_python_server_startup.sh \
-    $EXERCISE_DIR/Z1.2/docker/server/server_container_config.sh \
+scp $EXERCISE_DIR/Z1.1/server.py \
+    $EXERCISE_DIR/Z1.1/docker/server/Dockerfile \
+    $EXERCISE_DIR/Z1.1/docker/server/docker_python_server_startup.sh \
+    $EXERCISE_DIR/Z1.1/docker/server/server_container_config.sh \
     $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/server
 
-scp $EXERCISE_DIR/Z1.2/client.py \
-    $EXERCISE_DIR/Z1.2/docker/client/Dockerfile \
-    $EXERCISE_DIR/Z1.2/docker/client/client_container_config.sh \
-    $EXERCISE_DIR/Z1.2/docker/client/docker_python_client_startup.sh \
+scp $EXERCISE_DIR/Z1.1/client.py \
+    $EXERCISE_DIR/Z1.1/docker/client/Dockerfile \
+    $EXERCISE_DIR/Z1.1/docker/client/client_container_config.sh \
+    $EXERCISE_DIR/Z1.1/docker/client/docker_python_client_startup.sh \
     $USERNAME@$SERVER_ADDRESS:$SCP_DEST_DIR/client
 
 ssh $USERNAME@$SERVER_ADDRESS << EOF
@@ -61,3 +61,4 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
     sed -i -e 's/\r$//' docker_python_client_startup.sh
     ./docker_python_client_startup.sh
 EOF
+ 
