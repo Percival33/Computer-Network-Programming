@@ -48,7 +48,7 @@ def main():
 
         sockfd.sendto(message_t_packed, (arguments.ip, arguments.port))
         print("Data sent to server:")
-        print(f'Size: {size}, Key: "{key}", Value: "{value}"')
+        print(f'Id: {idx}, Count: "{count}", Pairs_packed: "{pairs_packed}"')
 
         response, server = sockfd.recvfrom(int(arguments.port))
         print(f"INFO: Response received from server: {response}")
