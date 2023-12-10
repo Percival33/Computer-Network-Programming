@@ -50,11 +50,9 @@ def main():
         print("Data sent to server:")
         print(f'Size: {size}, Key: "{key}", Value: "{value}"')
 
-        message, address = sockfd.recvfrom(BUF_SIZE)
-        id, status_code = struct.unpack('!HB', message)
-        message_to_print = f'Received from server  Id: {id}, status_code: {status_code}'
-        print(message_to_print)
-
+        response, server = sockfd.recvfrom(int(arguments.port))
+        print(f"INFO: Response received from server: {response}")
+        
     except struct.error as e:
         print(f"An error occurred with the struct: {e}")
 
