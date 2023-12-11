@@ -8,7 +8,7 @@
 #include "node.h"
 #include "serialize.h"
 
-#define PORT 65432
+#define PORT 8888
 #define BACKLOG 10  // Number of pending connections queue will hold
 #define BUFFER_SIZE 1024
 
@@ -70,7 +70,7 @@ void start_server(const char *host, int port) {
 }
 
 int main() {
-    start_server("127.0.0.1", PORT);
+    start_server("0.0.0.0", PORT);
     return 0;
 }
 
