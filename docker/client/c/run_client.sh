@@ -8,4 +8,5 @@
 while true; do
     ./client $SERVER_IP 8888
     sleep 5
+    echo ""
 done
