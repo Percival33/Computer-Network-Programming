@@ -18,7 +18,7 @@
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
 
-    if (argc != 3) {
+    if (argc != 4) {
         printf("Invalid argument count\n");
         exit(ERROR_INVALID_ARG);
     }
@@ -30,12 +30,19 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in serverAddr;
     char *ip = argv[1];
     int port = atoi(argv[2]);
+    int bufferSize = atoi(argv[3]);
 
     // Socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("Socket creation failed");
-        exit(EXIT_FAILURE);
+        exit(ERROR_FAILED_SOCKET_CREATION);
+    }
+
+    // Change the sender buffer size
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
+        perror("setsockopt SO_SNDBUF failed");
+        exit(ERROR_SO_SNDBUF_FAILED);
     }
 
     // Server address
