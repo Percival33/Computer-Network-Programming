@@ -5,8 +5,10 @@ set -e
 
 
 SERVER_CONTAINER_NAME=$1
+LANG=$2
 
 
+CURRENT_DIR=$(dirname $0)
 SERVER_CONTAINER_TAG="$SERVER_CONTAINER_NAME:v1"
 NETWORK_NAME='z41_network'
 
@@ -21,7 +23,9 @@ if [[ "$(docker ps -aqf name=$SERVER_CONTAINER_NAME)" ]]; then
 fi
 
 
-docker build --tag $SERVER_CONTAINER_TAG .
+docker build \
+    -f "$CURRENT_DIR/$LANG/Dockerfile" \
+    --tag $SERVER_CONTAINER_TAG .
 
 
 docker run -d \

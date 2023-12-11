@@ -3,8 +3,8 @@ FROM ubuntu:22.04
 WORKDIR /server
 
 COPY ./server .
-COPY ./server_container_config.sh .
-RUN chmod 777 ./server_container_config.sh
+COPY ./run_server.sh .
+RUN chmod +x ./run_server.sh
 
 # RUN apt-get update
 # RUN apt-get install -y netcat

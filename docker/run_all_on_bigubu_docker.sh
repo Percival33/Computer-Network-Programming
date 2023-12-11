@@ -11,31 +11,33 @@
 set -e
 
 
-EXERCISE_DIR=$1             # e.g. ../../../Z2/Z2.1
-CONTAINER_NAME_PREFIX=$2    # e.g. z41_z_2_1
-SCP_DEST_DIR=$3             # e.g. ~/PSI/lab/Z2/Z2.1
-SERVER_LANG=$4              # e.g. C
-CLIENT_LANG=$5              # e.g. Python
+GIT_REPO_DIR=$1             # absolute path to the repo dir
+REL_EXERCISE_DIR=$2         # something like Z2/Z2.1
+CONTAINER_NAME_PREFIX=$3    # e.g. z41_z_2_1
+SCP_DEST_DIR=$4             # e.g. ~/PSI/lab/Z2/Z2.1
+SERVER_LANG=$5              # e.g. c
+CLIENT_LANG=$6              # e.g. python
 
 
-SERVER_ADDRESS="bigubu.ii.pw.edu.pl"
-# EXERCISE_DIR might not be absolute
-ABS_EXERCISE_DIR=$(realpath $REL_EXERCISE_DIR)
 CURRENT_SCRIPT_DIR=$(dirname $0)
+DOCKER_SCRIPTS_DIR=$CURRENT_SCRIPT_DIR
 SERVER_CONTAINER_NAME="${CONTAINER_NAME_PREFIX}_server"
 CLIENT_CONTAINER_NAME="${CONTAINER_NAME_PREFIX}_client"
 
 
+SERVER_EXERCISE_DIR="$GIT_REPO_DIR/$SERVER_LANG/$REL_EXERCISE_DIR"
 case $SERVER_LANG in
-    "C" | "c")
-        $CURRENT_SCRIPT_DIR/server/c/run_c_server_on_bigubu_docker.sh \
-            "$EXERCISE_DIR" \
+    "c")
+        "$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh" \
+            "$DOCKER_SCRIPTS_DIR" \
+            "$SERVER_EXERCISE_DIR" \
             "$SERVER_CONTAINER_NAME" \
             "$SCP_DEST_DIR"
         ;;
-    "Python" | "python")
-        $CURRENT_SCRIPT_DIR/server/python/run_python_server_on_bigubu_docker.sh \
-            "$EXERCISE_DIR" \
+    "python")
+        "$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh" \
+            "$DOCKER_SCRIPTS_DIR" \
+            "$SERVER_EXERCISE_DIR" \
             "$SERVER_CONTAINER_NAME" \
             "$SCP_DEST_DIR"
         ;;
@@ -43,11 +45,16 @@ case $SERVER_LANG in
         echo "ERROR: INVALID SERVER LANGUAGE"
         ;;
 esac
+
+
+CLIENT_EXERCISE_DIR="$GIT_REPO_DIR/$CLIENT_LANG/$REL_EXERCISE_DIR"
 case $CLIENT_LANG in
-    "C" | "c")
-        $CURRENT_SCRIPT_DIR/client/c/run_c_client_on_bigubu_docker.sh \
-            "$EXERCISE_DIR" \
+    "c")
+        "$CURRENT_SCRIPT_DIR/client/$CLIENT_LANG/run_client_on_bigubu_docker.sh" \
+            "$DOCKER_SCRIPTS_DIR" \
+            "$CLIENT_EXERCISE_DIR" \
             "$CLIENT_CONTAINER_NAME" \
+            "$SERVER_CONTAINER_NAME" \
             "$SCP_DEST_DIR"
         ;;
     *)

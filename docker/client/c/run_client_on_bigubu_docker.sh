@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # This script works if you setup the server to use your public SSH key.
 # How to do that:
 # - Add your SSH public key to the server using ssh-copy-id.
@@ -7,20 +8,24 @@
 # Running this script with sudo will most likely require
 # a password, as the keys are set up for the user, not root.
 
+
 set -e
 
 
-EXERCISE_DIR=$1     # e.g. ../../../Z2/Z2.1
-CONTAINER_NAME=$2   # e.g. z41_z_2_1_server
-SCP_DEST_DIR=$3     # e.g. ~/PSI/lab/Z2/Z2.1
+echo "C client setup..."
+
+
+DOCKER_SCRIPTS_DIR=$1 
+EXERCISE_DIR=$2             # something like .../Z2/Z2.1
+CLIENT_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
+SERVER_CONTAINER_NAME=$4    # e.g. z41_z_2_1_server
+SCP_DEST_DIR=$5             # e.g. ~/PSI/lab/Z2/Z2.1
 
 
 SERVER_ADDRESS="bigubu.ii.pw.edu.pl"
-# EXERCISE_DIR might not be absolute
-ABS_EXERCISE_DIR=$(realpath $REL_EXERCISE_DIR)
 
 
-cd $ABS_EXERCISE_DIR/build
+cd $EXERCISE_DIR/build
 cmake ..
 make clean client -j$(nproc)
 
@@ -33,10 +38,10 @@ ssh $SERVER_ADDRESS << EOF
 EOF
 
 
-scp $ABS_EXERCISE_DIR/build/output/client \
-    $ABS_EXERCISE_DIR/docker/client/Dockerfile \
-    $ABS_EXERCISE_DIR/docker/client/client_docker_setup.sh \
-    $ABS_EXERCISE_DIR/docker/client/run_client.sh \
+scp $EXERCISE_DIR/build/output/client \
+    $DOCKER_SCRIPTS_DIR/client/c/Dockerfile \
+    $DOCKER_SCRIPTS_DIR/client/c/run_client.sh \
+    $DOCKER_SCRIPTS_DIR/client/client_docker_setup.sh \
     $SERVER_ADDRESS:$SCP_DEST_DIR/client
 
 
@@ -45,5 +50,5 @@ ssh $SERVER_ADDRESS << EOF
     chmod +x client_docker_setup.sh
     sed -i -e 's/\r$//' client_docker_setup.sh
     sed -i -e 's/\r$//' run_client.sh
-    ./client_docker_setup.sh
+    ./client_docker_setup.sh $CLIENT_CONTAINER_NAME $SERVER_CONTAINER_NAME
 EOF

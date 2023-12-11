@@ -11,17 +11,19 @@
 set -e
 
 
-EXERCISE_DIR=$1     # e.g. ../../../Z2/Z2.1
-CONTAINER_NAME=$2   # e.g. z41_z_2_1_server
-SCP_DEST_DIR=$3     # e.g. ~/PSI/lab/Z2/Z2.1
+echo "C server setup..."
+
+
+DOCKER_SCRIPTS_DIR=$1
+EXERCISE_DIR=$2             # something like .../Z2/Z2.1
+CLIENT_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
+SCP_DEST_DIR=$4             # e.g. ~/PSI/lab/Z2/Z2.1
 
 
 SERVER_ADDRESS="bigubu.ii.pw.edu.pl"
-# EXERCISE_DIR might not be absolute
-ABS_EXERCISE_DIR=$(realpath $REL_EXERCISE_DIR)
 
 
-cd $ABS_EXERCISE_DIR/build
+cd $EXERCISE_DIR/build
 cmake ..
 make clean server -j$(nproc)
 
@@ -34,10 +36,10 @@ ssh $SERVER_ADDRESS << EOF
 EOF
 
 
-scp $ABS_EXERCISE_DIR/build/output/server \
-    $ABS_EXERCISE_DIR/docker/server/Dockerfile \
-    $ABS_EXERCISE_DIR/docker/server/server_docker_setup.sh \
-    $ABS_EXERCISE_DIR/docker/server/run_server.sh \
+scp $EXERCISE_DIR/build/output/server \
+    $DOCKER_SCRIPTS_DIR/server/c/Dockerfile \
+    $DOCKER_SCRIPTS_DIR/server/c/run_server.sh \
+    $DOCKER_SCRIPTS_DIR/server/server_docker_setup.sh \
     $SERVER_ADDRESS:$SCP_DEST_DIR/server
 
 
@@ -45,6 +47,6 @@ ssh $SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x server_docker_setup.sh
     sed -i -e 's/\r$//' server_docker_setup.sh
-    sed -i -e 's/\r$//' run_server.sh
-    ./server_docker_setup.sh
+    sed -i -e 's/\r$//' run_c_server.sh
+    ./server_docker_setup.sh $CONTAINER_NAME
 EOF

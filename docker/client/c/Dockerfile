@@ -3,8 +3,8 @@ FROM ubuntu:22.04
 WORKDIR /client
 
 COPY ./client .
-COPY ./client_container_config.sh .
-RUN chmod 777 ./client_container_config.sh
+COPY ./run_client.sh .
+RUN chmod +x ./run_client.sh
 
 # RUN apt-get update
 # RUN apt-get install -y netcat
