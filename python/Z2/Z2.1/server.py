@@ -49,7 +49,7 @@ def unpack(data) -> list[Node]:
     return unpacked_data
 
 
-def start_server(host='127.0.0.1', port=65432):
+def start_server(host='0.0.0.0', port=8888):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
         s.listen()
