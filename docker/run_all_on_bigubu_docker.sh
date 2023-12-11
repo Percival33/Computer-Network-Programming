@@ -28,14 +28,18 @@ CLIENT_CONTAINER_NAME="${CONTAINER_NAME_PREFIX}_client"
 SERVER_EXERCISE_DIR="$GIT_REPO_DIR/$SERVER_LANG/$REL_EXERCISE_DIR"
 case $SERVER_LANG in
     "c")
-        "$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh" \
+        CMD="$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh"
+        dos2unix $CMD
+        "$CMD" \
             "$DOCKER_SCRIPTS_DIR" \
             "$SERVER_EXERCISE_DIR" \
             "$SERVER_CONTAINER_NAME" \
             "$SCP_DEST_DIR"
         ;;
     "python")
-        "$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh" \
+        CMD="$CURRENT_SCRIPT_DIR/server/$SERVER_LANG/run_server_on_bigubu_docker.sh"
+        dos2unix $CMD
+        "$CMD" \
             "$DOCKER_SCRIPTS_DIR" \
             "$SERVER_EXERCISE_DIR" \
             "$SERVER_CONTAINER_NAME" \
@@ -50,7 +54,9 @@ esac
 CLIENT_EXERCISE_DIR="$GIT_REPO_DIR/$CLIENT_LANG/$REL_EXERCISE_DIR"
 case $CLIENT_LANG in
     "c")
-        "$CURRENT_SCRIPT_DIR/client/$CLIENT_LANG/run_client_on_bigubu_docker.sh" \
+        CMD="$CURRENT_SCRIPT_DIR/client/$CLIENT_LANG/run_client_on_bigubu_docker.sh"
+        dos2unix $CMD
+        "$CMD" \
             "$DOCKER_SCRIPTS_DIR" \
             "$CLIENT_EXERCISE_DIR" \
             "$CLIENT_CONTAINER_NAME" \
