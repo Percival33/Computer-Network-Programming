@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     strncpy(B->text, "def\0", 4);
     print_nodes(B);
     uint8_t buf[1024];
-    uint16_t size = pack(buf, B, length(B));
+    uint16_t size = pack(buf, B);
 
     for(int i = 0; i < size; i++) {
         printf("i: %d, bajt: %d\n", i, buf[i]);
