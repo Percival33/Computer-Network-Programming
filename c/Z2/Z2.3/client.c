@@ -16,6 +16,8 @@
 #include "node.h"
 
 int main(int argc, char *argv[]) {
+    printf("Z2.3a C client\n");
+
     if (argc != 3) {
         printf("Invalid argument count\n");
         exit(ERROR_INVALID_ARG);

@@ -18,6 +18,8 @@
 #include "check_ip_type.h"
 
 int main(int argc, char *argv[]) {
+    printf("Z2.2 C client\n");
+
     if (argc != 3) {
         printf("Invalid argument count\n");
         exit(ERROR_INVALID_ARG);

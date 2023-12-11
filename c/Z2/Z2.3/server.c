@@ -70,6 +70,8 @@ void start_server(const char *host, int port) {
 }
 
 int main() {
+    printf("Z2.3a C server\n");
+
     start_server("0.0.0.0", PORT);
     return 0;
 }
