@@ -51,17 +51,23 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
-    Node* B = create_node();
-    set_values(B, 3, 4, "def\0", 4);
-    Node* C = create_node();
-    set_values(C, 5, 6, "test\0", 5);
-    add_node(B, C);
+    Node* head = create_node();
+    set_values(head, 3, 4, "def\0", 4);
 
-    print_nodes(B);
+    // Generate a lot of data
+    Node* tail = head;
+    for (int i = 0; i < 1000; i++) {
+        Node* newNode = create_node();
+        set_values(newNode, 5, 6, "test\0", 5);
+        add_node(tail, newNode);
+        tail = newNode;
+    }
+
+    print_nodes(head);
 
     uint8_t buf[1024];
-    uint16_t size = pack(buf, B);
-    delete_list(B);
+    uint16_t size = pack(buf, head);
+    delete_list(head);
 
 //    for(int i = 0; i < size; i++) {
 //        printf("i: %d, bajt: %d\n", i, buf[i]);
