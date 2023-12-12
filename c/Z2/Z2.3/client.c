@@ -15,6 +15,8 @@
 #include "serialize.h"
 #include "node.h"
 
+#define MAX_LINKED_LIST_SIZE 4096
+
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
 
@@ -56,16 +58,30 @@ int main(int argc, char *argv[]) {
 
     // Generate a lot of data
     Node* tail = head;
-    for (int i = 0; i < 1000; i++) {
+    int nodeCount = 10;
+    int minLength = 1;
+    char text[minLength + nodeCount + 1];
+    for (int i = 0; i < nodeCount; i++) {
         Node* newNode = create_node();
-        set_values(newNode, 5, 6, "test\0", 5);
+
+        // Expected text: something like "aaaaaa\0",
+        // Each time longer by 1 'a'
+        int textLength = minLength + i + 1;
+        for (int k = 0; k < textLength - 1; k++) {
+            text[k] = 'a';
+        }
+        text[textLength - 1] = '\0';
+
+        printf("%s\n", text);
+
+        set_values(newNode, 5, 6, text, textLength);
         add_node(tail, newNode);
         tail = newNode;
     }
 
     print_nodes(head);
 
-    uint8_t buf[1024];
+    uint8_t buf[MAX_LINKED_LIST_SIZE];
     uint16_t size = pack(buf, head);
     delete_list(head);
 
@@ -90,7 +106,7 @@ int main(int argc, char *argv[]) {
 
     printf("Time taken for data send: %f milliseconds\n", total_time);
 
-    if (read(sockfd, buf, 100) == -1) {
+    if (read(sockfd, buf, 1500) == -1) {
         LOG_ERROR("reading on stream socket");
         perror("reading on stream socket");
     }

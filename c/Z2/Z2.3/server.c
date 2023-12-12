@@ -10,7 +10,7 @@
 
 #define PORT 8888
 #define BACKLOG 10  // Number of pending connections queue will hold
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1500
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
