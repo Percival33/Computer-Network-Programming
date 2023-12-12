@@ -16,7 +16,7 @@ echo "C server setup..."
 
 DOCKER_SCRIPTS_DIR=$1
 EXERCISE_DIR=$2             # something like .../Z2/Z2.1
-CLIENT_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
+SERVER_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
 SCP_DEST_DIR=$4             # e.g. ~/PSI/lab/Z2/Z2.1
 
 
@@ -47,6 +47,6 @@ ssh $SERVER_ADDRESS << EOF
     cd $SCP_DEST_DIR/server
     chmod +x server_docker_setup.sh
     sed -i -e 's/\r$//' server_docker_setup.sh
-    sed -i -e 's/\r$//' run_c_server.sh
-    ./server_docker_setup.sh $CONTAINER_NAME
+    sed -i -e 's/\r$//' run_server.sh
+    ./server_docker_setup.sh $SERVER_CONTAINER_NAME
 EOF

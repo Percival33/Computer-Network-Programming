@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
         exit(ERROR_INVALID_ARG);
     }
 
+    printf("Z2.1 C server (???)\n");
+
     char *ip = argv[1];
     int port = atoi(argv[2]);
 

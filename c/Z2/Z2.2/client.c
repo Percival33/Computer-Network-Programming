@@ -18,6 +18,8 @@
 #include "check_ip_type.h"
 
 int main(int argc, char *argv[]) {
+    printf("Z2.2 C client\n");
+
     if (argc != 3) {
         printf("Invalid argument count\n");
         exit(ERROR_INVALID_ARG);
@@ -77,9 +79,9 @@ int main(int argc, char *argv[]) {
     uint8_t buf[1024];
     uint16_t size = pack(buf, B);
 
-    for(int i = 0; i < size; i++) {
-        printf("i: %d, bajt: %d\n", i, buf[i]);
-    }
+    // for(int i = 0; i < size; i++) {
+    //     printf("i: %d, bajt: %d\n", i, buf[i]);
+    // }
 
     // if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
     //     LOG_ERROR("connect() failed");
