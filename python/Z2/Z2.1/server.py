@@ -47,15 +47,17 @@ def start_server(host='0.0.0.0', port=8888):
         s.listen()
         print(f"Server started, listening on {host}:{port}")
 
-        conn, addr = s.accept()
-        with conn:
-            print(f"Connected by {addr}")
-            data = conn.recv(1024)
-            if not data:
-                return
+        while True:
+            conn, addr = s.accept()
+            with conn:
+                print(f"Connected by {addr}")
+                data = conn.recv(1024)
+                if not data:
+                    continue
 
-            head_node = unpack_data(data)
-            print_linked_list(head_node)
+                head_node = unpack_data(data)
+                print_linked_list(head_node)
+
 
 
 if __name__ == "__main__":
