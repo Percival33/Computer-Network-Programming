@@ -79,9 +79,9 @@ int main(int argc, char *argv[]) {
     uint8_t buf[1024];
     uint16_t size = pack(buf, B);
 
-    for(int i = 0; i < size; i++) {
-        printf("i: %d, bajt: %d\n", i, buf[i]);
-    }
+    // for(int i = 0; i < size; i++) {
+    //     printf("i: %d, bajt: %d\n", i, buf[i]);
+    // }
 
     // if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
     //     LOG_ERROR("connect() failed");
