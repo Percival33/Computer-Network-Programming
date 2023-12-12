@@ -93,11 +93,44 @@ int main(int argc, char *argv[]) {
     //     perror("writing on stream socket");
     // }
 
-    Node* C = unpack(buf);
-    print_nodes(C);
+    // Node* C = unpack(buf);
+    // print_nodes(C);
 
-    delete_node(B);
-    delete_node(C);
+    // delete_node(B);
+    // delete_node(C);
+
+
+    Node* head = create_node();
+    set_values(head, 3, 4, "def\0", 4);
+
+    // Generate a lot of data
+    Node* tail = head;
+    int nodeCount = 10;
+    int minLength = 1;
+    char text[minLength + nodeCount + 1];
+    for (int i = 0; i < nodeCount; i++) {
+        Node* newNode = create_node();
+
+        // // Expected text: something like "aaaaaa\0",
+        // // Each time longer by 1 'a'
+
+        int textLength = minLength + i + 1;
+        for (int k = 0; k < textLength - 1; k++) {
+            text[k] = 'a';
+        }
+        text[textLength - 1] = '\0';
+        
+        // char *text = "test\0";
+        // int textLength = 5;
+
+        set_values(newNode, 5, 6, text, textLength);
+        add_node(tail, newNode);
+        tail = newNode;
+    }
+
+    print_nodes(head);
+
+
     // Close the socket
     close(sockfd);
 
