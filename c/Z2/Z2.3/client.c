@@ -64,15 +64,17 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < nodeCount; i++) {
         Node* newNode = create_node();
 
-        // Expected text: something like "aaaaaa\0",
-        // Each time longer by 1 'a'
+        // // Expected text: something like "aaaaaa\0",
+        // // Each time longer by 1 'a'
+
         int textLength = minLength + i + 1;
         for (int k = 0; k < textLength - 1; k++) {
             text[k] = 'a';
         }
         text[textLength - 1] = '\0';
-
-        printf("%s\n", text);
+        
+        // char *text = "test\0";
+        // int textLength = 5;
 
         set_values(newNode, 5, 6, text, textLength);
         add_node(tail, newNode);
@@ -84,6 +86,11 @@ int main(int argc, char *argv[]) {
     uint8_t buf[MAX_LINKED_LIST_SIZE];
     uint16_t size = pack(buf, head);
     delete_list(head);
+
+    // // DEBUG
+    // printf("DEBUG\n");
+    // Node* X = unpack(buf);
+    // print_nodes(X);
 
 //    for(int i = 0; i < size; i++) {
 //        printf("i: %d, bajt: %d\n", i, buf[i]);
@@ -111,9 +118,6 @@ int main(int argc, char *argv[]) {
         perror("reading on stream socket");
     }
     printf("Received data: %s\n", buf);
-
-//    Node* X = unpack(buf);
-//    print_nodes(NULL);
 
     // Close the socket
     close(sockfd);

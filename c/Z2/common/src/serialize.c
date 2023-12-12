@@ -69,10 +69,10 @@ Node* unpack(uint8_t* buf) {
         curr_node = create_node();
         if(prev_node == NULL) {
             root = curr_node;
-            prev_node = curr_node;
         } else {
             prev_node->next = curr_node;
         }
+        prev_node = curr_node;
 
         curr_node->a = unpacku16(buf);
         buf += 2;
@@ -87,8 +87,9 @@ Node* unpack(uint8_t* buf) {
         for(uint16_t j = 0; j < str_len; j++) {
             str[j] = (unsigned char)*buf++;
         }
+        // str_len is counted excluding the null sign!!!
         str[str_len] = '\0';
-        assign_text(curr_node, str, str_len);
+        assign_text(curr_node, str, str_len + 1);
     }
 
     return root;
