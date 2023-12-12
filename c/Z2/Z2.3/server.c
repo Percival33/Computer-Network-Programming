@@ -10,7 +10,7 @@
 
 #define PORT 8888
 #define BACKLOG 10  // Number of pending connections queue will hold
-#define BUFFER_SIZE 1500
+#define BUFFER_SIZE 1024 * 10
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
@@ -52,17 +52,15 @@ void start_server(const char *host, int port) {
         printf("Connected by %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
         while (1) {
-            int bytes_read = read(new_socket, buffer, BUFFER_SIZE);
+            int bytes_read = read(new_socket, buffer, sizeof(buffer));
             if (bytes_read == 0) {
                 break;
             }
 
-            Node *unpacked = unpack(buffer);
-            print_nodes(unpacked);
-            strncpy((char*) buffer, "ok\0", 3);
-            write(new_socket, "ok", 2);
+            printf("Received %zu bytes of data.\n", sizeof(buffer));
 
-            delete_list(unpacked);
+            // Artificial delay
+            sleep(1);
         }
 
         close(new_socket);
