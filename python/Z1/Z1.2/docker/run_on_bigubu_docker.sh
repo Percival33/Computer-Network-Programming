@@ -9,7 +9,7 @@
 
 set -e
 
-DEFAULT_CONTAINER_NAME="z41_z_1_python_server"
+DEFAULT_CONTAINER_NAME="z41_z_1_2_python_server"
 DEFAULT_SCP_DEST_DIR="~/PSI/lab_1/Z1.2"
 
 CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
@@ -61,4 +61,3 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
     sed -i -e 's/\r$//' docker_python_client_startup.sh
     ./docker_python_client_startup.sh
 EOF
- 

@@ -52,11 +52,11 @@ def main():
                 id = 1
                 status_code = 0
                 message_t_packed = struct.pack('!HB', id, status_code)
-                print("INFO: Sending a reply to the server")
+                print("INFO: Sending a response to the server")
                 sockfd.sendto(message_t_packed, (arguments.ip,arguments.port))
                 break
             except socket.timeout:
-                print("INFO: No response from the server, sending again....")
+                print("INFO: No response from the server, trying once more....")
 
         print(f"INFO: Data sent to server: {message_t_packed}")
 

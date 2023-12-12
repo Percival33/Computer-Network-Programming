@@ -1,4 +1,6 @@
-// Created by Michał Sobiech on 20.11.2023
+//
+// Created by Marcin Jarczewski on 28/11/2023.
+//
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -6,6 +8,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#define BLUE_TEXT "\033[1;34m"
+#define RESET_COLOR "\033[0m"
+#define LOG_INFO BLUE_TEXT "INFO: " RESET_COLOR
 
 #define ERROR_INVALID_ARGC 1
 #define ERROR_FAILED_SOCKET_CREATION 2
@@ -13,8 +18,7 @@
 #define ERROR_FAILED_DATA_RECEIVAL 4
 #define ERROR_FAILED_TO_SEND_RESPONSE 5
 
-#define PAIR_SIZE 4
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1<<16
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -57,7 +61,7 @@ int main(int argc, char *argv[]) {
             exit(ERROR_FAILED_DATA_RECEIVAL);
         }
         inet_ntop(AF_INET, &(client_address.sin_addr), client_ip_str, sizeof(client_ip_str));
-        printf("Data received from %s:%d. Size: %d\n",
+        printf(LOG_INFO"Data received from %s:%d. Size: %d\n",
             client_ip_str,
             ntohs(client_address.sin_port),
             data_length

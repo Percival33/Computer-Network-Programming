@@ -7,8 +7,7 @@ SERVER_PORT = 8088
 BUF_SIZE = 1024
 STR_SIZE = 2
 
-
-MAX_PAYLOAD_SIZE = 2
+MAX_PAYLOAD_SIZE = 127
 key_value_pair_t = struct.Struct('!2s2s')
 message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
 
@@ -24,42 +23,36 @@ def parse_arguments(parser):
     return parser.parse_args()
 
 
+def fill_payload_with_zeros(count):
+    zero_pair = b'\0\0'
+    return zero_pair * (MAX_PAYLOAD_SIZE - count)
+
+
 def main():
-
-
     try:
         sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        idx = 1
+        count = 5
+        pairs = [('ef', '12'), ('ef', '34'), ('ef', '34'), ('ef', '34'), ('ef', '34')]
 
-        size = 1
-        key = 'A'
-        value = '1'
-
-        id = 1
-        count = 1
-        pairs = [('ef', '12'), ('rt', '34')]
-
-        few_pairs_packed = []
-
-        for k, v in pairs:
-            one_pair_packed = key_value_pair_t.pack(k.encode(), v.encode())
-            few_pairs_packed.append(one_pair_packed)
-
+        few_pairs_packed = [key_value_pair_t.pack(k.encode(), v.encode()) for k, v in pairs]
         pairs_packed = b''.join(few_pairs_packed)
+        
+        if len(few_pairs_packed) < MAX_PAYLOAD_SIZE:
+            zero_payload = fill_payload_with_zeros(len(few_pairs_packed))
+            pairs_packed += zero_payload
 
-        message_t_packed = message_t.pack(id, count, pairs_packed)
-
+        message_t_packed = message_t.pack(idx, count, pairs_packed)
 
         arguments = parse_arguments(get_parser())
 
         sockfd.sendto(message_t_packed, (arguments.ip, arguments.port))
         print("Data sent to server:")
-        print(f'Size: {size}, Key: "{key}", Value: "{value}"')
+        print(f'Id: {idx}, Count: "{count}", Pairs_packed: "{pairs_packed}"')
 
-        message, address = sockfd.recvfrom(BUF_SIZE)
-        id, status_code = struct.unpack('!HB', message)
-        message_to_print = f'Received from server  Id: {id}, status_code: {status_code}'
-        print(message_to_print)
-
+        response, server = sockfd.recvfrom(int(arguments.port))
+        print(f"INFO: Response received from server: {response}")
+        
     except struct.error as e:
         print(f"An error occurred with the struct: {e}")
 
