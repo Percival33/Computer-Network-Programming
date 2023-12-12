@@ -41,17 +41,50 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
-    Node* B = create_node();
-    set_values(B, 3, 4, "def\0", 4);
-    Node* C = create_node();
-    set_values(C, 5, 6, "test\0", 5);
-    add_node(B, C);
+    // Node* B = create_node();
+    // set_values(B, 3, 4, "def\0", 4);
+    // Node* C = create_node();
+    // set_values(C, 5, 6, "test\0", 5);
+    // add_node(B, C);
 
-    print_nodes(B);
+    // print_nodes(B);
+
+
+    Node* head = create_node();
+    set_values(head, 3, 4, "def\0", 4);
+
+    // Generate a lot of data
+    Node* tail = head;
+    int nodeCount = 10;
+    int minLength = 1;
+    char text[minLength + nodeCount + 1];
+    for (int i = 0; i < nodeCount; i++) {
+        Node* newNode = create_node();
+
+        // // Expected text: something like "aaaaaa\0",
+        // // Each time longer by 1 'a'
+
+        int textLength = minLength + i + 1;
+        for (int k = 0; k < textLength - 1; k++) {
+            text[k] = 'a';
+        }
+        text[textLength - 1] = '\0';
+        
+        // char *text = "test\0";
+        // int textLength = 5;
+
+        set_values(newNode, 5, 6, text, textLength);
+        add_node(tail, newNode);
+        tail = newNode;
+    }
+
+    print_nodes(head);
+
+
 
     uint8_t buf[1024];
-    uint16_t size = pack(buf, B);
-    delete_list(B);
+    uint16_t size = pack(buf, head);
+    delete_list(head);
 
 //    for(int i = 0; i < size; i++) {
 //        printf("i: %d, bajt: %d\n", i, buf[i]);
