@@ -26,13 +26,6 @@ void start_server(const char *host, int port) {
         exit(EXIT_FAILURE);
     }
 
-    // // Change the receive buffer size
-    // long int rcvbufSize = RCVBUF_SIZE;
-    // if (setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &rcvbufSize, sizeof(rcvbufSize)) != 0) {
-    //     perror("setsockopt SO_RCVBUF failed");
-    //     exit(EXIT_FAILURE);
-    // }
-
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(host);
     address.sin_port = htons(port);
@@ -65,10 +58,6 @@ void start_server(const char *host, int port) {
         }
 
         printf("Connected by %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
-
-        sleep(6);
-
-        printf("AAAA\n");
 
         while (1) {
             // int bytes_read = read(new_socket, buffer, sizeof(buffer));

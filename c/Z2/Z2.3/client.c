@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_SIZE_KB 1
+#define DATA_SIZE_KB 512
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
