@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_BUF_SIZE 1024 * 100
+#define DATA_SIZE_KB 128
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
@@ -32,7 +32,9 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in serverAddr;
     char *ip = argv[1];
     int port = atoi(argv[2]);
-    int bufferSize = atoi(argv[3]);
+    int sndbufSizekB = atoi(argv[3]);
+
+    int sndbufSize = sndbufSizekB * 1024;
 
     // Socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,7 +44,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Change the sender buffer size
-    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize)) != 0) {
+    if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &sndbufSize, sizeof(sndbufSize)) != 0) {
         perror("setsockopt SO_SNDBUF failed");
         exit(ERROR_SO_SNDBUF_FAILED);
     }
@@ -54,7 +56,7 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     // Generate a lot of data
-    uint8_t data_buf[DATA_BUF_SIZE];
+    uint8_t data_buf[DATA_SIZE_KB * 1024];
     for (int i = 0; i < sizeof(data_buf); i++) {
         data_buf[i] = (uint8_t) 'a';
     }
@@ -64,22 +66,25 @@ int main(int argc, char *argv[]) {
         perror("connect failed");
     }
 
+    int counter = 1;
     while (1) {
         gettimeofday(&start, NULL);
-        printf("START\n");
         if (write(sockfd, data_buf, sizeof(data_buf)) == -1) {
             LOG_ERROR("writing on stream socket");
             perror("writing on stream socket");
         }
 
         gettimeofday(&end, NULL);
-        printf("END\n");
 
         seconds  = end.tv_sec  - start.tv_sec;
         useconds = end.tv_usec - start.tv_usec;
         total_time = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
-        printf("Time taken for data send: %f milliseconds\n", total_time);
+        printf("Msg no: %d, time between send and ack: %f ms\n", counter, total_time);
+
+        usleep(100 * 1000);
+
+        counter++;
     }
 
     // Close the socket

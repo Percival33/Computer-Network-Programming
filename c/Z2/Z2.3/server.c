@@ -9,20 +9,30 @@
 #include "serialize.h"
 
 #define PORT 8888
-#define BACKLOG 10  // Number of pending connections queue will hold
-#define BUFFER_SIZE 1024 * 10
+#define BACKLOG 100  // Number of pending connections queue will hold
+#define RCVBUF_SIZE_KB 1024
+#define KB 1024
+#define RCVBUF_SIZE RCVBUF_SIZE_KB * KB
+// #define BUFFER_SIZE RCVBUF_SIZE   
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
-    uint8_t buffer[BUFFER_SIZE];
+    uint8_t buffer[RCVBUF_SIZE];
 
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
         exit(EXIT_FAILURE);
+    }
+
+    // Change the receive buffer size
+    long int rcvbufSize = RCVBUF_SIZE;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &rcvbufSize, sizeof(rcvbufSize)) != 0) {
+        perror("setsockopt SO_RCVBUF failed");
+        exit(1);
     }
 
     address.sin_family = AF_INET;
@@ -57,10 +67,10 @@ void start_server(const char *host, int port) {
                 break;
             }
 
-            printf("Received %zu bytes of data.\n", sizeof(buffer));
-
             // Artificial delay
-            sleep(1);
+            sleep(5);
+
+            printf("Processed %zu kB of data.\n", sizeof(buffer)/KB);
         }
 
         close(new_socket);
