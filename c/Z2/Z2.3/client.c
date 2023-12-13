@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
         total_time = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
         printf("Msg no: %d, time between send and ack: %f ms\n", msg_counter, total_time);
-
+        fflush(stdout);
         // usleep(10 * 1000);
 
         msg_counter++;

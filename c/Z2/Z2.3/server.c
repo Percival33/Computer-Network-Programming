@@ -70,7 +70,7 @@ void start_server(const char *host, int port) {
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
         
             // Artificial delay
-            sleep(3);
+            sleep(1.5f);
         }
 
         close(new_socket);
