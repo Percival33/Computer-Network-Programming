@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_SIZE_KB 128
+#define DATA_SIZE_KB 512
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]);
     int sndbufSizekB = atoi(argv[3]);
 
-    int sndbufSize = sndbufSizekB * 1024;
+    int sndbufSize = sndbufSizekB * KB;
 
     // Socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     // Generate a lot of data
-    uint8_t data_buf[DATA_SIZE_KB * 1024];
+    uint8_t data_buf[DATA_SIZE_KB * KB];
     for (int i = 0; i < sizeof(data_buf); i++) {
         data_buf[i] = (uint8_t) 'a';
     }
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         perror("connect failed");
     }
 
-    int counter = 1;
+    int msg_counter = 1;
     while (1) {
         gettimeofday(&start, NULL);
         if (write(sockfd, data_buf, sizeof(data_buf)) == -1) {
@@ -80,11 +80,11 @@ int main(int argc, char *argv[]) {
         useconds = end.tv_usec - start.tv_usec;
         total_time = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
-        printf("Msg no: %d, time between send and ack: %f ms\n", counter, total_time);
+        printf("Msg no: %d, time between send and ack: %f ms\n", msg_counter, total_time);
 
-        usleep(100 * 1000);
+        // usleep(10 * 1000);
 
-        counter++;
+        msg_counter++;
     }
 
     // Close the socket
