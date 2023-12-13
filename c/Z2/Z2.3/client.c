@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_SIZE_KB 512
+#define DATA_SIZE_KB 1
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
@@ -34,8 +34,6 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]);
     int sndbufSizekB = atoi(argv[3]);
 
-    int sndbufSize = sndbufSizekB * KB;
-
     // Socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -44,6 +42,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Change the sender buffer size
+    int sndbufSize = sndbufSizekB * KB;
     if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &sndbufSize, sizeof(sndbufSize)) != 0) {
         perror("setsockopt SO_SNDBUF failed");
         exit(ERROR_SO_SNDBUF_FAILED);
