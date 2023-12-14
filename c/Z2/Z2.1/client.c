@@ -61,8 +61,8 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < nodeCount; i++) {
         Node* newNode = create_node();
 
-        // // Expected text: something like "aaaaaa\0",
-        // // Each time longer by 1 'a'
+        // Expected text: something like "aaaaaa\0",
+        // Each time longer by 1 'a'
 
         int textLength = minLength + i + 1;
         for (int k = 0; k < textLength - 1; k++) {
@@ -78,13 +78,11 @@ int main(int argc, char *argv[]) {
         tail = newNode;
     }
 
+    print_nodes(head);
+
     uint8_t buf[1024];
     uint16_t size = pack(buf, head);
     delete_list(head);
-
-//    for(int i = 0; i < size; i++) {
-//        printf("i: %d, bajt: %d\n", i, buf[i]);
-//    }
 
     if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
         LOG_ERROR("connect() failed");
@@ -100,9 +98,6 @@ int main(int argc, char *argv[]) {
         LOG_ERROR("reading on stream socket");
         perror("reading on stream socket");
     }
-
-    Node* X = unpack(buf);
-    print_nodes(X);
 
     // Close the socket
     close(sockfd);
