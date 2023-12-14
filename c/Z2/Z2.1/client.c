@@ -78,10 +78,6 @@ int main(int argc, char *argv[]) {
         tail = newNode;
     }
 
-    print_nodes(head);
-
-
-
     uint8_t buf[1024];
     uint16_t size = pack(buf, head);
     delete_list(head);
