@@ -9,15 +9,16 @@
 #include "serialize.h"
 
 #define PORT 8888
-#define BACKLOG 10  // Number of pending connections queue will hold
-#define BUFFER_SIZE 1500
+#define BACKLOG 1  // Number of pending connections queue will hold
+#define RCVBUF_SIZE_KB 1024
+#define RCVBUF_SIZE RCVBUF_SIZE_KB * KB 
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
-    uint8_t buffer[BUFFER_SIZE];
+    uint8_t buffer[RCVBUF_SIZE];
 
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -49,20 +50,27 @@ void start_server(const char *host, int port) {
             exit(EXIT_FAILURE);
         }
 
+        // Change the receive buffer size
+        long int rcvbufSize = RCVBUF_SIZE;
+        if (setsockopt(new_socket, SOL_SOCKET, SO_RCVBUF, &rcvbufSize, sizeof(rcvbufSize)) != 0) {
+            perror("setsockopt SO_RCVBUF failed");
+            exit(EXIT_FAILURE);
+        }
+
         printf("Connected by %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
         while (1) {
-            int bytes_read = read(new_socket, buffer, BUFFER_SIZE);
+            // int bytes_read = read(new_socket, buffer, sizeof(buffer));
+            int bytes_read = read(new_socket, buffer, sizeof(buffer));
             if (bytes_read == 0) {
                 break;
             }
 
-            Node *unpacked = unpack(buffer);
-            print_nodes(unpacked);
-            strncpy((char*) buffer, "ok\0", 3);
-            write(new_socket, "ok", 2);
-
-            delete_list(unpacked);
+            float bytes_read_kB_formatted = ((float) bytes_read)/((float)KB);
+            printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
+        
+            // Artificial delay
+            sleep(1.5f);
         }
 
         close(new_socket);
@@ -75,4 +83,3 @@ int main() {
     start_server("0.0.0.0", PORT);
     return 0;
 }
-

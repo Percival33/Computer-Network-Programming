@@ -1,6 +1,3 @@
-//
-// Created by Marcin Jarczewski and Michał Sobiech on 06/12/2023.
-//
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,6 +9,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include <netinet/in.h>
 #include "common.h"
 #include "serialize.h"
 #include "node.h"
@@ -35,69 +33,82 @@ int main(int argc, char *argv[]) {
         exit(ERROR_INVALID_IP);
     }
 
-    // Server address
-    struct sockaddr serverAddr;
+    // Server address length
     int serverAddrLen;
+
+    struct sockaddr_storage serverAddr; // Używamy sockaddr_storage, który obsługuje zarówno IPv4, jak i IPv6
     memset(&serverAddr, 0, sizeof(serverAddr));
 
-    // Address family
-    int address_family;
 
-    // Setup the server address
     if (ip_type == IPV4) {
-        address_family = AF_INET;
-
-        ((struct sockaddr_in *) &serverAddr)->sin_family = address_family;
-        ((struct sockaddr_in *) &serverAddr)->sin_port = htons(port);
-        inet_pton(address_family, ip, (struct sockaddr_in *) &serverAddr);
-
+        struct sockaddr_in *serverAddr4 = (struct sockaddr_in *)&serverAddr;
+        serverAddr4->sin_family = AF_INET;
+        serverAddr4->sin_port = htons(port);
+        inet_pton(AF_INET, ip, &serverAddr4->sin_addr);
         serverAddrLen = sizeof(struct sockaddr_in);
     }
     else if (ip_type == IPV6) {
-        int address_family = AF_INET6;
-
-        ((struct sockaddr_in6 *) &serverAddr)->sin6_family = address_family;
-        ((struct sockaddr_in6 *) &serverAddr)->sin6_port = htons(port);
-        inet_pton(address_family, ip, (struct sockaddr_in6 *) &serverAddr);
-
+        struct sockaddr_in6 *serverAddr6 = (struct sockaddr_in6 *)&serverAddr;
+        serverAddr6->sin6_family = AF_INET6;
+        serverAddr6->sin6_port = htons(port);
+        inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr);
         serverAddrLen = sizeof(struct sockaddr_in6);
     }
 
-    // Create a socket
-    int sockfd = socket(address_family, SOCK_STREAM, 0);
+    int sockfd;
+    if (ip_type == IPV4) {
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    } else {
+        sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    }
+
     if (sockfd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
-    // Create the data
-    Node* B = create_node();
-    B->a = 3;
-    B->b = 4;
-    strncpy(B->text, "def\0", 4);
-    print_nodes(B);
+    // Generate a lot of data
+    Node* head = create_node();
+    set_values(head, 3, 4, "def\0", 4);
+
+    Node* tail = head;
+    int nodeCount = 10;
+    int minLength = 1;
+    char text[minLength + nodeCount + 1];
+    for (int i = 0; i < nodeCount; i++) {
+        Node* newNode = create_node();
+
+        // Expected text: something like "aaaaaa\0",
+        // Each time longer by 1 'a'
+
+        int textLength = minLength + i + 1;
+        for (int k = 0; k < textLength - 1; k++) {
+            text[k] = 'a';
+        }
+        text[textLength - 1] = '\0';
+
+        set_values(newNode, 5, 6, text, textLength);
+        add_node(tail, newNode);
+        tail = newNode;
+    }
+
+    print_nodes(head);
+
     uint8_t buf[1024];
-    uint16_t size = pack(buf, B);
+    uint16_t size = pack(buf, head);
+    delete_list(head);
 
-    // for(int i = 0; i < size; i++) {
-    //     printf("i: %d, bajt: %d\n", i, buf[i]);
-    // }
 
-    // if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
-    //     LOG_ERROR("connect() failed");
-    //     perror("connect failed");
-    // }
+    if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
+        LOG_ERROR("connect() failed");
+        perror("connect failed");
+    }
 
-    // if (write(sockfd, buf, size) == -1) {
-    //     LOG_ERROR("writing on stream socket");
-    //     perror("writing on stream socket");
-    // }
+    if (write(sockfd, buf, size) == -1) {
+        LOG_ERROR("writing on stream socket");
+        perror("writing on stream socket");
+    }
 
-    Node* C = unpack(buf);
-    print_nodes(C);
-
-    delete_node(B);
-    delete_node(C);
     // Close the socket
     close(sockfd);
 

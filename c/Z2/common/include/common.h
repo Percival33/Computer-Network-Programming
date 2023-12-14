@@ -31,4 +31,7 @@
 #define LOG_DEBUG(message) printf(WHITE_TEXT "DEBUG:\t" RESET_COLOR "%s\n", message)
 
 
+#define KB 1024
+
+
 #endif //COMPUTER_NETWORK_PROGRAMMING_COMMON_H

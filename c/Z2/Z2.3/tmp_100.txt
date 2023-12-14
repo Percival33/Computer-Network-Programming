@@ -1,0 +1,22 @@
+Z2.3a C client
+Msg no: 1, time between send and ack: 9.785000 ms
+Msg no: 2, time between send and ack: 7.252000 ms
+Msg no: 3, time between send and ack: 0.830000 ms
+Msg no: 4, time between send and ack: 987.307000 ms
+Msg no: 5, time between send and ack: 0.924000 ms
+Msg no: 6, time between send and ack: 1004.149000 ms
+Msg no: 7, time between send and ack: 0.838000 ms
+Msg no: 8, time between send and ack: 1003.942000 ms
+Msg no: 9, time between send and ack: 1.417000 ms
+Msg no: 10, time between send and ack: 1004.430000 ms
+Msg no: 11, time between send and ack: 0.874000 ms
+Msg no: 12, time between send and ack: 1001.200000 ms
+Msg no: 13, time between send and ack: 1.035000 ms
+Msg no: 14, time between send and ack: 1004.844000 ms
+Msg no: 15, time between send and ack: 1.088000 ms
+Msg no: 16, time between send and ack: 1003.527000 ms
+Msg no: 17, time between send and ack: 1.865000 ms
+Msg no: 18, time between send and ack: 1001.284000 ms
+Msg no: 19, time between send and ack: 1.139000 ms
+Msg no: 20, time between send and ack: 1005.432000 ms
+Msg no: 21, time between send and ack: 1.227000 ms
