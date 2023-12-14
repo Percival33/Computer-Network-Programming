@@ -1,6 +1,3 @@
-//
-// Created by Marcin Jarczewski and Michał Sobiech on 06/12/2023.
-//
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,6 +9,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include <netinet/in.h>
 #include "common.h"
 #include "serialize.h"
 #include "node.h"
@@ -36,35 +34,66 @@ int main(int argc, char *argv[]) {
     }
 
     // Server address
-    struct sockaddr serverAddr;
+//    struct sockaddr serverAddr;
     int serverAddrLen;
+//    memset(&serverAddr, 0, sizeof(serverAddr));
+
+    struct sockaddr_storage serverAddr; // Używamy sockaddr_storage, który obsługuje zarówno IPv4, jak i IPv6
     memset(&serverAddr, 0, sizeof(serverAddr));
 
-    // Address family
-    int address_family;
 
-    // Setup the server address
+//    // Address family
+//    int address_family;
+
+//    // Setup the server address
+//    if (ip_type == IPV4) {
+//        address_family = AF_INET;
+//
+//        ((struct sockaddr_in *) &serverAddr)->sin_family = address_family;
+//        ((struct sockaddr_in *) &serverAddr)->sin_port = htons(port);
+//        inet_pton(address_family, ip, (struct sockaddr_in *) &serverAddr);
+//
+//        serverAddrLen = sizeof(struct sockaddr_in);
+//    }
+//    else if (ip_type == IPV6) {
+//        int address_family = AF_INET6;
+//
+//        ((struct sockaddr_in6 *) &serverAddr)->sin6_family = address_family;
+//        ((struct sockaddr_in6 *) &serverAddr)->sin6_port = htons(port);
+//        inet_pton(address_family, ip, (struct sockaddr_in6 *) &serverAddr);
+//
+//        serverAddrLen = sizeof(struct sockaddr_in6);
+//    }
+
     if (ip_type == IPV4) {
-        address_family = AF_INET;
-
-        ((struct sockaddr_in *) &serverAddr)->sin_family = address_family;
-        ((struct sockaddr_in *) &serverAddr)->sin_port = htons(port);
-        inet_pton(address_family, ip, (struct sockaddr_in *) &serverAddr);
-
+        struct sockaddr_in *serverAddr4 = (struct sockaddr_in *)&serverAddr;
+        serverAddr4->sin_family = AF_INET;
+        serverAddr4->sin_port = htons(port);
+        inet_pton(AF_INET, ip, &serverAddr4->sin_addr);
         serverAddrLen = sizeof(struct sockaddr_in);
     }
     else if (ip_type == IPV6) {
-        int address_family = AF_INET6;
-
-        ((struct sockaddr_in6 *) &serverAddr)->sin6_family = address_family;
-        ((struct sockaddr_in6 *) &serverAddr)->sin6_port = htons(port);
-        inet_pton(address_family, ip, (struct sockaddr_in6 *) &serverAddr);
-
+        struct sockaddr_in6 *serverAddr6 = (struct sockaddr_in6 *)&serverAddr;
+        serverAddr6->sin6_family = AF_INET6;
+        serverAddr6->sin6_port = htons(port);
+        inet_pton(AF_INET6, ip, &serverAddr6->sin6_addr);
         serverAddrLen = sizeof(struct sockaddr_in6);
     }
 
-    // Create a socket
-    int sockfd = socket(address_family, SOCK_STREAM, 0);
+//    // Create a socket
+//    int sockfd = socket(address_family, SOCK_STREAM, 0);
+//    if (sockfd < 0) {
+//        perror("Socket creation failed");
+//        exit(EXIT_FAILURE);
+//    }
+
+    int sockfd;
+    if (ip_type == IPV4) {
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    } else {
+        sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    }
+
     if (sockfd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
@@ -83,15 +112,16 @@ int main(int argc, char *argv[]) {
     //     printf("i: %d, bajt: %d\n", i, buf[i]);
     // }
 
-    // if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
-    //     LOG_ERROR("connect() failed");
-    //     perror("connect failed");
-    // }
 
-    // if (write(sockfd, buf, size) == -1) {
-    //     LOG_ERROR("writing on stream socket");
-    //     perror("writing on stream socket");
-    // }
+     if (connect(sockfd, (struct sockaddr*)&serverAddr, serverAddrLen) != 0) {
+         LOG_ERROR("connect() failed");
+         perror("connect failed");
+     }
+
+     if (write(sockfd, buf, size) == -1) {
+         LOG_ERROR("writing on stream socket");
+         perror("writing on stream socket");
+     }
 
     // Node* C = unpack(buf);
     // print_nodes(C);
