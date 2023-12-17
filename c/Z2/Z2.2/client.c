@@ -1,3 +1,6 @@
+//
+// Created by Michał Sobiech and Marcin Jarczewski on 04/12/2023.
+//
 
 #include <stdlib.h>
 #include <stdio.h>
