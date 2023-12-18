@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_SIZE_KB 512
+#define DATA_SIZE_KB 1
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     // Generate a lot of data
-    uint8_t data_buf[KB];
+    uint8_t data_buf[DATA_SIZE_KB * KB];
     for (int i = 0; i < sizeof(data_buf); i++) {
         data_buf[i] = (uint8_t) 'a';
     }
