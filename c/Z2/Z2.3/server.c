@@ -10,7 +10,7 @@
 
 #define PORT 8888
 #define BACKLOG 1  // Number of pending connections queue will hold
-#define RCVBUF_SIZE_KB 1024
+#define RCVBUF_SIZE_KB 16
 #define RCVBUF_SIZE RCVBUF_SIZE_KB * KB 
 
 void start_server(const char *host, int port) {
@@ -51,7 +51,7 @@ void start_server(const char *host, int port) {
         }
 
         // Change the receive buffer size
-        long int rcvbufSize = RCVBUF_SIZE;
+        int rcvbufSize = RCVBUF_SIZE;
         if (setsockopt(new_socket, SOL_SOCKET, SO_RCVBUF, &rcvbufSize, sizeof(rcvbufSize)) != 0) {
             perror("setsockopt SO_RCVBUF failed");
             exit(EXIT_FAILURE);
@@ -70,7 +70,7 @@ void start_server(const char *host, int port) {
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
         
             // Artificial delay
-            sleep(1.5f);
+            sleep(2);
         }
 
         close(new_socket);

@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
     // Generate a lot of data
-    uint8_t data_buf[DATA_SIZE_KB * KB];
+    uint8_t data_buf[KB];
     for (int i = 0; i < sizeof(data_buf); i++) {
         data_buf[i] = (uint8_t) 'a';
     }
@@ -84,6 +84,7 @@ int main(int argc, char *argv[]) {
         // usleep(10 * 1000);
 
         msg_counter++;
+        if (msg_counter * KB >= (1<<18)) break;
     }
 
     // Close the socket
