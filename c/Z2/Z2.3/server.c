@@ -9,16 +9,20 @@
 #include "serialize.h"
 
 #define PORT 8888
-#define BACKLOG 1  // Number of pending connections queue will hold
-#define RCVBUF_SIZE_KB 16
+#define BACKLOG 10  // Number of pending connections queue will hold
+
+#define RCVBUF_SIZE_KB 4
 #define RCVBUF_SIZE RCVBUF_SIZE_KB * KB 
+
+#define READ_BUF_SIZE_KB 1
+#define READ_BUF_SIZE READ_BUF_SIZE_KB * KB
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
-    uint8_t buffer[RCVBUF_SIZE];
+    uint8_t read_buffer[READ_BUF_SIZE];
 
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -58,20 +62,20 @@ void start_server(const char *host, int port) {
         }
 
         // Buffer size printing for debugging
-        int buf, optlen;
-        optlen = sizeof(buf);
-        if (getsockopt(new_socket, SOL_SOCKET, SO_RCVBUF, &buf, &optlen) < 0) {
+        int receive_buffer_size, optlen;
+        optlen = sizeof(receive_buffer_size);
+        if (getsockopt(new_socket, SOL_SOCKET, SO_RCVBUF, &receive_buffer_size, &optlen) < 0) {
             perror("Error getting SO_RCVBUF");
             close(new_socket);
             return 1;
         }
-        printf("Receive buffer size = %d\n", buf);
+        printf("Receive buffer size = %d\n", receive_buffer_size);
 
         printf("Connected by %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
         while (1) {
             // int bytes_read = read(new_socket, buffer, sizeof(buffer));
-            int bytes_read = read(new_socket, buffer, sizeof(buffer));
+            int bytes_read = read(new_socket, read_buffer, sizeof(read_buffer));
             if (bytes_read == 0) {
                 break;
             }

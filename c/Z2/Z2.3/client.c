@@ -49,14 +49,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Buffer size printing for debugging
-    int buf, optlen;
-    optlen = sizeof(buf);
-    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &buf, &optlen) < 0) {
+    int send_buffer_size, optlen;
+    optlen = sizeof(send_buffer_size);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &send_buffer_size, &optlen) < 0) {
         perror("Error getting SO_RCVBUF");
         close(sockfd);
         return 1;
     }
-    printf("Send buffer size = %d\n", buf);
+    printf("Send buffer size = %d\n", send_buffer_size);
 
     // Server address
     memset(&serverAddr, 0, sizeof(serverAddr));
@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
 
         printf("Msg no: %d, time between send and ack: %f ms\n", msg_counter, total_time);
         fflush(stdout);
-        // usleep(10 * 1000);
 
         msg_counter++;
-        if (msg_counter * KB >= (1<<18)) break;
+    
+        // if (msg_counter * KB >= (1<<18)) break;
     }
 
     // Close the socket
