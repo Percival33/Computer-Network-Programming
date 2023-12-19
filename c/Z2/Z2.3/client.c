@@ -48,6 +48,16 @@ int main(int argc, char *argv[]) {
         exit(ERROR_SO_SNDBUF_FAILED);
     }
 
+    // Buffer size printing for debugging
+    int buf, optlen;
+    optlen = sizeof(buf);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &buf, &optlen) < 0) {
+        perror("Error getting SO_RCVBUF");
+        close(sockfd);
+        return 1;
+    }
+    printf("Send buffer size = %d\n", buf);
+
     // Server address
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;

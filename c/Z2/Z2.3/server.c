@@ -57,6 +57,16 @@ void start_server(const char *host, int port) {
             exit(EXIT_FAILURE);
         }
 
+        // Buffer size printing for debugging
+        int buf, optlen;
+        optlen = sizeof(buf);
+        if (getsockopt(new_socket, SOL_SOCKET, SO_RCVBUF, &buf, &optlen) < 0) {
+            perror("Error getting SO_RCVBUF");
+            close(new_socket);
+            return 1;
+        }
+        printf("Receive buffer size = %d\n", buf);
+
         printf("Connected by %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
         while (1) {
