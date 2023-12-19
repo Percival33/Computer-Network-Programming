@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include "node.h"
 #include "serialize.h"
+#include <time.h>
 
 #define PORT 8888
 #define BACKLOG 10  // Number of pending connections queue will hold
@@ -16,6 +17,10 @@
 
 #define READ_BUF_SIZE_KB 1
 #define READ_BUF_SIZE READ_BUF_SIZE_KB * KB
+
+#define SLEEP_MS 500
+#define SLEEP_US SLEEP_MS * 1000
+
 
 void start_server(const char *host, int port) {
     int server_fd, new_socket;
@@ -84,7 +89,7 @@ void start_server(const char *host, int port) {
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
         
             // Artificial delay
-            sleep(2);
+            usleep(SLEEP_US);
         }
 
         close(new_socket);
