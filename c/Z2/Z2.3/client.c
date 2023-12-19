@@ -15,7 +15,7 @@
 #include "serialize.h"
 #include "node.h"
 
-#define DATA_SIZE_KB 512
+#define DATA_SIZE_KB 1
 
 int main(int argc, char *argv[]) {
     printf("Z2.3a C client\n");
@@ -47,6 +47,16 @@ int main(int argc, char *argv[]) {
         perror("setsockopt SO_SNDBUF failed");
         exit(ERROR_SO_SNDBUF_FAILED);
     }
+
+    // Buffer size printing for debugging
+    int send_buffer_size, optlen;
+    optlen = sizeof(send_buffer_size);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &send_buffer_size, &optlen) < 0) {
+        perror("Error getting SO_RCVBUF");
+        close(sockfd);
+        return 1;
+    }
+    printf("Send buffer size = %d\n", send_buffer_size);
 
     // Server address
     memset(&serverAddr, 0, sizeof(serverAddr));
@@ -81,9 +91,11 @@ int main(int argc, char *argv[]) {
 
         printf("Msg no: %d, time between send and ack: %f ms\n", msg_counter, total_time);
         fflush(stdout);
-        // usleep(10 * 1000);
 
         msg_counter++;
+    
+        // 256 kB
+        if (msg_counter * KB >= (1<<18)) break;
     }
 
     // Close the socket
