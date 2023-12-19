@@ -94,7 +94,8 @@ int main(int argc, char *argv[]) {
 
         msg_counter++;
     
-        // if (msg_counter * KB >= (1<<18)) break;
+        // 256 kB
+        if (msg_counter * KB >= (1<<18)) break;
     }
 
     // Close the socket

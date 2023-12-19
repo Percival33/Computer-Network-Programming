@@ -18,7 +18,7 @@
 #define READ_BUF_SIZE_KB 1
 #define READ_BUF_SIZE READ_BUF_SIZE_KB * KB
 
-#define SLEEP_MS 500
+#define SLEEP_MS 200
 #define SLEEP_US SLEEP_MS * 1000
 
 
@@ -88,8 +88,11 @@ void start_server(const char *host, int port) {
             float bytes_read_kB_formatted = ((float) bytes_read)/((float)KB);
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
         
+            // printf("START\n");
             // Artificial delay
             usleep(SLEEP_US);
+            // printf("END\n");
+
         }
 
         close(new_socket);
