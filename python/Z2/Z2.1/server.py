@@ -1,3 +1,7 @@
+#
+# Created by Bartek Jasinski on 04/12/2023.
+#
+
 from dataclasses import dataclass
 import socket
 import struct

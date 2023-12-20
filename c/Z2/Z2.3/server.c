@@ -1,3 +1,7 @@
+//
+// Created by Marcin Jarczewski and Michał Sobiech on 04/12/2023.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +22,7 @@
 #define READ_BUF_SIZE_KB 1
 #define READ_BUF_SIZE READ_BUF_SIZE_KB * KB
 
-#define SLEEP_MS 200
+#define SLEEP_MS 2000
 #define SLEEP_US SLEEP_MS * 1000
 
 
