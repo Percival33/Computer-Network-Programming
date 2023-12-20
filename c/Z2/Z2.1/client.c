@@ -41,15 +41,6 @@ int main(int argc, char *argv[]) {
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip);
 
-    // Node* B = create_node();
-    // set_values(B, 3, 4, "def\0", 4);
-    // Node* C = create_node();
-    // set_values(C, 5, 6, "test\0", 5);
-    // add_node(B, C);
-
-    // print_nodes(B);
-
-
     Node* head = create_node();
     set_values(head, 3, 4, "def\0", 4);
 
@@ -69,9 +60,6 @@ int main(int argc, char *argv[]) {
             text[k] = 'a';
         }
         text[textLength - 1] = '\0';
-        
-        // char *text = "test\0";
-        // int textLength = 5;
 
         set_values(newNode, 5, 6, text, textLength);
         add_node(tail, newNode);

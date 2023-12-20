@@ -88,10 +88,8 @@ void start_server(const char *host, int port) {
             float bytes_read_kB_formatted = ((float) bytes_read)/((float)KB);
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
         
-            // printf("START\n");
             // Artificial delay
             usleep(SLEEP_US);
-            // printf("END\n");
 
         }
 
