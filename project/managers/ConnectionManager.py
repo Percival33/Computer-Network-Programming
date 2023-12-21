@@ -1,4 +1,8 @@
 from fastapi import WebSocket
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class ConnectionManager:
@@ -13,8 +17,11 @@ class ConnectionManager:
         self.active_connections.pop(board_id)
 
     async def send_to_board(self, board_id: str, message: str):
-        ws = self.active_connections[board_id]
-        await ws.send_json(message)
+        try:
+            ws = self.active_connections[board_id + 'n']
+            await ws.send_json(message)
+        except KeyError:
+            logger.error(f"No active connection to board {board_id}")
 
     async def broadcast(self, message: str):
         for connection in self.active_connections.values():

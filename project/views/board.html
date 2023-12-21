@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Board View</title>
+    </head>
+    <body>
+        <h1>Board Dashboard</h1>
+        <h2>Your ID: <span id="ws-id"></span></h2>
+        <form id="registerForm">
+            <label>Board ID: <input type="text" id="boardId" autocomplete="off"/></label>
+            <label>Category: <input type="text" id="category" autocomplete="off"/></label>
+            <button type="submit">Register</button>
+        </form>
+        <ul id='messages'></ul>
+        <script>
+            var ws;
+            document.querySelector("#ws-id").textContent = Date.now();
+
+            document.getElementById("registerForm").onsubmit = function(event) {
+                event.preventDefault();
+                var boardId = document.getElementById("boardId").value;
+                var category = document.getElementById("category").value;
+                if(boardId && category) {
+                    ws = new WebSocket(`ws://localhost:8000/ws/${boardId}/${category}`);
+                    ws.onmessage = function(event) {
+                        var messages = document.getElementById('messages');
+                        var message = document.createElement('li');
+                        var content = document.createTextNode(event.data);
+                        message.appendChild(content);
+                        messages.appendChild(message);
+                    };
+                } else {
+                    alert("Please enter both Board ID and Category.");
+                }
+            }
+        </script>
+    </body>
+</html>
