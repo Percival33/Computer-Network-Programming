@@ -15,29 +15,55 @@ html = """
         <form action="" onsubmit="sendMessage(event)">
             <label>Board ID: <input type="text" id="boardId" autocomplete="off" value=""/></label>
             <label>Category: <input type="text" id="category" autocomplete="off" value="some-category"/></label>
-            <button onclick="connect(event)">Connect</button>
+            <button type="button" onclick="connect()">Connect</button>
             <hr>
             <label>Ad text: <input type="text" id="adText" autocomplete="off"/></label>
-            <button>Send</button>
+            <button type="submit">Send</button>
         </form>
         <ul id='messages'>
         </ul>
         <script>
-            var client_id = Date.now()
-            document.querySelector("#ws-id").textContent = board_id;
-            var ws = new WebSocket(`ws://localhost:8000/ws/${board_id}`);
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
+            var ws;
+            var client_id = Date.now();
+            document.querySelector("#ws-id").textContent = client_id;
+
+            function connect() {
+                var boardId = document.getElementById("boardId").value;
+                if(boardId) {
+                    ws = new WebSocket(`ws://localhost:8000/ws/${boardId}`);
+                    ws.onmessage = function(event) {
+                        var messages = document.getElementById('messages');
+                        var message = document.createElement('li');
+                        var content = document.createTextNode(event.data);
+                        message.appendChild(content);
+                        messages.appendChild(message);
+                    };
+
+                    ws.onopen = function(event) {
+                        console.log("Connected to WebSocket");
+                    };
+
+                    ws.onerror = function(event) {
+                        console.error("WebSocket error observed:", event);
+                    };
+
+                    ws.onclose = function(event) {
+                        console.log("WebSocket connection closed:", event);
+                    };
+                } else {
+                    alert("Please enter a Board ID to connect.");
+                }
+            }
+
             function sendMessage(event) {
-                var input = document.getElementById("adText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
+                event.preventDefault();
+                if(ws && ws.readyState === WebSocket.OPEN) {
+                    var input = document.getElementById("adText");
+                    ws.send(input.value);
+                    input.value = '';
+                } else {
+                    alert("WebSocket is not connected.");
+                }
             }
         </script>
     </body>
@@ -45,8 +71,8 @@ html = """
 """
 
 app = FastAPI()
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 class ConnectionManager:
@@ -84,10 +110,12 @@ async def websocket_endpoint(websocket: WebSocket, board_id: str):
     try:
         while True:
             data = await websocket.receive_text()
+            logger.info(f'Received message from Board {board_id}: {data}')
             await manager.broadcast(f"New ad: {data}")
     except WebSocketDisconnect:
         manager.disconnect(board_id)
         logger.info(f'Board {board_id} disconnected')
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
