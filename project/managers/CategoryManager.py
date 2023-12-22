@@ -14,4 +14,5 @@ class CategoryManager:
                 del self.category_mapping[category]
 
     def get_boards_in_category(self, category: str):
+        # TODO: add handling non existing categories
         return self.category_mapping.get(category, set())

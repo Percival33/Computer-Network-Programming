@@ -7,7 +7,6 @@ router = APIRouter()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
 with open("views/board.html", "r") as f:
     board_html = f.read()
 
@@ -17,7 +16,7 @@ async def get():
     return HTMLResponse(board_html)
 
 
-@router.websocket("/ws/{board_id}")
+@router.websocket("/ws/{board_id}/{category}")
 async def websocket_endpoint(websocket: WebSocket, board_id: str, category: str):
     # TODO: extract this methods
     await connection_manager.connect(websocket, board_id)

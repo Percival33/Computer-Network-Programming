@@ -1,7 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from beans import connection_manager, category_manager
-import logging
+from fastapi import FastAPI
 
 from routers.history_router import router as history_router
 from routers.board_router import router as board_router

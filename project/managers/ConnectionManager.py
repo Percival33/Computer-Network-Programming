@@ -17,8 +17,9 @@ class ConnectionManager:
         self.active_connections.pop(board_id)
 
     async def send_to_board(self, board_id: str, message: str):
+        # TODO: decide if more complex data structure is needed to be sent
         try:
-            ws = self.active_connections[board_id + 'n']
+            ws = self.active_connections[board_id]
             await ws.send_json(message)
         except KeyError:
             logger.error(f"No active connection to board {board_id}")

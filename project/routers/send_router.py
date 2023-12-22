@@ -6,14 +6,17 @@ router = APIRouter()
 
 with open("views/send-ad.html", "r") as f:
     send_html = f.read()
+
+
 @router.post("/")
-async def send_ad(category: str = Form(...), adText: str = Form(...)):
+async def send_ad(category: str = Form(...), ad_text: str = Form(...)):
     # TODO: create method send_to_category?
     for target_board_id in category_manager.get_boards_in_category(category):
         if target_board_id in connection_manager.active_connections:
-            await connection_manager.send_to_board(target_board_id, adText)
+            await connection_manager.send_to_board(target_board_id, ad_text)
 
-    return {"message": f"Ad sent: {adText}"}
+    return {"message": f"Ad sent: {ad_text}"}
+
 
 @router.get("/")
 async def get():
