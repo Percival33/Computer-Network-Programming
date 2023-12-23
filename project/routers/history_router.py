@@ -1,9 +1,9 @@
 from fastapi import APIRouter
-from beans import category_manager
+from beans import global_category_manager
 
 router = APIRouter()
 
 
 @router.get("/{category}")
 async def get_history(category: str):
-    return category_manager.get(category, [])
+    return global_category_manager.get_category_manager(category).get_history()

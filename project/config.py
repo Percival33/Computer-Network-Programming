@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class CommonSettings(BaseSettings):
@@ -13,8 +13,8 @@ class ServerSettings(BaseSettings):
 
 class DatabaseSettings(BaseSettings):
     # TODO: add default values for docker?
-    DB_URL: str
-    DB_NAME: str
+    DB_URL: str = ''
+    DB_NAME: str = ''
 
 
 class Settings(CommonSettings, ServerSettings, DatabaseSettings):

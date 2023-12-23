@@ -1,18 +1,28 @@
+from managers.ConnectionManager import ConnectionManager
+from fastapi import WebSocket
+
+
 class CategoryManager:
-    def __init__(self):
-        self.category_mapping: dict[str, set[str]] = {}
+    def __init__(self, name: str):
+        self.boards: set[str] = set()
+        self.name: str = name
+        self.connection_manager = ConnectionManager()
+        self.ads: list[str] = []
 
-    def add_to_category(self, board_id: str, category: str):
-        if category not in self.category_mapping:
-            self.category_mapping[category] = set()
-        self.category_mapping[category].add(board_id)
+    async def add_to_category(self, ws: WebSocket, board_id: str):
+        self.boards.add(board_id)
+        await self.connection_manager.connect(ws, board_id)
 
-    def remove_from_category(self, board_id: str, category: str):
-        if category in self.category_mapping:
-            self.category_mapping[category].discard(board_id)
-            if not self.category_mapping[category]:
-                del self.category_mapping[category]
+    async def broadcast(self, message: str):
+        self.ads.append(message)
+        await self.connection_manager.broadcast(message)
 
-    def get_boards_in_category(self, category: str):
-        # TODO: add handling non existing categories
-        return self.category_mapping.get(category, set())
+    def remove_from_category(self, board_id: str):
+        self.boards.discard(board_id)
+        self.connection_manager.disconnect(board_id)
+
+    def get_boards_in_category(self):
+        return self.boards
+
+    def get_history(self):
+        return self.ads
