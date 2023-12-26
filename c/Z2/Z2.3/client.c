@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
         fflush(stdout);
 
         msg_counter++;
-    
+
         // 256 kB
         if (msg_counter * KB >= (1<<18)) break;
     }

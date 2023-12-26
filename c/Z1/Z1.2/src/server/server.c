@@ -88,13 +88,13 @@ int main(int argc, char *argv[]) {
 
             // The datagram is the first packet in a transmission.
             // Make a new transmission handling thread.
-            
+
             // The thread will send a response:
             response_t response_to_client = {
                 (uint16_t) htons(datagram->id),
                 (uint8_t) htons(0)
             };
-            
+
             client_thread_data_t *client_thread_data = add_client_thread_data_to_list(
                 &client_threads_data_list,
                 (client_thread_data_t) {
@@ -127,14 +127,14 @@ int main(int argc, char *argv[]) {
             }
 
             // Response belongs to a thread. Proceed.
-            
+
             // The thread for this transmission exists.
             // Find it and inform it, that the transmission has ended
             client_thread_data_t *thread_data = get_client_thread_data(&client_threads_data_list, index);
-            
+
             thread_data->confirmation_received = true;
             remove_client_thread_data_from_list(&client_threads_data_list, index);
-            
+
             int expected_packet_id = thread_data->id.packet_id;
             if (response_is_valid(response, expected_packet_id)) {
                 print_response_data(response);

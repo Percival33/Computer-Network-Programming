@@ -48,7 +48,7 @@ void fillPairs(key_value_pair_t pairs[], int size) {
 
 void send_message_with_retry(message_args_t *message) {
     // Send message and if response is absent then periodically resend the message
-    
+
     resender_args_t timer_args;
     timer_args.send_message_args = message;
     timer_args.message_received = false;

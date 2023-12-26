@@ -14,7 +14,7 @@ set -e
 echo "Python server setup..."
 
 
-DOCKER_SCRIPTS_DIR=$1   
+DOCKER_SCRIPTS_DIR=$1
 EXERCISE_DIR=$2             # something like .../python/Z2/Z2.1
 SERVER_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
 SCP_DEST_DIR=$4             # e.g. ~/PSI/lab/Z2/Z2.1
