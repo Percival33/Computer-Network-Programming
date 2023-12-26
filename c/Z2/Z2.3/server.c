@@ -17,7 +17,7 @@
 #define BACKLOG 10  // Number of pending connections queue will hold
 
 #define RCVBUF_SIZE_KB 4
-#define RCVBUF_SIZE RCVBUF_SIZE_KB * KB 
+#define RCVBUF_SIZE RCVBUF_SIZE_KB * KB
 
 #define READ_BUF_SIZE_KB 1
 #define READ_BUF_SIZE READ_BUF_SIZE_KB * KB
@@ -91,7 +91,7 @@ void start_server(const char *host, int port) {
 
             float bytes_read_kB_formatted = ((float) bytes_read)/((float)KB);
             printf("Read %.2f kB of data.\n", bytes_read_kB_formatted);
-        
+
             // Artificial delay
             usleep(SLEEP_US);
 

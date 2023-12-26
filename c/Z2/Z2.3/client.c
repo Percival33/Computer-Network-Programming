@@ -68,6 +68,28 @@ int main(int argc, char *argv[]) {
     uint8_t data_buf[DATA_SIZE_KB * KB];
     for (int i = 0; i < sizeof(data_buf); i++) {
         data_buf[i] = (uint8_t) 'a';
+    Node* tail = head;
+    int nodeCount = 10;
+    int minLength = 1;
+    char text[minLength + nodeCount + 1];
+    for (int i = 0; i < nodeCount; i++) {
+        Node* newNode = create_node();
+
+        // // Expected text: something like "aaaaaa\0",
+        // // Each time longer by 1 'a'
+
+        int textLength = minLength + i + 1;
+        for (int k = 0; k < textLength - 1; k++) {
+            text[k] = 'a';
+        }
+        text[textLength - 1] = '\0';
+
+        // char *text = "test\0";
+        // int textLength = 5;
+
+        set_values(newNode, 5, 6, text, textLength);
+        add_node(tail, newNode);
+        tail = newNode;
     }
 
     if (connect(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) != 0) {
@@ -93,7 +115,7 @@ int main(int argc, char *argv[]) {
         fflush(stdout);
 
         msg_counter++;
-    
+
         // 256 kB
         if (msg_counter * KB >= (1<<18)) break;
     }

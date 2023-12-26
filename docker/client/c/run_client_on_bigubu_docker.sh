@@ -15,7 +15,7 @@ set -e
 echo "C client setup..."
 
 
-DOCKER_SCRIPTS_DIR=$1 
+DOCKER_SCRIPTS_DIR=$1
 EXERCISE_DIR=$2             # something like .../Z2/Z2.1
 CLIENT_CONTAINER_NAME=$3    # e.g. z41_z_2_1_server
 SERVER_CONTAINER_NAME=$4    # e.g. z41_z_2_1_server

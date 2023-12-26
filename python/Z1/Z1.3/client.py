@@ -1,7 +1,7 @@
 import socket
 import argparse
 
-SERVER_IP = '127.0.0.1'
+SERVER_IP = "127.0.0.1"
 SERVER_PORT = 8088
 BUF_SIZE = 1024
 
@@ -23,7 +23,7 @@ def main():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sockfd:
         datagram_size = 1
         while True:
-            datagram = b'A' * datagram_size
+            datagram = b"A" * datagram_size
             try:
                 sockfd.sendto(datagram, (arguments.ip, arguments.port))
                 print(f"INFO: Data sent: size = {datagram_size} bytes")

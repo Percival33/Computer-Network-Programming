@@ -24,7 +24,7 @@ bool datagram_is_valid(data_t *datagram) {
     // - After the declared pairs there are only zeroes,
     // - The number of pairs does not exceed the max number of
     // pairs that can fit in a packet
-    
+
     // TODO parametrize
 
     int count = datagram->count;
@@ -60,7 +60,7 @@ void print_datagram_data(data_t *datagram) {
     printf("Packet id: %d\n", datagram->id);
     printf("Pairs: \n");
     char printable_key[KEY_SIZE + 1];
-    char printable_value[VALUE_SIZE + 1]; 
+    char printable_value[VALUE_SIZE + 1];
     printable_key[KEY_SIZE] = '\0';
     printable_value[VALUE_SIZE] = '\0';
     for (int i = 0; i < datagram->count; i++) {

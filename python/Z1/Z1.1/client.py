@@ -2,14 +2,14 @@ import socket
 import struct
 import argparse
 
-SERVER_IP = '127.0.0.1'
+SERVER_IP = "127.0.0.1"
 SERVER_PORT = 8088
 BUF_SIZE = 1024
 STR_SIZE = 2
 
 MAX_PAYLOAD_SIZE = 127
-key_value_pair_t = struct.Struct('!2s2s')
-message_t = struct.Struct('!HH' + f'{4 * MAX_PAYLOAD_SIZE}s')
+key_value_pair_t = struct.Struct("!2s2s")
+message_t = struct.Struct("!HH" + f"{4 * MAX_PAYLOAD_SIZE}s")
 
 
 def get_parser():
@@ -24,7 +24,7 @@ def parse_arguments(parser):
 
 
 def fill_payload_with_zeros(count):
-    zero_pair = b'\0\0'
+    zero_pair = b"\0\0"
     return zero_pair * (MAX_PAYLOAD_SIZE - count)
 
 
@@ -33,11 +33,11 @@ def main():
         sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         idx = 1
         count = 5
-        pairs = [('ef', '12'), ('ef', '34'), ('ef', '34'), ('ef', '34'), ('ef', '34')]
+        pairs = [("ef", "12"), ("ef", "34"), ("ef", "34"), ("ef", "34"), ("ef", "34")]
 
         few_pairs_packed = [key_value_pair_t.pack(k.encode(), v.encode()) for k, v in pairs]
-        pairs_packed = b''.join(few_pairs_packed)
-        
+        pairs_packed = b"".join(few_pairs_packed)
+
         if len(few_pairs_packed) < MAX_PAYLOAD_SIZE:
             zero_payload = fill_payload_with_zeros(len(few_pairs_packed))
             pairs_packed += zero_payload
@@ -52,7 +52,7 @@ def main():
 
         response, server = sockfd.recvfrom(int(arguments.port))
         print(f"INFO: Response received from server: {response}")
-        
+
     except struct.error as e:
         print(f"An error occurred with the struct: {e}")
 

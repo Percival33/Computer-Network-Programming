@@ -63,4 +63,3 @@ ssh $SERVER_ADDRESS << EOF
     sed -i -e 's/\r$//' docker_c_client_startup.sh
     ./docker_c_client_startup.sh
 EOF
- 

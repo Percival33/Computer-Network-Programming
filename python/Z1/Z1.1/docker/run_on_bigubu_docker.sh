@@ -61,4 +61,3 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
     sed -i -e 's/\r$//' docker_python_client_startup.sh
     ./docker_python_client_startup.sh
 EOF
- 

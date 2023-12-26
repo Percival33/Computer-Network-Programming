@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
         Node* A = unpack(buf);
         print_nodes(A);
         delete_node(A);
-    }    
+    }
 
     // Close the socket
     close(sockfd);

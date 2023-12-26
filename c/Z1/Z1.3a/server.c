@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         sprintf(response, "ok");
         printf("Sending response (network encoded): %s\n", response);
         if (sendto(sockfd, response, sizeof(response), 0,
-            (struct sockaddr*) &client_address, 
+            (struct sockaddr*) &client_address,
             sizeof(client_address)) == -1
         ) {
             perror("Failed to send a response");

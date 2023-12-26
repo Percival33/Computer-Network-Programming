@@ -1,9 +1,9 @@
 
 ## Serialized structure
 - uint16: number of nodes
-- uint16: value a 
+- uint16: value a
 - uint32: value b
-- uint16: length of string 
+- uint16: length of string
 - uint8: string characters
 
 Example (serialized to binary):

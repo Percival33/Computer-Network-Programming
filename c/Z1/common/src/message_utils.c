@@ -29,7 +29,7 @@ int send_message(message_args_t *args) {
 int receive_message(message_args_t *args) {
     int data_length = recvfrom(
         args->sockfd,
-        args->message_buffer, 
+        args->message_buffer,
         args->message_buffer_length,
         0,
         (struct sockaddr *) args->to_address,
