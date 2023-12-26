@@ -13,13 +13,13 @@ class ServerSettings(BaseSettings):
 
 class DatabaseSettings(BaseSettings):
     # TODO: add default values for docker?
-    DB_URL: str = ''
-    DB_NAME: str = ''
+    DB_URL: str = ""
+    DB_NAME: str = ""
 
 
 class Settings(CommonSettings, ServerSettings, DatabaseSettings):
     class Config:
-        env_file = '.env', '.env.prod'
+        env_file = ".env", ".env.prod"
 
 
 settings = Settings()
