@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Board View</title>
+    <style>
+        #successMessage {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: lightgreen;
+            text-align: center;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #unregisterButton {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="successMessage">Board successfully registered!</div>
+<h1>Board Dashboard</h1>
+<h2>Board ID: <span id="boardId"></span></h2>
+<h3>Current Category: <span id="currentCategory"></span></h3>
+<h3>Current Ad: <span id="currentAd"></span></h3>
+<form id="registerForm">
+    <label>Category: <input type="text" id="category" autocomplete="off"/></label>
+    <button type="submit">Register</button>
+</form>
+<button id="unregisterButton" onclick="unregister()">Unregister</button>
+<h4>Past Ads</h4>
+<ul id='pastAds'></ul>
+<script>
+    var ws;
+    var boardIdElement = document.getElementById("boardId");
+    var currentCategoryElement = document.getElementById("currentCategory");
+    boardIdElement.textContent = crypto.randomUUID();
+
+    function unregister() {
+        if (ws) {
+            ws.close();
+        }
+        currentCategoryElement = '';
+    }
+
+    function updateUIForRegisteredState(isRegistered) {
+        document.getElementById("registerForm").style.display = isRegistered ? 'none' : 'block';
+        document.getElementById("unregisterButton").style.display = isRegistered ? 'block' : 'none';
+        if (!isRegistered) {
+            currentCategoryElement.textContent = '';
+        }
+    }
+
+    document.getElementById("registerForm").onsubmit = function (event) {
+        event.preventDefault();
+        var boardId = boardIdElement.textContent;
+        var category = document.getElementById("category").value;
+        if (category) {
+            currentCategoryElement.textContent = category;
+            ws = new WebSocket(`ws://localhost:8000/board/ws/${boardId}/${category}`);
+            ws.onopen = function (event) {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(function () {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+                updateUIForRegisteredState(true);
+            };
+            ws.onclose = function (event) {
+                updateUIForRegisteredState(false);
+            };
+            ws.onmessage = function (event) {
+                console.log(event);
+                // TODO: consider receiving JSON
+                var adData = event.data;
+                var currentAdElement = document.getElementById('currentAd');
+                var pastAdsElement = document.getElementById('pastAds');
+
+                // Update current ad
+                currentAdElement.textContent = adData + ' (Received at: ' + new Date().toLocaleTimeString() + ')';
+
+                // Add to past ads
+                var adItem = document.createElement('li');
+                adItem.textContent = adData + ' (Received at: ' + new Date().toLocaleTimeString() + ')';
+                pastAdsElement.appendChild(adItem);
+            };
+        } else {
+            alert("Please enter a Category.");
+        }
+    }
+</script>
+</body>
+</html>
