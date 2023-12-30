@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from beans import global_category_manager
+from beans.global_category_manager import global_category_manager
 import logging
 
 router = APIRouter()
