@@ -13,11 +13,11 @@ class DatabaseManager:
     def __init__(self) -> None:
         self.db_file = "example.db"  # TODO parametrize
         self.setup()
+        logger.info("DatabaseManager setup")
 
     def setup(self) -> None:
         self.setup_categories_table()
         self.setup_ads_table()
-        self.add_category("test")
 
     def setup_ads_table(self):
         # Create the table if it does not exist
@@ -80,7 +80,7 @@ class DatabaseManager:
         creation_date_str = creation_date.strftime("%Y.%m.%d %H:%M:%S")
         command = f"""
             INSERT INTO ads (text, creation_date)
-            VALUES ('{text}', {creation_date_str})
+            VALUES ('{text}', DATE('{creation_date_str}'))
         """
         self.execute_command(command)
 
