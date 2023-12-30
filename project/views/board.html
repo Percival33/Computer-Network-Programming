@@ -43,7 +43,19 @@
         if (ws) {
             ws.close();
         }
-        currentCategoryElement = '';
+        // Reset the current ad element
+        var currentAdElement = document.getElementById('currentAd');
+        currentAdElement.textContent = '';
+
+        // Reset the current ad element
+        var currentAdElement = document.getElementById('currentAd');
+        currentAdElement.textContent = '';
+
+        // Remove all children elements
+        var pastAdsElement = document.getElementById('pastAds');
+        while (pastAdsElement.firstChild) {
+            pastAdsElement.removeChild(pastAdsElement.firstChild)
+        }
     }
 
     function updateUIForRegisteredState(isRegistered) {
