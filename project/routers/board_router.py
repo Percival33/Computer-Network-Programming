@@ -31,3 +31,6 @@ async def websocket_endpoint(websocket: WebSocket, board_id: str, category: str)
     except WebSocketDisconnect:
         category_manager.remove_from_category(board_id)
         logger.info(f"Board {board_id} disconnected")
+
+
+

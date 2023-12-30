@@ -12,6 +12,8 @@ class CategoryManager:
     async def add_to_category(self, ws: WebSocket, board_id: str):
         self.boards.add(board_id)
         await self.connection_manager.connect(ws, board_id)
+        for ad in self.ads:
+            await self.connection_manager.send_to_board(board_id, ad)
 
     async def broadcast(self, message: str):
         self.ads.append(message)
