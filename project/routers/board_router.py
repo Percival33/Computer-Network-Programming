@@ -22,8 +22,6 @@ async def websocket_endpoint(websocket: WebSocket, board_id: str, category: str)
     category_manager = global_category_manager.get_category_manager(category)
     await category_manager.add_to_category(websocket, board_id)
 
-    database_manager.add_category(category)
-
     logger.info(f"Board {board_id} connected to category {category}")
     try:
         while True:

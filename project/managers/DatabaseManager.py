@@ -25,8 +25,8 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS ads (
                 id INTEGER PRIMARY KEY,
                 text TEXT,
-                creation_date DATE,
-                category_id INTEGER,
+                creation_date DATETIME,
+                category_id INTEGER NOT NULL,
                 FOREIGN KEY(category_id) REFERENCES categories(id)
             )
         """
@@ -71,16 +71,27 @@ class DatabaseManager:
 
         ads: list[Ad] = []
         for row in rows:
-            # Id, text and date
+            # Id, text, creation date and category id
             ad = Ad(id=row[0], text=row[1])
             ads.append(ad)
         return ads
 
-    def add_ad(self, text: str, creation_date: datetime) -> None:
-        creation_date_str = creation_date.strftime("%Y.%m.%d %H:%M:%S")
+    def add_ad(self, text: str, creation_date: datetime, category: str) -> None:
+        creation_date_str = creation_date.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Get the category id
         command = f"""
-            INSERT INTO ads (text, creation_date)
-            VALUES ('{text}', DATE('{creation_date_str}'))
+            SELECT id FROM categories
+            WHERE name = '{category}'
+        """
+        result = self.execute_command(command)
+        category_id = result[0][0]
+        print(result)
+
+        # Add the ad
+        command = f"""
+            INSERT INTO ads (text, creation_date, category_id)
+            VALUES ('{text}', '{creation_date_str}', {category_id})
         """
         self.execute_command(command)
 

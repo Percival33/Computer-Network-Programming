@@ -15,7 +15,7 @@ async def send_ad(category: str = Form(...), ad_text: str = Form(...)):
     category_manager = global_category_manager.get_category_manager(category)
     await category_manager.broadcast(ad_text)
 
-    database_manager.add_ad(text=ad_text, creation_date=datetime.now())
+    database_manager.add_ad(text=ad_text, creation_date=datetime.now(), category=category)
 
     return {"message": f"Ad sent: {ad_text}"}
 
