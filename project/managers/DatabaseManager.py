@@ -2,103 +2,95 @@ import sqlite3
 from datetime import datetime
 from domain.Ad import Ad
 from domain.Category import Category
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
     def __init__(self) -> None:
-        self.db_file = 'example.db' # TODO parametrize
+        self.db_file = "example.db"  # TODO parametrize
         self.setup()
-
 
     def setup(self) -> None:
         self.setup_categories_table()
         self.setup_ads_table()
-
+        self.add_category("test")
 
     def setup_ads_table(self):
         # Create the table if it does not exist
-        command = '''
+        command = """
             CREATE TABLE IF NOT EXISTS ads (
                 id INTEGER PRIMARY KEY,
                 text TEXT,
-                creation_date DATE
-                category_id INTEGER
+                creation_date DATE,
+                category_id INTEGER,
                 FOREIGN KEY(category_id) REFERENCES categories(id)
             )
-        '''
+        """
         self.execute_command(command)
-
 
     def setup_categories_table(self):
         # Create the table if it does not exist
-        command = '''
+        command = """
             CREATE TABLE IF NOT EXISTS categories (
                 id INTEGER PRIMARY KEY,
                 name TEXT
             )
-        '''
+        """
         self.execute_command(command)
 
-
     def get_ads_by_category(self, category: str) -> list[Ad]:
-        command = f'''
+        command = f"""
             SELECT * FROM ads
             JOIN categories ON ads.category_id = categories.id
-            WHERE categories.name = {category} 
-        '''
+            WHERE categories.name = '{category}'
+        """
         return self.execute_command(command)
 
-
     def get_categories(self) -> list[Category]:
-        command = '''
+        command = """
             SELECT * FROM categories
-        '''
+        """
         rows = self.execute_command(command)
 
         categories: list[Category] = []
         for row in rows:
             # Id, name
-            category = Category(
-                id=row[0],
-                name=row[1]
-            )
+            category = Category(id=row[0], name=row[1])
             categories.append(category)
         return categories
 
-
     def get_ads(self) -> list[Ad]:
-        command = '''
+        command = """
             SELECT * FROM ads
-        '''
+        """
         rows = self.execute_command(command)
 
         ads: list[Ad] = []
         for row in rows:
             # Id, text and date
-            ad = Ad(
-                id=row[0],
-                text=row[1]
-            )
+            ad = Ad(id=row[0], text=row[1])
             ads.append(ad)
         return ads
 
-
     def add_ad(self, text: str, creation_date: datetime) -> None:
-        creation_date_str = creation_date.strftime('%Y.%m.%d %H:%M:%S')
-        command = f'''
+        creation_date_str = creation_date.strftime("%Y.%m.%d %H:%M:%S")
+        command = f"""
             INSERT INTO ads (text, creation_date)
-            VALUES ({text}, {creation_date_str})
-        '''
+            VALUES ('{text}', {creation_date_str})
+        """
         self.execute_command(command)
-
 
     def add_category(self, name: str) -> None:
-        command = f'''
+        command = f"""
             INSERT INTO categories (name)
-            VALUES ({name})
-        '''
+            VALUES ('{name}')
+        """
         self.execute_command(command)
-
+        logger.info(f"Added new category to DB: {name}")
 
     def execute_command(self, command: str) -> list[tuple]:
         connection = sqlite3.connect(self.db_file)
@@ -108,7 +100,7 @@ class DatabaseManager:
         rows = cursor.fetchall()
         connection.commit()
 
-        connection.close()
         cursor.close()
+        connection.close()
 
         return rows
