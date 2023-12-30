@@ -54,6 +54,23 @@
         }
     }
 
+    function getFormattedDate(date) {
+        // YY/mm/dd HH:MM:SS
+        var options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+
+        var formatter = new Intl.DateTimeFormat('en-US', options);
+        var formattedDate = formatter.format(date);
+        return formattedDate;
+    }
+
     document.getElementById("registerForm").onsubmit = function (event) {
         event.preventDefault();
         var boardId = boardIdElement.textContent;
@@ -74,16 +91,22 @@
             ws.onmessage = function (event) {
                 console.log(event);
                 // TODO: consider receiving JSON
-                var adData = event.data;
+                var adDataRaw = event.data;
                 var currentAdElement = document.getElementById('currentAd');
                 var pastAdsElement = document.getElementById('pastAds');
 
+                var adData = JSON.parse(adDataRaw)
+                console.log(adData)
+                // var dateNow = getFormattedDate(new Date());
+                var dateNow = new Date().toLocaleString();
+                var adText = `"${adData.text}", added: ${adData.creation_date}, received: ${dateNow}`;
+
                 // Update current ad
-                currentAdElement.textContent = adData + ' (Received at: ' + new Date().toLocaleTimeString() + ')';
+                currentAdElement.textContent = adText;
 
                 // Add to past ads
                 var adItem = document.createElement('li');
-                adItem.textContent = adData + ' (Received at: ' + new Date().toLocaleTimeString() + ')';
+                adItem.textContent = adText;
                 pastAdsElement.appendChild(adItem);
             };
         } else {

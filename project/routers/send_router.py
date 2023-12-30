@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from datetime import datetime
 from beans.global_category_manager import global_category_manager
 from beans.database_manager import database_manager
+from domain.Ad import Ad
 
 router = APIRouter()
 
@@ -12,10 +13,11 @@ with open("views/send-ad.html", "r") as f:
 
 @router.post("/")
 async def send_ad(category: str = Form(...), ad_text: str = Form(...)):
-    category_manager = global_category_manager.get_category_manager(category)
-    await category_manager.broadcast(ad_text)
+    ad_creation_date = datetime.now()
+    ad = database_manager.add_ad(text=ad_text, creation_date=ad_creation_date, category=category)
 
-    database_manager.add_ad(text=ad_text, creation_date=datetime.now(), category=category)
+    category_manager = global_category_manager.get_category_manager(category)
+    await category_manager.broadcast(ad)
 
     return {"message": f"Ad sent: {ad_text}"}
 

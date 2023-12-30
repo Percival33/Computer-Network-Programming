@@ -48,7 +48,19 @@ class DatabaseManager:
             JOIN categories ON ads.category_id = categories.id
             WHERE categories.name = '{category}'
         """
-        return self.execute_command(command)
+        rows = self.execute_command(command)
+
+        ads: list[Ad] = []
+        for row in rows:
+            # Id, text, creation date and category id
+            ad = Ad(
+                id=row[0],
+                text=row[1],
+                creation_date=datetime.strptime(row[2], "%d.%m.%Y, %H:%M:%S"),
+                category_id=row[3],
+            )
+            ads.append(ad)
+        return ads
 
     def get_categories(self) -> list[Category]:
         command = """
@@ -72,12 +84,17 @@ class DatabaseManager:
         ads: list[Ad] = []
         for row in rows:
             # Id, text, creation date and category id
-            ad = Ad(id=row[0], text=row[1])
+            ad = Ad(
+                id=row[0],
+                text=row[1],
+                creation_date=datetime.strptime(row[2], "%d.%m.%Y, %H:%M:%S"),
+                category_id=row[3],
+            )
             ads.append(ad)
         return ads
 
-    def add_ad(self, text: str, creation_date: datetime, category: str) -> None:
-        creation_date_str = creation_date.strftime("%Y-%m-%d %H:%M:%S")
+    def add_ad(self, text: str, creation_date: datetime, category: str) -> Ad:
+        creation_date_str = creation_date.strftime("%d.%m.%Y, %H:%M:%S")
 
         # Get the category id
         command = f"""
@@ -86,7 +103,6 @@ class DatabaseManager:
         """
         result = self.execute_command(command)
         category_id = result[0][0]
-        print(result)
 
         # Add the ad
         command = f"""
@@ -94,14 +110,34 @@ class DatabaseManager:
             VALUES ('{text}', '{creation_date_str}', {category_id})
         """
         self.execute_command(command)
+        ad_id = self.get_last_insert_id()
+        return Ad(id=ad_id, text=text, creation_date=creation_date, category_id=category_id)
 
-    def add_category(self, name: str) -> None:
+    def get_category_id_by_name(self, name: str) -> int:
+        command = f"""
+            SELECT id FROM categories
+            WHERE name = '{name}'
+        """
+        result = self.execute_command(command)
+        return result[0][0]
+
+    def add_category(self, name: str) -> Category:
         command = f"""
             INSERT INTO categories (name)
             VALUES ('{name}')
         """
         self.execute_command(command)
         logger.info(f"Added new category to DB: {name}")
+        cat_id = self.get_last_insert_id()
+        return Category(id=cat_id, name=name)
+
+    def get_last_insert_id(self) -> int:
+        command = """
+            SELECT last_insert_rowid()
+        """
+        result = self.execute_command(command)
+        print(result)
+        return result[0][0]
 
     def execute_command(self, command: str) -> list[tuple]:
         connection = sqlite3.connect(self.db_file)
@@ -113,5 +149,4 @@ class DatabaseManager:
 
         cursor.close()
         connection.close()
-
         return rows

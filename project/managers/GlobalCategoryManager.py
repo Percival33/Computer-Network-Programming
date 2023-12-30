@@ -34,6 +34,6 @@ class GlobalCategoryManager:
         creating a new one if it doesn't exist.
         """
         if category_name not in self.category_managers:
-            self.category_managers[category_name] = CategoryManager(category_name)
-            database_manager.add_category(category_name)
+            category = database_manager.add_category(category_name)
+            self.category_managers[category_name] = CategoryManager(category)
         return self.category_managers[category_name]
