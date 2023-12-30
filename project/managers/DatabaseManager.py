@@ -5,8 +5,8 @@ from domain.Category import Category
 
 
 class DatabaseManager:
-    def __init__(self, db_file: str) -> None:
-        self.db_file = db_file
+    def __init__(self) -> None:
+        self.db_file = 'example.db' # TODO parametrize
         self.setup()
 
 
@@ -89,7 +89,15 @@ class DatabaseManager:
             INSERT INTO ads (text, creation_date)
             VALUES ({text}, {creation_date_str})
         '''
-        rows = self.execute_command(command)
+        self.execute_command(command)
+
+
+    def add_category(self, name: str) -> None:
+        command = f'''
+            INSERT INTO categories (name)
+            VALUES ({name})
+        '''
+        self.execute_command(command)
 
 
     def execute_command(self, command: str) -> list[tuple]:
@@ -104,5 +112,3 @@ class DatabaseManager:
         cursor.close()
 
         return rows
-
-
