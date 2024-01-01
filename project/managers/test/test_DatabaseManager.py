@@ -24,7 +24,7 @@ def test_setup_ads_table():
 
 def test_setup_categories_table():
     db_manager = DatabaseManager()
-    db_manager.setup_ads_table()
+    db_manager.setup_categories_table()
 
     command = """
         SELECT name FROM sqlite_master WHERE type='table';
