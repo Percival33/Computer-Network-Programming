@@ -1,5 +1,15 @@
 from project.managers.DatabaseManager import DatabaseManager
-import sqlite3
+
+
+def get_tables_from_db(db_manager):
+    command = """
+        SELECT name FROM sqlite_master WHERE type='table';
+    """
+    tables = db_manager.execute_command(command)
+    tables = [table[0] for table in tables]
+
+    return tables
+
 
 def test_init():
     db_manager = DatabaseManager()
@@ -14,23 +24,16 @@ def test_setup_ads_table():
     db_manager = DatabaseManager()
     db_manager.setup_ads_table()
 
-    command = """
-        SELECT name FROM sqlite_master WHERE type='table';
-    """
-    tables = db_manager.execute_command(command)
-    tables = [table[0] for table in tables]
+    tables = get_tables_from_db(db_manager)
 
     assert 'ads' in tables
+
 
 def test_setup_categories_table():
     db_manager = DatabaseManager()
     db_manager.setup_categories_table()
 
-    command = """
-        SELECT name FROM sqlite_master WHERE type='table';
-    """
-    tables = db_manager.execute_command(command)
-    tables = [table[0] for table in tables]
+    tables = get_tables_from_db(db_manager)
 
     assert 'categories' in tables
 
