@@ -1,17 +1,38 @@
+from project.managers.DatabaseManager import DatabaseManager
+import sqlite3
+
 def test_init():
-    pass
+    db_manager = DatabaseManager()
 
 
 def test_setup():
-    pass
+    db_manager = DatabaseManager()
+    db_manager.setup()
 
 
 def test_setup_ads_table():
-    pass
+    db_manager = DatabaseManager()
+    db_manager.setup_ads_table()
 
+    command = """
+        SELECT name FROM sqlite_master WHERE type='table';
+    """
+    tables = db_manager.execute_command(command)
+    tables = [table[0] for table in tables]
+
+    assert 'ads' in tables
 
 def test_setup_categories_table():
-    pass
+    db_manager = DatabaseManager()
+    db_manager.setup_ads_table()
+
+    command = """
+        SELECT name FROM sqlite_master WHERE type='table';
+    """
+    tables = db_manager.execute_command(command)
+    tables = [table[0] for table in tables]
+
+    assert 'categories' in tables
 
 
 def test_get_ads_by_category():
