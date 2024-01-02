@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
-    def __init__(self) -> None:
-        self.db_file = "example.db"  # TODO parametrize
+    def __init__(self, db_file="example.db") -> None:
+        self.db_file = db_file  # TODO parametrize
         self.setup()
         logger.info("DatabaseManager setup")
 
