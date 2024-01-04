@@ -1,21 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html>-->
-<!--    <head>-->
-<!--        <title>Send Ads</title>-->
-<!--    </head>-->
-<!--    <body>-->
-<!--        <h1>Send Advertisement</h1>-->
-
-<!--        <form action="/send" method="post">-->
-<!--            <label>Category: <input type="text" name="category" required></label>-->
-<!--            -->
-<!--            <label>Ad Text: <input type="text" name="ad_text" required></label>-->
-<!--            <button type="submit">Send Ad</button>-->
-<!--        </form>-->
-<!--    </body>-->
-<!--</html>-->
-
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -25,9 +7,9 @@
         <h1>Send Advertisement</h1>
         <p>Enter a name of the new or existing category, or select existing one from the box<br> Only one option is required </p>
         <form action="/send" method="post">
-            <label>Category: <input type="text" name="category" required></label>
+            <label>Category: <input type="text" name="entered_category"></label>
             <label>Existing Categories:
-                <select name="existing_categories">
+                <select name="selected_category">
                     {% for category in categories %}
                        <option value="{{ category }}">{{ category }}</option>
                     {% endfor %}
