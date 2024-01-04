@@ -12,3 +12,5 @@ app.include_router(send_router, prefix="/send", tags=["send"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
