@@ -3,6 +3,12 @@
 <head>
     <title>Board View</title>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
         #successMessage {
             display: none;
             position: absolute;
@@ -14,18 +20,47 @@
             padding: 10px;
             font-size: 16px;
         }
-
+        #boardId, #currentCategory, #currentAd {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin: 10px;
+        }
         #unregisterButton {
             display: none;
+            background-color: #008cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #unregisterButton:hover {
+            background-color: #005f73;
+        }
+        ul#pastAds {
+            text-align: left;
+            list-style-type: none;
+            padding: 0;
+        }
+        ul#pastAds li {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
-<div id="successMessage">Board successfully registered!</div>
-<h1>Board Dashboard</h1>
-<h2>Board ID: <span id="boardId"></span></h2>
-<h3>Current Category: <span id="currentCategory"></span></h3>
-<h3>Current Ad: <span id="currentAd"></span></h3>
+    <div id="successMessage">Board successfully registered!</div>
+    <h1>Board Dashboard</h1>
+    <h2>Board ID: <span id="boardId"></span></h2>
+    <h3>Current Category: <span id="currentCategory"></span></h3>
+    <h3>Current Ad: <span id="currentAd"></span></h3>
 <form id="registerForm">
     <label>Existing Categories:
     <select name="category" id="category">
