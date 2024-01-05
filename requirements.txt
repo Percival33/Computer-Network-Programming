@@ -3,7 +3,8 @@ asyncio
 watchdog[watchmedo]
 fastapi
 uvicorn
-
+jinja2
+aiofiles
 python-multipart
 
 pre-commit      # hooks for applying linters on commit
