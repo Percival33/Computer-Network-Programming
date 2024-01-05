@@ -27,9 +27,18 @@
 <h3>Current Category: <span id="currentCategory"></span></h3>
 <h3>Current Ad: <span id="currentAd"></span></h3>
 <form id="registerForm">
-    <label>Category: <input type="text" id="category" autocomplete="off"/></label>
+    <label>Existing Categories:
+    <select name="category" id="category">
+        {% for category in categories %}
+            <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+    </select>
+    </label>
     <button type="submit">Register</button>
 </form>
+
+
+
 <button id="unregisterButton" onclick="unregister()">Unregister</button>
 <h4>Past Ads</h4>
 <ul id='pastAds'></ul>
