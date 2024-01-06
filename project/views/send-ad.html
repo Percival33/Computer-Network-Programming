@@ -69,33 +69,40 @@
     <h1>Send Advertisement</h1>
     <p>Enter a name of the new or existing category, or select existing one from the box<br> Only one option is required </p>
     <form action="/send" method="post">
-        <label>Category:<input type="text" class="uniform-width" name="entered_category" oninput="toggleSelectBox()"></label>
-        <label for="selected_category" id="selectCategoryLabel">Existing Categories:
-            <select class="uniform-width" name="selected_category">
-                {% for category in categories %}
-                   <option value="{{ category }}">{{ category }}</option>
-                {% endfor %}
-            </select>
-        </label>
-        <label>Ad Text: <input type="text" class="uniform-width" name="ad_text" required></label>
-        <button type="submit">Send Ad</button>
+    <label>Category:<input type="text" class="uniform-width" name="entered_category" oninput="toggleSelectBox()" autocomplete="off"></label>
+    <label for="selected_category" id="selectCategoryLabel" style="display: none;">Existing Categories:
+        <select class="uniform-width" name="selected_category" autocomplete="off">
+            {% for category in categories %}
+               <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>Ad Text: <input type="text" class="uniform-width" name="ad_text" required autocomplete="off"></label>
+    <button type="submit">Send Ad</button>
     </form>
     <script>
         function toggleSelectBox() {
             var enteredCategory = document.querySelector('input[name="entered_category"]');
             var selectBoxLabel = document.getElementById('selectCategoryLabel');
-            if (enteredCategory.value) {
+            if (enteredCategory.value.trim() !== "") {
                 selectBoxLabel.style.display = 'none';
             } else {
                 selectBoxLabel.style.display = 'inline-block';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var enteredCategory = document.querySelector('input[name="entered_category"]');
-            enteredCategory.addEventListener('input', toggleSelectBox);
-            toggleSelectBox();
-        });
+
+        toggleSelectBox();
+        document.querySelector('input[name="entered_category"]').addEventListener('input', toggleSelectBox);
+
+
+        window.onpageshow = function(event) {
+            if (event.persisted) { // If true, the page was loaded from the cache
+                toggleSelectBox();
+            }
+        };
     </script>
+
+
 </body>
 </html>
