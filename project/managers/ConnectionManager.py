@@ -26,7 +26,6 @@ class ConnectionManager:
         # TODO: decide if more complex data structure is needed to be sent
         try:
             ws = self.active_connections[board_id]
-            print(ad)
             message = {
                 "text": ad.text,
                 "creation_date": ad.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),

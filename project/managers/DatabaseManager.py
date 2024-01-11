@@ -136,7 +136,6 @@ class DatabaseManager:
             SELECT last_insert_rowid()
         """
         result = self.execute_command(command)
-        print(result)
         return result[0][0]
 
     def execute_command(self, command: str) -> list[tuple]:
