@@ -2,9 +2,9 @@ FROM python:3.10
 
 WORKDIR /server
 
-COPY . .
+COPY --from=project_top_dir . project
 
-RUN chmod 777 ./docker/server/run_server.py
+# RUN chmod 777 ./docker/server/run_server.py
 
 RUN apt-get install -y python3
 

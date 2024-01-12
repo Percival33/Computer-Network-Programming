@@ -15,8 +15,10 @@ if [[ "$(docker ps -aqf name=$CONTAINER_NAME)" ]]; then
 fi
 
 # Build from the top dir
-cd $PROJECT_TOP_DIR
-docker build --tag $CONTAINER_NAME:v1 ./docker/server
+docker build \
+    --tag $CONTAINER_NAME:v1 \
+    --build-context project_top_dir=$PROJECT_TOP_DIR \
+    .
 
 docker run -d \
     --name $CONTAINER_NAME \
