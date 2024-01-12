@@ -36,7 +36,7 @@ ssh $USERNAME@$SERVER_ADDRESS << EOF
 
     cd $SCP_DEST_DIR/project/docker/server
     chmod +x run_on_docker.sh
-    chmod +x run_server.py
+    chmod +x run_server.sh
     sed -i -e 's/\r$//' run_on_docker.sh
     sed -i -e 's/\r$//' run_server.sh
     ./run_on_docker.sh
