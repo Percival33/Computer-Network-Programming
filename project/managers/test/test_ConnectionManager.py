@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 from fastapi import WebSocket
 
 from project.domain.Ad import Ad
-from project.managers.ConnectionManager import ConnectionManager  # Replace 'your_module' with the actual module name
+from project.managers.ConnectionManager import ConnectionManager
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def websocket_mock():
 
 
 @pytest.fixture
-def test_ad():
+def ad_test():
     return Ad(id=1, category_id=1, text="Test Ad", creation_date=datetime.datetime.now())
 
 
@@ -40,29 +40,29 @@ async def test_disconnect(connection_manager, websocket_mock):
 
 
 @pytest.mark.asyncio
-async def test_send_to_board(connection_manager, websocket_mock, test_ad):
+async def test_send_to_board(connection_manager, websocket_mock, ad_test):
     board_id = "board1"
     await connection_manager.connect(websocket_mock, board_id)
-    await connection_manager.send_to_board(board_id, test_ad)
+    await connection_manager.send_to_board(board_id, ad_test)
 
     expected_message = {
-        "text": test_ad.text,
-        "creation_date": test_ad.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
+        "text": ad_test.text,
+        "creation_date": ad_test.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
     }
     websocket_mock.send_json.assert_called_once_with(expected_message)
 
 
 @pytest.mark.asyncio
-async def test_broadcast(connection_manager, websocket_mock, test_ad):
+async def test_broadcast(connection_manager, websocket_mock, ad_test):
     board_ids = ["board1", "board2", "board3"]
     for board_id in board_ids:
         await connection_manager.connect(websocket_mock, board_id)
 
-    await connection_manager.broadcast(test_ad)
+    await connection_manager.broadcast(ad_test)
 
     expected_message = {
-        "text": test_ad.text,
-        "creation_date": test_ad.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
+        "text": ad_test.text,
+        "creation_date": ad_test.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
     }
 
     for connection_mock in websocket_mock.send_json.mock_calls:
