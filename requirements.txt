@@ -13,4 +13,3 @@ pytest-asyncio
 # sh            # for running bash commands in some tests (linux/macos only)
 
 pydantic_settings
-httpx
