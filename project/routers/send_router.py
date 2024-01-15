@@ -25,7 +25,12 @@ async def send_ad(
     if entered_category:
         category_name = entered_category
     else:
-        category_name = selected_category
+        # The category is defined by the drop-down list
+        if selected_category:
+            category_name = selected_category
+        else:
+            # Special case
+            return {"message": "No category was given!"}
 
     alreadyExists = category_name in global_category_manager.category_managers
 
