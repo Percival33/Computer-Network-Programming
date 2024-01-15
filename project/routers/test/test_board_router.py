@@ -5,8 +5,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from project.domain.Ad import Ad
-from project.routers.board_router import router
+from domain.Ad import Ad
+from routers.board_router import router
 
 app = FastAPI()
 app.include_router(router)

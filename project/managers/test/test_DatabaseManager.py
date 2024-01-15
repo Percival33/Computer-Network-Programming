@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from project.managers.DatabaseManager import DatabaseManager
+from managers.DatabaseManager import DatabaseManager
 
 
 def get_tables_from_db(db_manager):
