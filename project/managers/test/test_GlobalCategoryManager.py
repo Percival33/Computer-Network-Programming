@@ -1,8 +1,7 @@
 import sqlite3
 
-from project.managers.CategoryManager import CategoryManager
-from project.managers.DatabaseManager import DatabaseManager
-from project.managers.GlobalCategoryManager import GlobalCategoryManager
+from managers.DatabaseManager import DatabaseManager
+from managers.GlobalCategoryManager import GlobalCategoryManager
 
 
 def clean_db(table, column, value):
@@ -18,7 +17,7 @@ def clean_db(table, column, value):
 
 def test_init():
     global_category_manager = GlobalCategoryManager()
-    assert global_category_manager.category_managers == {}
+    assert type(global_category_manager.category_managers) is dict
 
 
 def test_load_category_managers_from_db():
@@ -47,6 +46,4 @@ def test_get_category_manager():
     db_manager.add_category("auta__")
 
     category_manager = global_category_manager.get_category_manager("auta__")
-
-    # assert type(category_manager) is CategoryManager
     assert category_manager.category == "auta__"

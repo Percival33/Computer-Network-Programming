@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse
 from beans.global_category_manager import global_category_manager
@@ -6,13 +7,10 @@ from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory="views")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../views"))
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-with open("views/board.html", "r") as f:
-    board_html = f.read()
 
 
 @router.get("/", response_class=HTMLResponse)

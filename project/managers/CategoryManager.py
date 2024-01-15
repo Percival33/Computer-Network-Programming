@@ -1,5 +1,5 @@
-from managers.ConnectionManager import ConnectionManager
 from fastapi import WebSocket
+from managers.ConnectionManager import ConnectionManager
 from domain.Ad import Ad
 from domain.Category import Category
 

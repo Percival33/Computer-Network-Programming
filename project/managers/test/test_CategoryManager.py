@@ -1,9 +1,9 @@
 import pytest
 from datetime import datetime
 
-from project.managers.CategoryManager import CategoryManager
-from project.domain.Ad import Ad
-from project.domain.Category import Category
+from managers.CategoryManager import CategoryManager
+from domain.Ad import Ad
+from domain.Category import Category
 
 
 class MockWebSocket:
@@ -62,11 +62,13 @@ async def test_remove_from_category(category_manager):
 
 
 def test_get_boards_in_category(category_manager):
-    board_id = "board1"
-    category_manager.boards.add(board_id)
+    board_id1 = "board1"
+    board_id2 = "board2"
+    category_manager.boards.add(board_id1)
+    category_manager.boards.add(board_id2)
     result = category_manager.get_boards_in_category()
 
-    assert result == {board_id}
+    assert result == {board_id1, board_id2}
 
 
 def test_get_history(ad_test, category_manager):

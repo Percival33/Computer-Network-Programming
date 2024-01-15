@@ -2,18 +2,12 @@ from fastapi.responses import HTMLResponse
 from datetime import datetime
 from beans.global_category_manager import global_category_manager
 from beans.database_manager import database_manager
-
-# from domain.Ad import Ad
-# from managers.id_generator import next_ad_id
 from fastapi import APIRouter, Form, Request
 from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter()
 templates = Jinja2Templates(directory="views")
-
-with open("views/send-ad.html", "r") as f:
-    send_html = f.read()
 
 
 @router.post("/")
