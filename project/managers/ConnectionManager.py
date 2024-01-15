@@ -26,7 +26,6 @@ class ConnectionManager:
         # TODO: decide if more complex data structure is needed to be sent
         try:
             ws = self.active_connections[board_id]
-            print(ad)
             message = {
                 "text": ad.text,
                 "creation_date": ad.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
@@ -36,21 +35,15 @@ class ConnectionManager:
         except KeyError:
             logger.error(f"No active connection to board {board_id}")
 
-    async def broadcast(self, ad: Ad, min_jitter: float = 0.1, max_jitter: float = 0.5):
+    async def broadcast(self, ad: Ad):
         """
-        Sends a message to all active connections with a jitter.
+        Sends a message to all active connections.
 
         :param message: The message to be sent.
-        :param min_jitter: Minimum delay in seconds before sending the message.
-        :param max_jitter: Maximum delay in seconds before sending the message.
         """
         for connection in self.active_connections.values():
-            jitter = random.uniform(min_jitter, max_jitter)
-            await asyncio.sleep(jitter)
-
             message = {
                 "text": ad.text,
                 "creation_date": ad.creation_date.strftime("%d.%m.%Y, %H:%M:%S"),
             }
             await connection.send_json(message)
-            logger.debug(f"Sent message with jitter {jitter:.2f}s to a board")
