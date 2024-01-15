@@ -12,36 +12,52 @@ app = FastAPI()
 app.include_router(router)
 client = TestClient(app)
 
-html_page = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Send Ads</title>
-    </head>
-    <body>
-        <h1>Send Advertisement</h1>
-        <form action="/send" method="post">
-            <label>Category: <input type="text" name="category" required></label>
-            <label>Ad Text: <input type="text" name="ad_text" required></label>
-            <button type="submit">Send Ad</button>
-        </form>
-    </body>
-</html>
-"""
+html_fragment = '''
+<body>
+    <div id="successMessage">Board successfully registered!</div>
+    <h1>Board Dashboard</h1>
+    <h2>Board ID: <span id="boardId"></span></h2>
+    <h3>Current Category: <span id="currentCategory"></span></h3>
+    <h3>Current Ad: <span id="currentAd"></span></h3>
+    <form id="registerForm">
+        <label>Existing Categories:
+        <select name="category" id="category">
+
+                <option value="category1">category1</option>
+
+                <option value="test_category">test_category</option>
+
+                <option value="category1111">category1111</option>
+
+                <option value="aut22a">aut22a</option>
+
+                <option value="auta">auta</option>
+
+                <option value="category">category</option>
+
+        </select>
+        </label>
+        <button type="submit">Register</button>
+    </form>
+'''
 
 
 @pytest.fixture
-def websocket_connection(path):
-    with client.websocket_connect(path) as websocket:
+def websocket_connection():
+    with client.websocket_connect("/ws/board_id/category") as websocket:
         yield websocket
 
 
-def test_get_board_html():
+def test_get_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
 
-    cleaned_html_string = "".join(html_page.split())
+
+def test_get_endpoint_content():
+    response = client.get("/")
+    assert response.status_code == 200
+    cleaned_html_string = "".join(html_fragment.split())
     cleaned_response_text = "".join(response.text.split())
 
     assert cleaned_html_string in cleaned_response_text
