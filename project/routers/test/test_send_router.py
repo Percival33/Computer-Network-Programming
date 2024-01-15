@@ -3,11 +3,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
 from datetime import datetime
 from unittest.mock import MagicMock
-from project.managers.DatabaseManager import DatabaseManager
-from project.routers.send_router import router
+from managers.DatabaseManager import DatabaseManager
+from routers.send_router import router
+from managers.test.test_DatabaseManager import clean_db
 
 global_category_manager = MagicMock()
-
 html_page = '''
 <!DOCTYPE html>
 <html>
