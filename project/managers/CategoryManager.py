@@ -1,7 +1,7 @@
-from managers.ConnectionManager import ConnectionManager
+from project.managers.ConnectionManager import ConnectionManager
 from fastapi import WebSocket
-from domain.Ad import Ad
-from domain.Category import Category
+from project.domain.Ad import Ad
+from project.domain.Category import Category
 
 
 class CategoryManager:

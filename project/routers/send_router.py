@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Form
 from fastapi.responses import HTMLResponse
 from datetime import datetime
-from beans.global_category_manager import global_category_manager
-from beans.database_manager import database_manager
-from domain.Ad import Ad
+from project.beans.global_category_manager import global_category_manager
+from project.beans.database_manager import database_manager
+from project.domain.Ad import Ad
+import os
 
 router = APIRouter()
 
-with open("views/send-ad.html", "r") as f:
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../views/send-ad.html")
+with open(file_path, "r") as f:
     send_html = f.read()
 
 

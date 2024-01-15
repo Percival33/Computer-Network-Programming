@@ -1,14 +1,17 @@
+import os
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from beans.global_category_manager import global_category_manager
+from project.beans.global_category_manager import global_category_manager
 import logging
-from beans.database_manager import database_manager
+from project.beans.database_manager import database_manager
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-with open("views/board.html", "r") as f:
+file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../views/send-ad.html")
+with open(file_path, "r") as f:
     board_html = f.read()
 
 
