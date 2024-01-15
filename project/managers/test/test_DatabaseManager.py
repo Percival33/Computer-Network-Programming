@@ -1,6 +1,8 @@
 import datetime
 import sqlite3
 
+import pytest
+
 from project.managers.DatabaseManager import DatabaseManager
 
 
@@ -112,6 +114,13 @@ def test_add_ad():
 
     clean_db("categories", "name", "auta")
     clean_db("ads", "text", "Sprzedam opla")
+
+
+def test_add_ad_nonexistent_category():
+    db_manager = DatabaseManager()
+
+    with pytest.raises(IndexError):
+        db_manager.add_ad("Sprzedam opla", datetime.datetime.today(), "auta__no__")
 
 
 def test_get_category_id_by_name():
