@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
@@ -32,21 +34,32 @@ def client():
 
 def test_send_ad(client):
     db_manager = DatabaseManager()
-    db_manager.add_category("category1")
-    response = client.post("/", data={"category": "category1", "ad_text": "Test Ad"})
+    categories = db_manager.get_categories()
+    if "auta" not in [category.name for category in categories]:
+        db_manager.add_category("auta")
+        # clean_db("categories", "name", "auta")
+
+    response = client.post("/", data={"selected_category": "auta", "ad_text": "Test Ad"})
 
     assert response.status_code == 200
-    assert response.json() == {"message": "Ad sent: Test Ad"}
+    assert response.json() == {'message': 'Ad sent: Test Ad, to existing category: auta'}
 
 
 def test_send_ad_no_category(client):
-    with pytest.raises(IndexError):
-        response = client.post("/", data={"category": "category1111", "ad_text": "Test Ad"})
+    db_manager = DatabaseManager()
+    categories = db_manager.get_categories()
+    if "auta" in [category.name for category in categories]:
+        clean_db("categories", "name", "auta")
+
+    response = client.post("/", data={"selected_category": "auta", "ad_text": "Test Ad"})
+    assert response.status_code == 200
+    assert response.json() == {'message': 'New category: auta has been created, Ad sent: Test Ad'}
 
 
 def test_send_ad_empty_category(client):
-    with pytest.raises(RequestValidationError):
-        response = client.post("/", data={"category": "", "ad_text": "Test Ad"})
+    response = client.post("/", data={"selected_category": "", "ad_text": "Test Ad"})
+    assert response.status_code == 200
+    assert response.json() == {'message': 'No category was given!'}
 
 
 def test_get(client):
