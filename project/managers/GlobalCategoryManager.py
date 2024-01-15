@@ -2,7 +2,6 @@ from managers.CategoryManager import CategoryManager
 from beans.database_manager import database_manager
 from domain.Category import Category
 import logging
-from .id_generator import next_category_id
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
