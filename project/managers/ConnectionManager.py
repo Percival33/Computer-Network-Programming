@@ -1,10 +1,7 @@
-import asyncio
-import random
-
 from fastapi import WebSocket
 import logging
 
-from project.domain.Ad import Ad
+from domain.Ad import Ad
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

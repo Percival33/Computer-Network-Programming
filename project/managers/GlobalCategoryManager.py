@@ -1,6 +1,6 @@
-from project.managers.CategoryManager import CategoryManager
-from project.beans.database_manager import database_manager
-from project.domain.Category import Category
+from managers.CategoryManager import CategoryManager
+from beans.database_manager import database_manager
+from domain.Category import Category
 import logging
 
 

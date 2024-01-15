@@ -1,5 +1,5 @@
-from project.managers.DatabaseManager import DatabaseManager
-from project.config import settings
+from managers.DatabaseManager import DatabaseManager
+from config import settings
 
 
 database_manager: DatabaseManager = DatabaseManager()
