@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import HTMLResponse
-from beans.global_category_manager import global_category_manager
+from project.beans.global_category_manager import global_category_manager
 import logging
 from fastapi.templating import Jinja2Templates
 

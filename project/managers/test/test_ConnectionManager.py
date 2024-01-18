@@ -3,8 +3,8 @@ import datetime
 from unittest.mock import AsyncMock
 from fastapi import WebSocket
 
-from domain.Ad import Ad
-from managers.ConnectionManager import ConnectionManager
+from project.domain.Ad import Ad
+from project.managers.ConnectionManager import ConnectionManager
 
 
 @pytest.fixture

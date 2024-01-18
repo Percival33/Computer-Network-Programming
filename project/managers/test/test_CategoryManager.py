@@ -1,9 +1,9 @@
 import pytest
 from datetime import datetime
 
-from managers.CategoryManager import CategoryManager
-from domain.Ad import Ad
-from domain.Category import Category
+from project.managers.CategoryManager import CategoryManager
+from project.domain.Ad import Ad
+from project.domain.Category import Category
 
 
 class MockWebSocket:

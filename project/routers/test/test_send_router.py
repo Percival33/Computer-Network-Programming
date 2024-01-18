@@ -1,9 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
-from managers.DatabaseManager import DatabaseManager
-from routers.send_router import router
-from managers.test.test_DatabaseManager import clean_db
+from project.managers.DatabaseManager import DatabaseManager
+from project.routers.send_router import router
+from project.managers.test.test_DatabaseManager import clean_db
 
 global_category_manager = MagicMock()
 html_page = '''
@@ -40,6 +40,7 @@ def test_send_ad_no_category(client):
     assert response.status_code == 200
     assert response.json() == {'message': 'New category: samochody has been created, Ad sent: Test Ad'}
     clean_db("categories", "name", "samochody")
+
 
 def test_send_ad_empty_category(client):
     response = client.post("/", data={"selected_category": "", "ad_text": "Test Ad"})

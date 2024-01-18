@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
-from domain.Ad import Ad
-from domain.Category import Category
+from project.domain.Ad import Ad
+from project.domain.Category import Category
 import logging
 
 

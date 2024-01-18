@@ -1,7 +1,7 @@
 from fastapi.responses import HTMLResponse
 from datetime import datetime
-from beans.global_category_manager import global_category_manager
-from beans.database_manager import database_manager
+from project.beans.global_category_manager import global_category_manager
+from project.beans.database_manager import database_manager
 from fastapi import APIRouter, Form, Request
 from fastapi.templating import Jinja2Templates
 import os
