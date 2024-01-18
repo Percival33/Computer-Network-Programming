@@ -1,9 +1,5 @@
-import time
-
 import pytest
-from fastapi.exceptions import RequestValidationError
 from fastapi.testclient import TestClient
-from datetime import datetime
 from unittest.mock import MagicMock
 from managers.DatabaseManager import DatabaseManager
 from routers.send_router import router
@@ -13,18 +9,8 @@ global_category_manager = MagicMock()
 html_page = '''
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Send Ads</title>
-    </head>
-    <body>
-        <h1>Send Advertisement</h1>
-        <form action="/send" method="post">
-            <label>Category: <input type="text" name="category" required></label>
-            <label>Ad Text: <input type="text" name="ad_text" required></label>
-            <button type="submit">Send Ad</button>
-        </form>
-    </body>
-</html>
+<head>
+    <title>SendAds</title>
 '''
 
 @pytest.fixture
@@ -37,7 +23,6 @@ def test_send_ad(client):
     categories = db_manager.get_categories()
     if "auta" not in [category.name for category in categories]:
         db_manager.add_category("auta")
-        # clean_db("categories", "name", "auta")
 
     response = client.post("/", data={"selected_category": "auta", "ad_text": "Test Ad"})
 
@@ -48,13 +33,13 @@ def test_send_ad(client):
 def test_send_ad_no_category(client):
     db_manager = DatabaseManager()
     categories = db_manager.get_categories()
-    if "auta" in [category.name for category in categories]:
-        clean_db("categories", "name", "auta")
+    if "samochody" in [category.name for category in categories]:
+        clean_db("categories", "name", "samochody")
 
-    response = client.post("/", data={"selected_category": "auta", "ad_text": "Test Ad"})
+    response = client.post("/", data={"selected_category": "samochody", "ad_text": "Test Ad"})
     assert response.status_code == 200
-    assert response.json() == {'message': 'New category: auta has been created, Ad sent: Test Ad'}
-
+    assert response.json() == {'message': 'New category: samochody has been created, Ad sent: Test Ad'}
+    clean_db("categories", "name", "samochody")
 
 def test_send_ad_empty_category(client):
     response = client.post("/", data={"selected_category": "", "ad_text": "Test Ad"})

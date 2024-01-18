@@ -4,10 +4,10 @@ from beans.global_category_manager import global_category_manager
 from beans.database_manager import database_manager
 from fastapi import APIRouter, Form, Request
 from fastapi.templating import Jinja2Templates
-
+import os
 
 router = APIRouter()
-templates = Jinja2Templates(directory="views")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../views"))
 
 
 @router.post("/")
