@@ -2,20 +2,19 @@
 
 ---
 
-- [Computer-Network-Programming](#computer-network-programming)
-  - [Team:](#team)
-  - [Project overview](#project-overview)
-  - [Installation and Running](#installation-and-running)
-  - [Architecture](#architecture)
-  - [Functional and Non-Functional Requirements](#functional-and-non-functional-requirements)
-    - [Functional Requirements](#functional-requirements)
-    - [Non-Functional Requirements](#non-functional-requirements)
-  - [Use Cases and Scenarios](#use-cases-and-scenarios)
-    - [Client Application for Sending Advertisements](#client-application-for-sending-advertisements)
-    - [Bulletin Board](#bulletin-board)
-  - [Labs Overview](#labs-overview)
-    - [Lab 1: Network Programming Basics](#lab-1-network-programming-basics)
-    - [Lab 2: Advanced Networking Concepts](#lab-2-advanced-networking-concepts)
+- [Team:](#team)
+- [Project overview](#project-overview)
+- [Installation and Running](#installation-and-running)
+- [Architecture](#architecture)
+- [Functional and Non-Functional Requirements](#functional-and-non-functional-requirements)
+  - [Functional Requirements](#functional-requirements)
+  - [Non-Functional Requirements](#non-functional-requirements)
+- [Use Cases and Scenarios](#use-cases-and-scenarios)
+  - [Client Application for Sending Advertisements](#client-application-for-sending-advertisements)
+  - [Bulletin Board](#bulletin-board)
+- [Labs Overview](#labs-overview)
+  - [Lab 1: Network Programming Basics](#lab-1-network-programming-basics)
+  - [Lab 2: Advanced Networking Concepts](#lab-2-advanced-networking-concepts)
 
 ---
 
